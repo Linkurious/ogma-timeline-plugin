@@ -1,0 +1,22 @@
+#graph-container {
+  top: 0;
+  bottom: 216px;
+  left: 0;
+  right: 0;
+  position: absolute;
+}
+
+#timeline > div {
+  position: absolute !important;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+  display: flex;
+  z-index: 100;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 216px;
+  box-shadow: rgb(0 0 0 / 80%) 0 0 10px;
+  overflow-x: hidden;
+  background: rgba(255, 255, 255, 0.7);
+}

@@ -1,0 +1,29 @@
+
+.vis-text,
+.vis-data-axis {
+  font-family: 'Roboto';
+  font-weight: 500;
+}
+.vis-timeline .vis-data-axis {
+  font-size: 12px;
+}
+.vis-timeline .vis-item {
+  font-family: 'Roboto';
+  color: #1a1a1a;
+  border-color: #1499ff;
+  background-color: #d4ecff;
+}
+.vis-timeline .vis-bar {
+  stroke: #1499ff;
+  fill: #d4ecff;
+}
+
+.vis-timeline .vis-item.vis-selected {
+  border-color: #34b9ff;
+  background-color: rgb(205, 249, 255);
+}
+
+.vis-timeline .vis-bar.selected {
+  stroke: #34b9ff;
+  fill: rgb(205, 249, 255);
+}

@@ -1,0 +1,49 @@
+{
+  "name": "@linkurious/ogma-timeline-plugin",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "dist/ogma-timeline-plugin.umd.cjs",
+  "module": "dist/ogma-timeline-plugin.js",
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "LICENCE",
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite --config=demo.vite.config.js",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/parser": "^5.53.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-import": "^2.27.5",
+    "prettier": "^2.8.4",
+    "typescript": "^4.9.3",
+    "vite": "^4.1.0"
+  },
+  "dependencies": {
+    "eventemitter3": "^5.0.0",
+    "vis-data": "^7.1.4",
+    "vis-timeline": "^7.7.0"
+  },
+  "peerDependencies": {
+    "@linkurious/ogma": "^4.4.1-develop.230"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Linkurious/ogma-prototype.git"
+  },
+  "keywords": [
+    "ogma",
+    "timeline",
+    "plugin"
+  ],
+  "author": "Linkurious SAS",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Linkurious/ogma-prototype/issues"
+  }
+}
