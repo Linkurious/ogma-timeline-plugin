@@ -23,7 +23,7 @@
   background-color: rgb(205, 249, 255);
 }
 
-.vis-timeline .vis-bar.selected {
+.vis-timeline .vis-bar.hightlight {
   stroke: #34b9ff;
   fill: rgb(205, 249, 255);
 }

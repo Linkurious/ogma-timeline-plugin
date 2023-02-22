@@ -1,6 +1,6 @@
 import { NodeList } from '@linkurious/ogma';
 import { Timeline as VTimeline } from 'vis-timeline';
-import { scaleChange, scales } from './constants';
+import { click, scaleChange, scales } from './constants';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import './style.css';
 import { Id, Lookup, TimelineOptions } from './types';
@@ -24,8 +24,7 @@ export class Timeline extends Chart {
 
   // private ogma: Ogma<any, any>;
   private isChangingRange: boolean;
-
-  private isSelecting: boolean;
+  private groupToNodes: Lookup<Id[]>;
   /**
    * @param {HTMLDivElement} container
    * @param {Ogma} ogma
@@ -38,6 +37,7 @@ export class Timeline extends Chart {
       editable: false
     });
     this.chart = timeline;
+    this.groupToNodes = {};
     const { minTime, maxTime } = options;
     timeline.addCustomTime(minTime, 't1');
     timeline.addCustomTime(maxTime, 't2');
@@ -63,20 +63,21 @@ export class Timeline extends Chart {
         content: `node ${id}`
       };
     });
+    this.groupToNodes = groupToNodes;
     this.dataset.clear();
     this.dataset.add(elements);
     this.chart.setWindow(starts[0], ends[ends.length - 1]);
   }
 
   // TODO
-  onNodesSelectionChange = () => {
+  onNodesSelectionChange(){
     // if (this.isSelecting) return;
     // this.isSelecting = true;
     // this.timeline.setSelection(this.ogma.getSelectedNodes().getId());
     // this.isSelecting = false;
   };
   // TODO
-  onTimelineSelect = (s: { items: Id[] }) => {
+  onTimelineSelect(s: { items: Id[] }){
     // if (this.isSelecting) return;
     // this.isSelecting = true;
     // this.ogma.clearSelection();
@@ -87,7 +88,7 @@ export class Timeline extends Chart {
     //   .then(() => (this.isSelecting = false));
   };
 
-  protected onRangeChange = () => {
+  protected onRangeChange() {
     // prevent from infinite loop: setdata and window trigger this event
     if (this.isChangingRange) return;
 
@@ -114,4 +115,8 @@ export class Timeline extends Chart {
     this.emit(scaleChange, { scale, tooZoomed: false });
     this.isChangingRange = false;
   };
+
+  onBarClick(s: { items: Id[] }) {
+    this.emit(click, s.items);
+  }
 }

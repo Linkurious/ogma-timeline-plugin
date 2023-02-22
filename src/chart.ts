@@ -33,16 +33,17 @@ export abstract class Chart extends EventEmitter<Events> {
     });
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  public refresh(nodes: NodeList): void {}
-
+  
   public setWindow(minTime: number, maxTime: number): void {
     this.chart.setWindow(minTime, maxTime);
   }
-
+  
   public getWindow() {
     return this.chart.getWindow();
   }
-
+  
   protected abstract onRangeChange(): void;
+  public abstract refresh(nodes: NodeList): void;
+  public abstract onSelectionChange(selectedNodes: NodeList): void;
+
 }

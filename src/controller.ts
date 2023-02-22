@@ -5,6 +5,7 @@ import { Barchart, defaultBarchartOptions } from './barchart';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import './style.css';
 import { Id, TimelineMode } from './types';
+import {click} from './constants';
 
 export class Controller {
   private ogma: Ogma<any, any>;
@@ -16,8 +17,6 @@ export class Controller {
   public barchart: Barchart;
 
   private options: any;
-
-        private chosenScale: number;
 
   private timeFilter: Transformation<any, any>;
 
@@ -36,7 +35,6 @@ export class Controller {
     // state flags
     this.isChangingRange = false;
     this.isSelecting = false;
-    this.chosenScale = 0;
 
     const timeFilter = this.ogma.transformations.addNodeFilter({
       criteria: (node) => {
@@ -86,9 +84,11 @@ export class Controller {
       this.showBarchart();
     });
     // this.setupEvents(this.timeline, timeFilter, 'timeline');
-    // this.setupEvents(this.barchart, timeFilter, 'barchart');
-    // this.timeline.chart.on('rangechanged', this._onRangeChange);
-    // this.barchart.chart.on('rangechanged', this._onRangeChange);
+    this.setupEvents(this.barchart, timeFilter, 'barchart');
+
+    this.timeline.on(click, (e) => {
+      console.log(e);
+    })
   }
 
   refresh(nodes: NodeList<any, any>) {
@@ -101,12 +101,15 @@ export class Controller {
     timeFilter: Transformation,
     mode: TimelineMode
   ) {
-    const { ogma } = this;
     this.isSelecting = false;
     this.ogma.events.on(
       ['nodesSelected', 'nodesUnselected'],
-      this.onNodesSelectionChange
+      () => chart.onSelectionChange(this.ogma.getSelectedNodes())
     );
+
+    chart.chart.on('click', e => {
+      chart.onBarClick(e);
+    })
 
     chart.chart.on('timechange', () => {
       const [min, max] = chart.chart.components
@@ -117,10 +120,6 @@ export class Controller {
       this.options.maxTime = max;
       timeFilter.refresh();
     });
-
-    // if (mode === 'timeline') chart.on('select', this._onTimelineSelect);
-    // if (mode === 'barchart') chart.on('click', this._onBarClicked);
-
     this.isChangingRange = false;
   }
 
@@ -218,10 +217,12 @@ export class Controller {
   showTimeline() {
     this.barchart.container.style.display = 'none';
     this.timeline.container.style.display = '';
+    this.mode = 'timeline';
   }
 
   showBarchart() {
     this.barchart.container.style.display = '';
     this.timeline.container.style.display = 'none';
+    this.mode = 'barchart';
   }
 }

@@ -1,6 +1,6 @@
 import { NodeList } from '@linkurious/ogma';
 import { Graph2d as VGraph2d } from 'vis-timeline';
-import { scaleChange, scales } from './constants';
+import { click, scaleChange, scales } from './constants';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import './style.css';
 import { BarchartOptions, Group, GroupByScale, Id, Lookup } from './types';
@@ -27,7 +27,7 @@ export class Barchart extends Chart {
   private groupToNodes: Lookup<Id[]>;
 
   private isChangingRange: boolean;
-
+  private rects: SVGRectElement[];
 
   /**
    * @param {HTMLDivElement} container
@@ -48,12 +48,20 @@ export class Barchart extends Chart {
     this.nodeToGroup = {};
     this.groupToNodes = {};
     this.isChangingRange = false;
+    this.rects = [];
 
     // this._computeGroups();
     barchart.addCustomTime(options.minTime, 't1');
     barchart.addCustomTime(options.maxTime, 't2');
     this.registerEvents();
-    //  this.setupEvents(barchart, this.timeFilter, 'barchart');
+    this.chart.on('click', e => {
+      this.onBarClick(e);
+    })
+    this.chart.on("rangechanged", () => {
+      this.rects = Array.from(this.container.querySelectorAll('.vis-line-graph>svg>rect')) as SVGRectElement[];
+    })
+
+    
   }
 
   public refresh(nodes: NodeList): void {
@@ -151,56 +159,61 @@ export class Barchart extends Chart {
       }, {} as Lookup<GroupByScale>);
   }
 
-  //TODO
-  _onNodesSelectionChange() {
+  onSelectionChange(selectedNodes: NodeList) {
     // if (this.isSelecting) return;
     // this.isSelecting = true;
-    //   const groups = [
-    //     ...this.container.querySelectorAll('.vis-line-graph>svg>rect')
-    //   ];
-    //   groups.forEach(group => group.classList.remove('selected'));
-    //   this.ogma
-    //     .getSelectedNodes()
-    //     .getId()
-    //     .forEach(id => {
-    //       if (!groups[this.nodeToGroup[id]]) return;
-    //       groups[this.nodeToGroup[id]].classList.add('selected');
-    //     });
+    // this.highlightNodes(selectedNodes);
     // this.isSelecting = false;
   }
-  //TOOD
-  _onBarClicked({ x, y }: { x: number; y: number }) {
-    // if (!x || !y || this.isSelecting) return;
-    // this.isSelecting = true;
-    // this.ogma.clearSelection();
-    // const svg: SVGAElement| null = this.container.querySelector('.vis-line-graph>svg');
-    // if(!svg) return;
-    // const groups = [...svg.children];
-    // groups.forEach(g => g.classList.remove('selected'));
-    // const offset = +svg.style.left.slice(0, -2);
-    // const nodeIdsToSelect = (groups
-    //   .map((g, i) => {
-    //     const groupX = +(g.getAttribute('x') as string) + offset;
-    //     const groupW = +(g.getAttribute('width') as string);
-    //     return groupX < x && groupX + groupW > x
-    //       ? {
-    //           group: g,
-    //           nodeIds: this.groupToNodes[i]
-    //         }
-    //       : null;
-    //   })
-    //   .filter(e => e)as ({ nodeIds: Id[], group: Element}[]))
-    //   .reduce((nodes, { group, nodeIds }) => {
-    //     nodes.push(...nodeIds);
-    //     group.classList.add('selected');
-    //     return nodes;
-    //   }, [] as Id[]);
-    // const nodesToSelect = this.ogma.getNodes(nodeIdsToSelect).dedupe();
-    // nodesToSelect.setSelected(true);
-    // this.ogma.view
-    //   .moveToBounds(nodesToSelect.getBoundingBox())
-    //   .then(() => (this.isSelecting = false));
+
+  highlightNodes(nodes: NodeList) {
+    this.resethighlight();
+    nodes
+      .getId()
+      .forEach(id => {
+        if (!this.rects[this.nodeToGroup[id]]) return;
+        this.rects[this.nodeToGroup[id]].classList.add('hightlight');
+      });
   }
+
+  resethighlight(){
+    this.rects.forEach(group => group.classList.remove('hightlight'));
+  }
+
+  onBarClick(evt: MouseEvent) {
+    const { x, y } = evt;
+    if (!x || !y || !this.rects.length) return;
+    const svg: SVGAElement| null = this.container.querySelector('.vis-line-graph>svg');
+    if(!svg) return;
+    const offset = +svg.style.left.slice(0, -2);
+    const {nodeIds, rects} = (this.rects
+      .map((rect, i) => {
+        const groupX = +(rect.getAttribute('x') as string) + offset;
+        const groupW = +(rect.getAttribute('width') as string);
+        return groupX < x && groupX + groupW > x
+          ? {
+              rect,
+              nodeIds: this.groupToNodes[i]
+            }
+          : null;
+      })
+      .filter(e => e)as ({ nodeIds: Id[], rect: SVGRectElement}[]))
+      .reduce((acc, { rect, nodeIds }) => {
+        acc.nodeIds.push(...nodeIds);
+        acc.rects.push(rect);
+        return acc;
+      }, { nodeIds: [], rects: [] } as {nodeIds: Id[], rects: SVGRectElement[]});
+    this.emit(click, {nodeIds, rects, event: evt});
+  }
+
+  barFromNodeId(id: Id) {
+    return this.rects[this.nodeToGroup[id]];
+  }
+  groupFromNodeId(id: Id) {
+    return this.nodeToGroup[id];
+  }
+
+
 
   protected onRangeChange() {
     // prevent from infinite loop: setdata and window trigger this event

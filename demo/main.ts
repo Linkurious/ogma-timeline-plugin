@@ -1,6 +1,7 @@
 import './style.css';
 import Ogma from '@linkurious/ogma';
 import { Controller } from '../src';
+import { click } from '../src/constants';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
@@ -45,6 +46,13 @@ ogma.generate
   .then(() => {
     const container = document.getElementById('timeline') as HTMLDivElement;
     const controller = new Controller(ogma, container);
+
+    controller.barchart.on(click, ({nodeIds, rects}) => {
+      ogma.getSelectedNodes().setSelected(false);
+      const nodes = ogma.getNodes(nodeIds);
+      nodes.setSelected(true);
+      controller.barchart.highlightNodes(nodes);
+  });
     controller.refresh(ogma.getNodes());
     controller.showBarchart();
     controller.barchart.chart.setWindow(new Date(0), Date.now())
