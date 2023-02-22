@@ -47,12 +47,30 @@ ogma.generate
     const container = document.getElementById('timeline') as HTMLDivElement;
     const controller = new Controller(ogma, container);
 
-    controller.barchart.on(click, ({nodeIds, rects}) => {
+    let isBarchartClick = false;
+    controller.barchart.on(click, ({nodeIds, evt}) => {
+      isBarchartClick = true
       ogma.getSelectedNodes().setSelected(false);
-      const nodes = ogma.getNodes(nodeIds);
-      nodes.setSelected(true);
-      controller.barchart.highlightNodes(nodes);
-  });
+      ogma.getNodes(nodeIds).setSelected(true);
+      controller.barchart.highlightNodes(nodeIds);
+      isBarchartClick = false 
+    });
+    ogma.events.on(['nodesSelected', 'nodesUnselected'], (evt)=>{
+      if(isBarchartClick)return;
+      controller.barchart.highlightNodes(ogma.getSelectedNodes().getId());
+      controller.timeline.highlightNodes(ogma.getSelectedNodes().getId());
+
+    })
+
+
+    controller.timeline.on(click, ({ nodeIds }) => {
+      isBarchartClick = true
+      ogma.getSelectedNodes().setSelected(false);
+      ogma.getNodes(nodeIds).setSelected(true);
+      controller.barchart.highlightNodes(nodeIds);
+      isBarchartClick = false 
+    }); 
+
     controller.refresh(ogma.getNodes());
     controller.showBarchart();
     controller.barchart.chart.setWindow(new Date(0), Date.now())

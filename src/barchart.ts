@@ -1,5 +1,5 @@
 import { NodeList } from '@linkurious/ogma';
-import { Graph2d as VGraph2d } from 'vis-timeline';
+import { Graph2d as VGraph2d, TimelineEventPropertiesResult } from 'vis-timeline';
 import { click, scaleChange, scales } from './constants';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import './style.css';
@@ -53,15 +53,13 @@ export class Barchart extends Chart {
     // this._computeGroups();
     barchart.addCustomTime(options.minTime, 't1');
     barchart.addCustomTime(options.maxTime, 't2');
-    this.registerEvents();
     this.chart.on('click', e => {
       this.onBarClick(e);
     })
     this.chart.on("rangechanged", () => {
       this.rects = Array.from(this.container.querySelectorAll('.vis-line-graph>svg>rect')) as SVGRectElement[];
     })
-
-    
+    super.registerEvents();
   }
 
   public refresh(nodes: NodeList): void {
@@ -159,17 +157,13 @@ export class Barchart extends Chart {
       }, {} as Lookup<GroupByScale>);
   }
 
-  onSelectionChange(selectedNodes: NodeList) {
-    // if (this.isSelecting) return;
-    // this.isSelecting = true;
-    // this.highlightNodes(selectedNodes);
-    // this.isSelecting = false;
-  }
+  highlightNodes(nodes: NodeList| Id[]) {
 
-  highlightNodes(nodes: NodeList) {
     this.resethighlight();
-    nodes
-      .getId()
+    const ids = 'getId' in nodes ?  
+    nodes.getId() : nodes;
+
+    ids
       .forEach(id => {
         if (!this.rects[this.nodeToGroup[id]]) return;
         this.rects[this.nodeToGroup[id]].classList.add('hightlight');
@@ -180,13 +174,13 @@ export class Barchart extends Chart {
     this.rects.forEach(group => group.classList.remove('hightlight'));
   }
 
-  onBarClick(evt: MouseEvent) {
+  onBarClick(evt: TimelineEventPropertiesResult) {
     const { x, y } = evt;
     if (!x || !y || !this.rects.length) return;
     const svg: SVGAElement| null = this.container.querySelector('.vis-line-graph>svg');
     if(!svg) return;
     const offset = +svg.style.left.slice(0, -2);
-    const {nodeIds, rects} = (this.rects
+    const nodeIds = (this.rects
       .map((rect, i) => {
         const groupX = +(rect.getAttribute('x') as string) + offset;
         const groupW = +(rect.getAttribute('width') as string);
@@ -198,22 +192,12 @@ export class Barchart extends Chart {
           : null;
       })
       .filter(e => e)as ({ nodeIds: Id[], rect: SVGRectElement}[]))
-      .reduce((acc, { rect, nodeIds }) => {
-        acc.nodeIds.push(...nodeIds);
-        acc.rects.push(rect);
+      .reduce((acc, { nodeIds }) => {
+        acc.push(...nodeIds);
         return acc;
-      }, { nodeIds: [], rects: [] } as {nodeIds: Id[], rects: SVGRectElement[]});
-    this.emit(click, {nodeIds, rects, event: evt});
+      },  []  as Id[] );
+    this.emit(click, {nodeIds, evt});
   }
-
-  barFromNodeId(id: Id) {
-    return this.rects[this.nodeToGroup[id]];
-  }
-  groupFromNodeId(id: Id) {
-    return this.nodeToGroup[id];
-  }
-
-
 
   protected onRangeChange() {
     // prevent from infinite loop: setdata and window trigger this event

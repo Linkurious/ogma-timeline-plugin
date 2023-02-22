@@ -1,4 +1,4 @@
-import { Graph2d, Timeline } from 'vis-timeline';
+import { Graph2d, IdType, Timeline, TimelineEventPropertiesResult } from 'vis-timeline';
 import { click, scaleChange, zoomIn, zoomOut } from './constants';
 
 export interface ChartOptions {
@@ -47,8 +47,7 @@ export type ScaleChangeEvt = {
 };
 export type ClickEvt = {
   nodeIds: Id[];
-  rects: SVGRectElement[];
-  event: MouseEvent;
+  evt: TimelineEventPropertiesResult;
 }
 export type Events = {
   [scaleChange]: (evt: ScaleChangeEvt) => void;

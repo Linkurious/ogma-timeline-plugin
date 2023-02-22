@@ -12,15 +12,13 @@ export class Controller {
 
   private mode: TimelineMode;
 
-  private timeline: Timeline;
+  public timeline: Timeline;
 
   public barchart: Barchart;
 
   private options: any;
 
   private timeFilter: Transformation<any, any>;
-
-  private isChangingRange: boolean;
 
   private isSelecting: boolean;
 
@@ -83,8 +81,6 @@ export class Controller {
       this.barchart.setWindow(+start, +end);
       this.showBarchart();
     });
-    // this.setupEvents(this.timeline, timeFilter, 'timeline');
-    this.setupEvents(this.barchart, timeFilter, 'barchart');
 
     this.timeline.on(click, (e) => {
       console.log(e);
@@ -94,54 +90,6 @@ export class Controller {
   refresh(nodes: NodeList<any, any>) {
     this.timeline.refresh(nodes);
     this.barchart.refresh(nodes);
-  }
-
-  setupEvents(
-    chart: Timeline | Barchart,
-    timeFilter: Transformation,
-    mode: TimelineMode
-  ) {
-    this.isSelecting = false;
-    this.ogma.events.on(
-      ['nodesSelected', 'nodesUnselected'],
-      () => chart.onSelectionChange(this.ogma.getSelectedNodes())
-    );
-
-    chart.chart.on('click', e => {
-      chart.onBarClick(e);
-    })
-
-    chart.chart.on('timechange', () => {
-      const [min, max] = chart.chart.components
-        .map(({ customTime }: { customTime: string }) => customTime)
-        .filter((c: string) => c)
-        .sort((a: string, b: string) => +a - +b);
-      this.options.minTime = min;
-      this.options.maxTime = max;
-      timeFilter.refresh();
-    });
-    this.isChangingRange = false;
-  }
-
-  onNodesSelectionChange() {
-    // if (this.isSelecting) return;
-    // this.isSelecting = true;
-    // if (this.mode === 'timeline') {
-    //   this.timeline.setSelection(this.ogma.getSelectedNodes().getId());
-    // } else {
-    //   const groups = [
-    //     ...this.container.querySelectorAll('.vis-line-graph>svg>rect')
-    //   ];
-    //   groups.forEach(group => group.classList.remove('selected'));
-    //   this.ogma
-    //     .getSelectedNodes()
-    //     .getId()
-    //     .forEach(id => {
-    //       if (!groups[this.nodeToGroup[id]]) return;
-    //       groups[this.nodeToGroup[id]].classList.add('selected');
-    //     });
-    // }
-    // this.isSelecting = false;
   }
 
   _onTimelineSelect = (s: { items: Id[] }) => {
@@ -154,65 +102,6 @@ export class Controller {
       .moveToBounds(nodesToSelect.getBoundingBox())
       .then(() => (this.isSelecting = false));
   };
-
-  _onRangeChange() {
-    // prevent from infinite loop: setdata and window trigger this event
-    // if (this.isChangingRange) return;
-
-    // this.isChangingRange = true;
-    // const { start, end } =
-    //   this.mode === 'timeline'
-    //     ? this.timeline.timeline.getWindow()
-    //     : this.barchart.barchart.getWindow();
-    // const length = +end - +start;
-    // // choose a scale adapted to zoom
-    // const scale = scales.reduce(
-    //   (scale, candidate) => {
-    //     const bars = Math.round(length / candidate);
-    //     if (bars < scale.bars && bars > 10) {
-    //       return {
-    //         bars,
-    //         scale: candidate
-    //       };
-    //     }
-    //     return scale;
-    //   },
-    //   { bars: Infinity, scale: Infinity }
-    // ).scale;
-    // if (scale === this.chosenScale) {
-    //   this.isChangingRange = false;
-    //   return;
-    // }
-    // this.chosenScale = scale;
-    // // get the data depending on zoom
-    // const { groups, timelineMode, nodeToGroup, groupToNodes } =
-    //   this.groupsByScale[scale];
-    // const { minTime, maxTime } = this.options;
-    // this.nodeToGroup = nodeToGroup;
-    // this.groupToNodes = groupToNodes;
-
-    // update timelines
-    // if (timelineMode) {
-    //   this.mode = 'timeline';
-    //   this.showTimeline();
-    //   // no need to update the data, it does not change
-    //   // this.timedataset.clear();
-    //   // this.timedataset.add(groups);
-    //   this.timeline.setWindow(start, end);
-    //   this.timeline.setCustomTime(minTime, 't1');
-    //   this.timeline.setCustomTime(maxTime, 't2');
-    // } else {
-    //   this.mode = 'barchart';
-    //   this.showBarchart();
-    //   this.bardataset.clear();
-    //   this.bardataset.add(groups);
-    //   this.barchart.setWindow(start, end);
-    //   this.barchart.setCustomTime(minTime, 't1');
-    //   this.barchart.setCustomTime(maxTime, 't2');
-    //   this.barchart.redraw();
-    // }
-    this.isChangingRange = false;
-  }
 
   showTimeline() {
     this.barchart.container.style.display = 'none';

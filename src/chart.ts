@@ -44,6 +44,5 @@ export abstract class Chart extends EventEmitter<Events> {
   
   protected abstract onRangeChange(): void;
   public abstract refresh(nodes: NodeList): void;
-  public abstract onSelectionChange(selectedNodes: NodeList): void;
 
 }

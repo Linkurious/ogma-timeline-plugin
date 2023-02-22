@@ -1,5 +1,5 @@
 import { NodeList } from '@linkurious/ogma';
-import { Timeline as VTimeline } from 'vis-timeline';
+import { Timeline as VTimeline, TimelineEventPropertiesResult } from 'vis-timeline';
 import { click, scaleChange, scales } from './constants';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import './style.css';
@@ -25,6 +25,7 @@ export class Timeline extends Chart {
   // private ogma: Ogma<any, any>;
   private isChangingRange: boolean;
   private groupToNodes: Lookup<Id[]>;
+
   /**
    * @param {HTMLDivElement} container
    * @param {Ogma} ogma
@@ -43,8 +44,10 @@ export class Timeline extends Chart {
     timeline.addCustomTime(maxTime, 't2');
     // state flags
     this.isChangingRange = false;
-    this.isSelecting = false;
-    this.registerEvents();
+    this.chart.on('click', e => {
+      this.onBarClick(e);
+    })
+    super.registerEvents();
   }
 
   public refresh(nodes: NodeList<any, any>): void {
@@ -67,26 +70,8 @@ export class Timeline extends Chart {
     this.dataset.clear();
     this.dataset.add(elements);
     this.chart.setWindow(starts[0], ends[ends.length - 1]);
+    
   }
-
-  // TODO
-  onNodesSelectionChange(){
-    // if (this.isSelecting) return;
-    // this.isSelecting = true;
-    // this.timeline.setSelection(this.ogma.getSelectedNodes().getId());
-    // this.isSelecting = false;
-  };
-  // TODO
-  onTimelineSelect(s: { items: Id[] }){
-    // if (this.isSelecting) return;
-    // this.isSelecting = true;
-    // this.ogma.clearSelection();
-    // const nodesToSelect = this.ogma.getNodes(s.items);
-    // nodesToSelect.setSelected(true);
-    // this.ogma.view
-    //   .moveToBounds(nodesToSelect.getBoundingBox())
-    //   .then(() => (this.isSelecting = false));
-  };
 
   protected onRangeChange() {
     // prevent from infinite loop: setdata and window trigger this event
@@ -116,7 +101,23 @@ export class Timeline extends Chart {
     this.isChangingRange = false;
   };
 
-  onBarClick(s: { items: Id[] }) {
-    this.emit(click, s.items);
+  highlightNodes(nodes: NodeList| Id[]) {
+
+    this.resethighlight();
+    const ids = 'getId' in nodes ?  
+    nodes.getId() : nodes;
+    this.chart.setSelection(ids)
   }
+
+  resethighlight(){
+    this.chart.setSelection([])
+  }
+
+  onBarClick(evt: TimelineEventPropertiesResult) {
+    const { x, y, item } = evt;
+    if (!x || !y || !item) return;
+    const nodeIds = this.groupToNodes[item]
+    this.emit(click, { nodeIds: nodeIds, evt });
+  }
+
 }
