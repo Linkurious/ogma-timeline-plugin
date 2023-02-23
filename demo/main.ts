@@ -32,7 +32,7 @@ ogma.generate
       const start = Date.now() - Math.floor(Math.random() * range);
       // randomly add a lifespan to the node
       const end =
-        i % 2 ? start + 3000000 + (Math.random() * range) / 10 : undefined;
+        i % 2 ? start + 3000000 + Math.floor((Math.random() * range) / 10) : undefined;
       node.data = { start, end };
     });
     return ogma.setGraph(
@@ -45,7 +45,12 @@ ogma.generate
   })
   .then(() => {
     const container = document.getElementById('timeline') as HTMLDivElement;
-    const controller = new Controller(ogma, container);
+    const controller = new Controller(ogma, container, {
+      timeBars: [
+        new Date(Date.now()),
+        new Date(0),
+      ]
+    });
 
     let isBarchartClick = false;
     controller.barchart.on(click, ({nodeIds, evt}) => {
@@ -59,10 +64,7 @@ ogma.generate
       if(isBarchartClick)return;
       controller.barchart.highlightNodes(ogma.getSelectedNodes().getId());
       controller.timeline.highlightNodes(ogma.getSelectedNodes().getId());
-
     })
-
-
     controller.timeline.on(click, ({ nodeIds }) => {
       isBarchartClick = true
       ogma.getSelectedNodes().setSelected(false);
@@ -70,8 +72,13 @@ ogma.generate
       controller.barchart.highlightNodes(nodeIds);
       isBarchartClick = false 
     }); 
+    ogma.transformations.addNodeFilter({
+      selector: node => {
+        controller.nodesInWindow.has(node.getId());
+      },
+    })
 
     controller.refresh(ogma.getNodes());
-    controller.showBarchart();
+    // controller.showBarchart();
     controller.barchart.chart.setWindow(new Date(0), Date.now())
   });

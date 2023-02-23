@@ -1,19 +1,33 @@
 import { Graph2d, IdType, Timeline, TimelineEventPropertiesResult } from 'vis-timeline';
-import { click, scaleChange, zoomIn, zoomOut } from './constants';
-
+import { click, rangechanged, scaleChange, zoomIn, zoomOut } from './constants';
+import {Node } from '@linkurious/ogma';
 export interface ChartOptions {
   minTime: number;
   maxTime: number;
-  startDatePath: string;
-  endDatePath: string;
 }
+export type FilterStrategy = 'before' | 'after' | 'between' | 'outside';
+export type FilterTolerance = 'strict' | 'loose';
 
+export type FilterOptions = {
+  enabled: boolean;
+  criteria: (node: Node) => boolean;
+  strategy: FilterStrategy;
+  tolerance: FilterTolerance;
+}
 export type TimelineOptions = ChartOptions;
 
 export interface BarchartOptions extends ChartOptions {
   barWidth: number;
   barAlign: 'center' | 'left' | 'right';
   barAxisOrientation: 'top' | 'bottom';
+}
+
+export interface Options{
+  timeline: TimelineOptions;
+  barchart: BarchartOptions;
+  timeBars?: Date[];
+  startDatePath: string;
+  endDatePath: string;
 }
 
 export type Id = number | string;
@@ -52,5 +66,6 @@ export type ClickEvt = {
 export type Events = {
   [scaleChange]: (evt: ScaleChangeEvt) => void;
   [click]: (evt: ClickEvt) => void;
-  [zoomOut]: (evt) => void;
+  [rangechanged]: () => void;
+
 };

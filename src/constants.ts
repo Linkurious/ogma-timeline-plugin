@@ -49,3 +49,5 @@ export const zoomIn = 'zoom-in';
 export const zoomOut = 'zoom-out';
 export const scaleChange = 'scale-change';
 export const click = 'click';
+export const rangechanged = 'rangechanged';
+

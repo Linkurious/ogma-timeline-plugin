@@ -1,4 +1,4 @@
-import { NodeList } from '@linkurious/ogma';
+import { NodeId, NodeList } from '@linkurious/ogma';
 import { Timeline as VTimeline, TimelineEventPropertiesResult } from 'vis-timeline';
 import { click, scaleChange, scales } from './constants';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
@@ -39,9 +39,6 @@ export class Timeline extends Chart {
     });
     this.chart = timeline;
     this.groupToNodes = {};
-    const { minTime, maxTime } = options;
-    timeline.addCustomTime(minTime, 't1');
-    timeline.addCustomTime(maxTime, 't2');
     // state flags
     this.isChangingRange = false;
     this.chart.on('click', e => {
@@ -50,13 +47,10 @@ export class Timeline extends Chart {
     super.registerEvents();
   }
 
-  public refresh(nodes: NodeList<any, any>): void {
-    const nodeIndexes = nodes.getId();
-    const starts = nodes.getData(this.options.startDatePath);
-    const ends = nodes.getData(this.options.endDatePath);
+  public refresh(ids: NodeId[], starts: number[], ends: number[]): void {
     const groupToNodes: Lookup<Id[]> = {};
     const nodeToGroup: Lookup<number> = {};
-    const elements = nodeIndexes.map((id, i) => {
+    const elements = ids.map((id, i) => {
       groupToNodes[i] = [id];
       nodeToGroup[id] = i;
       return {
@@ -70,7 +64,6 @@ export class Timeline extends Chart {
     this.dataset.clear();
     this.dataset.add(elements);
     this.chart.setWindow(starts[0], ends[ends.length - 1]);
-    
   }
 
   protected onRangeChange() {

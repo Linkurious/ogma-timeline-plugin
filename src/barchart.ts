@@ -1,4 +1,4 @@
-import { NodeList } from '@linkurious/ogma';
+import { NodeId, NodeList } from '@linkurious/ogma';
 import { Graph2d as VGraph2d, TimelineEventPropertiesResult } from 'vis-timeline';
 import { click, scaleChange, scales } from './constants';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
@@ -49,10 +49,6 @@ export class Barchart extends Chart {
     this.groupToNodes = {};
     this.isChangingRange = false;
     this.rects = [];
-
-    // this._computeGroups();
-    barchart.addCustomTime(options.minTime, 't1');
-    barchart.addCustomTime(options.maxTime, 't2');
     this.chart.on('click', e => {
       this.onBarClick(e);
     })
@@ -62,8 +58,8 @@ export class Barchart extends Chart {
     super.registerEvents();
   }
 
-  public refresh(nodes: NodeList): void {
-    this.computeGroups(nodes);
+  public refresh(ids: NodeId[], starts: number[], ends: number[]): void {
+    this.computeGroups(ids, starts, ends);
     this.onRangeChange();
   }
 
@@ -71,12 +67,7 @@ export class Barchart extends Chart {
    * Compute the groups depending on the chart zoom.
    * Above a certain zoom, switch to timeline mode
    */
-  computeGroups(nodes: NodeList) {
-    const nodeIndexes = nodes.getId();
-
-    const starts = nodes.getData(this.options.startDatePath);
-    const ends = nodes.getData(this.options.endDatePath);
-
+  computeGroups(ids: NodeId[], starts: number[], ends: number[]) {
     const min = Math.min(
       starts.reduce(
         (min, start) => (isNaN(start) ? min : Math.min(min, start)),
@@ -114,7 +105,7 @@ export class Barchart extends Chart {
         }
         let groupToNodes: Lookup<Id[]> = {};
         const nodeToGroup: Lookup<number> = {};
-        const groupMap = nodeIndexes.reduce((groups, id, i) => {
+        const groupMap = ids.reduce((groups, id, i) => {
           // slice the data and group
           const index = Math.floor((starts[i] - min) / scale);
           const x = min + scale * index;
@@ -229,17 +220,15 @@ export class Barchart extends Chart {
     const { groups, nodeToGroup, groupToNodes, tooZoomed } =
       this.groupsByScale[scale];
     this.emit(scaleChange, { scale, tooZoomed });
-    const { minTime, maxTime } = this.options;
     this.nodeToGroup = nodeToGroup;
     this.groupToNodes = groupToNodes;
 
     this.dataset.clear();
     this.dataset.add(groups);
     this.chart.setWindow(start, end);
-    this.chart.setCustomTime(minTime, 't1');
-    this.chart.setCustomTime(maxTime, 't2');
     this.chart.redraw();
     this.isChangingRange = false;
+    this.emit('rangechanged')
   }
 
   isTooZoomed(scale: number) {
