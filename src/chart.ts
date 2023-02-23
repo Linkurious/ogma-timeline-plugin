@@ -32,6 +32,13 @@ export abstract class Chart extends EventEmitter<Events> {
     this.chart.on('rangechange', () => {
       this.onRangeChange();
     });
+    this.chart.on('timechange', () => {
+      this.emit('timechange');
+    });
+    this.chart.on('timechanged', () => {
+      this.emit('timechanged');
+    });
+
   }
 
   public addTimeBar(time: number): void {

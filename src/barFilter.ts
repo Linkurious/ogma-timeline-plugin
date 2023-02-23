@@ -41,7 +41,7 @@ export function getSelector(bars: number[], strategy: FilterStrategy, tolerance:
     }
   }
 
-  // if(strategy === 'outside'){
+    // outside
     if(tolerance === 'strict'){
       return (a, b) => {
         let res = true
@@ -63,6 +63,5 @@ export function getSelector(bars: number[], strategy: FilterStrategy, tolerance:
         return res;
       }
     }
-  // }
 
 }

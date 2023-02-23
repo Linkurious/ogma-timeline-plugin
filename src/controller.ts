@@ -1,16 +1,24 @@
 import Ogma, { Transformation, NodeList, NodeId } from '@linkurious/ogma';
-import { scaleChange ,click, rangechanged} from './constants';
+import EventEmitter from 'eventemitter3';
+import throttle from 'lodash.throttle';
+import { scaleChange, rangechanged, timechange, timechanged} from './constants';
+import {getSelector} from "./barFilter"
 import { Timeline, defaultTimelineOptions } from './timeline';
 import { Barchart, defaultBarchartOptions } from './barchart';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import './style.css';
-import { Id, Options, TimelineMode } from './types';
+import { ControlerEvents, Id, Options, TimelineMode } from './types';
 
 export const defaultOptions: Partial<Options> = {
   startDatePath: 'start',
   endDatePath: 'end',
+  filter: {
+    enabled: true,
+    strategy: 'between',
+    tolerance: 'loose'
+  }
 }
-export class Controller {
+export class Controller extends EventEmitter<ControlerEvents> {
   private ogma: Ogma<any, any>;
 
   private mode: TimelineMode;
@@ -28,6 +36,7 @@ export class Controller {
   private timeFilter: Transformation<any, any>;
 
   constructor(ogma: Ogma<any, any>, container: HTMLDivElement, options: Partial<Options> = {}) {
+    super();
     this.ogma = ogma;
     this.mode = 'barchart';
     this.options = {
@@ -92,19 +101,21 @@ export class Controller {
     })
 
     // update the list of filtered nodes
-    this.barchart.on(rangechanged, () => {
-
-      // this.nodes.getData(options.)
+    const throttled = throttle(() => this.onTimeChange(), 50);
+    this.barchart.on(timechange, () => {
+      throttled();
+    })
+    this.barchart.on(timechanged, () => {
+      throttled();
     })
 
-    // this.timeFilter
-    // .enable(100)
-    // .then(() => this.ogma.view.locateGraph())
-    // .then(() => {
-    //   const { minTime, maxTime } = this.options;
-    //   // this.timeline.chart.setWindow(minTime - 2 * year, maxTime + 2 * year);
-    //   // this.barchart.chart.setWindow(minTime - 2 * year, maxTime + 2 * year);
-    // });
+    this.timeline.on(timechange, () => {
+      throttled();
+    })
+    this.timeline.on(timechanged, () => {
+      throttled();
+    })
+
   }
 
   refresh(nodes: NodeList<any, any>) {
@@ -114,6 +125,7 @@ export class Controller {
     this.ends = nodes.getData(this.options.endDatePath);
     this.timeline.refresh(this.ids, this.starts, this.ends);
     this.barchart.refresh(this.ids, this.starts, this.ends);
+    this.onTimeChange();
   }
 
   showTimeline() {
@@ -143,5 +155,24 @@ export class Controller {
   setTimebarsDates(dates: Date[]) {
       this.timeline.setTimebarsDates(dates);
       this.barchart.setTimebarsDates(dates);
+  }
+
+  onTimeChange(){
+    if(!this.options.filter.enabled)return this.emit(timechange);
+    const times = (this.mode === 'timeline' 
+      ? this.timeline.getTimebarsDates()
+      : this.barchart.getTimebarsDates())
+      .map(d => +d).sort((a,b) => a - b);
+    const selector = getSelector(
+      times,
+      this.options.filter.strategy,
+      this.options.filter.tolerance);
+      this.filteredNodes.clear();
+      for(let i=0; i< this.ids.length; i++){
+        if(selector(this.starts[i], this.ends[i])){
+          this.filteredNodes.add(this.ids[i]);
+        }
+      }
+      this.emit(timechange);
   }
 }

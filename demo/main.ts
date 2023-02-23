@@ -43,13 +43,18 @@ ogma.generate
       { ignoreInvalid: true }
     );
   })
+  .then(() => ogma.view.locateGraph())
   .then(() => {
     const container = document.getElementById('timeline') as HTMLDivElement;
     const controller = new Controller(ogma, container, {
       timeBars: [
         new Date(Date.now()),
-        new Date(0),
-      ]
+      ],
+      filter: {
+        enabled: true,
+        strategy: 'after',
+        tolerance: 'loose'
+      }
     });
 
     let isBarchartClick = false;
@@ -72,10 +77,14 @@ ogma.generate
       controller.barchart.highlightNodes(nodeIds);
       isBarchartClick = false 
     }); 
-    ogma.transformations.addNodeFilter({
-      selector: node => {
-        controller.nodesInWindow.has(node.getId());
+    const filter = ogma.transformations.addNodeFilter({
+      criteria: node => {
+        return controller.filteredNodes.has(node.getId());
       },
+    })
+
+    controller.on('timechange', () => {
+      filter.refresh();
     })
 
     controller.refresh(ogma.getNodes());
