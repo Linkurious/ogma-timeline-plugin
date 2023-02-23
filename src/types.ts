@@ -1,9 +1,6 @@
-import { Graph2d, Timeline, TimelineEventPropertiesResult } from 'vis-timeline';
-import { click, scaleChange, timechange, timechanged } from './constants';
-export interface ChartOptions {
-  minTime: number;
-  maxTime: number;
-}
+import { DataItem, DataGroup, Graph2d, Timeline, TimelineEventPropertiesResult } from 'vis-timeline';
+import {NodeId} from "@linkurious/ogma";
+import { click, rangechanged, scaleChange, timechange, timechanged } from './constants';
 export type FilterStrategy = 'before' | 'after' | 'between' | 'outside';
 export type FilterTolerance = 'strict' | 'loose';
 
@@ -12,9 +9,12 @@ export type FilterOptions = {
   strategy: FilterStrategy;
   tolerance: FilterTolerance;
 }
-export type TimelineOptions = ChartOptions;
+export interface TimelineOptions {
+  getItem: (item: NodeId) => Partial<DataItem>;
+  getGroups: () => DataGroup[];
+};
 
-export interface BarchartOptions extends ChartOptions {
+export interface BarchartOptions {
   barWidth: number;
   barAlign: 'center' | 'left' | 'right';
   barAxisOrientation: 'top' | 'bottom';
@@ -65,7 +65,7 @@ export type ClickEvt = {
 export type Events = {
   [scaleChange]: (evt: ScaleChangeEvt) => void;
   [click]: (evt: ClickEvt) => void;
-  // [rangechanged]: () => void;
+  [rangechanged]: () => void;
   [timechange]: () => void;
   [timechanged]: () => void;
 

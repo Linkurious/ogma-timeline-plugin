@@ -1,10 +1,10 @@
 import { NodeId, NodeList } from '@linkurious/ogma';
-import { Timeline as VTimeline, TimelineEventPropertiesResult } from 'vis-timeline';
+import { DataItem, Timeline as VTimeline, TimelineEventPropertiesResult } from 'vis-timeline';
 import { click, scaleChange, scales } from './constants';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import './style.css';
 import { Id, Lookup, TimelineOptions } from './types';
-import { Chart, defaultChartOptions } from './chart';
+import { Chart } from './chart';
 
 /**
  * @typedef {object} TimelineOptions
@@ -16,7 +16,8 @@ import { Chart, defaultChartOptions } from './chart';
  *
  */
 export const defaultTimelineOptions: TimelineOptions = {
-  ...defaultChartOptions
+  getItem: id => ({content: `node ${id}`}),
+  getGroups: () => [],
 };
 
 export class Timeline extends Chart {
@@ -32,7 +33,7 @@ export class Timeline extends Chart {
    * @param {TimelineOptions} options
    */
   constructor(container: HTMLDivElement, options: TimelineOptions) {
-    super(container, { ...defaultTimelineOptions, ...options });
+    super(container);
     this.options = options;
     const timeline = new VTimeline(container, this.dataset, {
       editable: false
@@ -50,20 +51,23 @@ export class Timeline extends Chart {
   public refresh(ids: NodeId[], starts: number[], ends: number[]): void {
     const groupToNodes: Lookup<Id[]> = {};
     const nodeToGroup: Lookup<number> = {};
-    const elements = ids.map((id, i) => {
+    const elements: DataItem[] = ids.map((id, i) => {
       groupToNodes[i] = [id];
       nodeToGroup[id] = i;
+      const content = this.options.getItem(id);
       return {
         id,
         start: starts[i],
         end: ends[i],
-        content: `node ${id}`
+        ...content,
       };
     });
     this.groupToNodes = groupToNodes;
     this.dataset.clear();
     this.dataset.add(elements);
+    this.chart.setGroups(this.options.getGroups());
     this.chart.setWindow(starts[0], ends[ends.length - 1]);
+     
   }
 
   protected onRangeChange() {

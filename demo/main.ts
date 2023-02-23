@@ -54,6 +54,24 @@ ogma.generate
         enabled: true,
         strategy: 'after',
         tolerance: 'loose'
+      },
+      timeline: {
+        getItem: (nodeId) => {
+          const group = `group${(+nodeId % 2) +1}`;
+          console.log(group)
+          return {
+            content: `${ogma.getNode(nodeId)!.getData('start')}`,
+            group
+          };
+        },
+        getGroups: () => {return [{
+          id: 'group1',
+          content: 'group1',
+        },{
+          id: 'group2',
+          content: 'group2',
+
+        }]}
       }
     });
 

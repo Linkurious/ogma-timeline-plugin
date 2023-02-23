@@ -1,31 +1,24 @@
 import { NodeId, NodeList } from '@linkurious/ogma';
 import EventEmitter from 'eventemitter3';
 import { DataSet } from 'vis-data';
-import { IdType } from 'vis-timeline';
-import { ChartOptions, Events, Id, VChart } from './types';
-
-export const defaultChartOptions: ChartOptions = {
-  minTime: 0,
-  maxTime: Infinity
-};
+import { DataItem, IdType } from 'vis-timeline';
+import { Events, Id, VChart } from './types';
 
 export abstract class Chart extends EventEmitter<Events> {
   public chart!: VChart;
 
-  protected dataset: DataSet<Record<string, string | number>>;
+  protected dataset: DataSet<DataItem>;
 
-  protected options: ChartOptions;
   public container: HTMLDivElement;
   protected currentScale: number;
   protected timebars: IdType[];
 
-  constructor(container: HTMLDivElement, options: Partial<ChartOptions> = {}) {
+  constructor(container: HTMLDivElement) {
     super();
     this.dataset = new DataSet([]);
     this.container = container;
     this.currentScale = 0;
     this.timebars = []
-    this.options = { ...defaultChartOptions, ...options };
   }
 
   protected registerEvents(): void {

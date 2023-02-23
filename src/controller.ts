@@ -1,7 +1,9 @@
 import Ogma, { Transformation, NodeList, NodeId } from '@linkurious/ogma';
 import EventEmitter from 'eventemitter3';
 import throttle from 'lodash.throttle';
-import { scaleChange, rangechanged, timechange, timechanged} from './constants';
+import merge from 'lodash.merge';
+
+import { scaleChange, timechange, timechanged} from './constants';
 import {getSelector} from "./barFilter"
 import { Timeline, defaultTimelineOptions } from './timeline';
 import { Barchart, defaultBarchartOptions } from './barchart';
@@ -16,7 +18,9 @@ export const defaultOptions: Partial<Options> = {
     enabled: true,
     strategy: 'between',
     tolerance: 'loose'
-  }
+  },
+  barchart:defaultBarchartOptions,
+  timeline: defaultTimelineOptions,
 }
 export class Controller extends EventEmitter<ControlerEvents> {
   private ogma: Ogma<any, any>;
@@ -32,45 +36,26 @@ export class Controller extends EventEmitter<ControlerEvents> {
   private ends: number[];
   private ids: NodeId[];
 
-
-  private timeFilter: Transformation<any, any>;
-
   constructor(ogma: Ogma<any, any>, container: HTMLDivElement, options: Partial<Options> = {}) {
     super();
     this.ogma = ogma;
     this.mode = 'barchart';
-    this.options = {
-      ...defaultBarchartOptions,
-      ...defaultTimelineOptions,
-      ...defaultOptions,
-      ...options
-    };
+    this.options = merge(
+      defaultOptions,
+      options,
+    );
     this.filteredNodes = new Set();
     this.nodes = ogma.createNodeList();
     this.starts = [];
     this.ends = [];
     this.ids = [];
-    const timeFilter = this.ogma.transformations.addNodeFilter({
-      criteria: (node) => {
-        const start = node.getData('start');
-        const end = node.getData('end');
-        const { minTime, maxTime } = this.options;
-        return (
-          start > minTime &&
-          start < maxTime &&
-          (!end || (end > minTime && end < maxTime))
-        );
-      },
-      enabled: false
-    });
-    this.timeFilter = timeFilter;
     const timelineContainer = document.createElement('div');
     const barchartContainer = document.createElement('div');
     container.appendChild(timelineContainer);
     container.appendChild(barchartContainer);
 
-    const timeline = new Timeline(timelineContainer, this.options);
-    const barchart = new Barchart(barchartContainer, this.options);
+    const timeline = new Timeline(timelineContainer, this.options.timeline);
+    const barchart = new Barchart(barchartContainer, this.options.barchart);
     this.timeline = timeline;
     this.barchart = barchart;
 

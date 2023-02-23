@@ -1,10 +1,10 @@
 import { NodeId, NodeList } from '@linkurious/ogma';
 import { Graph2d as VGraph2d, TimelineEventPropertiesResult } from 'vis-timeline';
-import { click, scaleChange, scales } from './constants';
+import { click, rangechanged, scaleChange, scales } from './constants';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import './style.css';
 import { BarchartOptions, Group, GroupByScale, Id, Lookup } from './types';
-import { Chart, defaultChartOptions } from './chart';
+import { Chart } from './chart';
 
 /**
  * @typedef {object} BarchartOptions
@@ -16,7 +16,6 @@ export const defaultBarchartOptions: BarchartOptions = {
   barWidth: 50,
   barAlign: 'center',
   barAxisOrientation: 'top',
-  ...defaultChartOptions
 };
 
 export class Barchart extends Chart {
@@ -25,7 +24,6 @@ export class Barchart extends Chart {
   private nodeToGroup: Lookup<number>;
 
   private groupToNodes: Lookup<Id[]>;
-
   private isChangingRange: boolean;
   private rects: SVGRectElement[];
 
@@ -35,7 +33,7 @@ export class Barchart extends Chart {
    * @param {TimelineOptions} options
    */
   constructor(container: HTMLDivElement, options: BarchartOptions) {
-    super(container, { ...defaultBarchartOptions, ...options });
+    super(container, { ...defaultBarchartOptions });
     const barchart = new VGraph2d(container, this.dataset, {
       style: 'bar',
       barChart: { width: options.barWidth, align: options.barAlign },
@@ -228,7 +226,7 @@ export class Barchart extends Chart {
     this.chart.setWindow(start, end);
     this.chart.redraw();
     this.isChangingRange = false;
-    this.emit('rangechanged')
+    this.emit(rangechanged);
   }
 
   isTooZoomed(scale: number) {
