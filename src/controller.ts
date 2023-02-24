@@ -74,7 +74,7 @@ export class Controller extends EventEmitter<ControlerEvents> {
       if (barchart.isTooZoomed(scale)) return;
       const { start, end } = this.timeline.getWindow();
       this.barchart.setWindow(+start, +end);
-      this.barchart.setTimebarsDates(this.timeline.getTimebarsDates());
+      // this.barchart.setTimebarsDates(this.timeline.getTimebarsDates());
       this.showBarchart();
     });
 

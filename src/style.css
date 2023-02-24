@@ -27,3 +27,9 @@
   stroke: #34b9ff;
   fill: rgb(205, 249, 255);
 }
+
+
+.vis-graph-group{
+  fill-opacity: 0;
+  stroke: #1499ff;
+}

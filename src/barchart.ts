@@ -1,10 +1,11 @@
 import { NodeId, NodeList } from '@linkurious/ogma';
-import { Graph2d as VGraph2d, TimelineEventPropertiesResult } from 'vis-timeline';
+import { DataItem, Graph2d as VGraph2d, TimelineEventPropertiesResult,DataGroup } from 'vis-timeline';
 import { click, rangechanged, scaleChange, scales } from './constants';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import './style.css';
-import { BarchartOptions, Group, GroupByScale, Id, Lookup } from './types';
+import { BarchartOptions, BarChartItem, Id, Lookup, ItemByScale } from './types';
 import { Chart } from './chart';
+import { DataSet } from 'vis-data';
 
 /**
  * @typedef {object} BarchartOptions
@@ -16,16 +17,19 @@ export const defaultBarchartOptions: BarchartOptions = {
   barWidth: 50,
   barAlign: 'center',
   barAxisOrientation: 'top',
+  groupIdFunction: (id) => `group-0`,
+  groupContent: (groupId: string, nodeIds: Id[]) => groupId,
+  itemGenerator: () => ({}),
 };
 
 export class Barchart extends Chart {
-  private groupsByScale: Lookup<GroupByScale>;
-
-  private nodeToGroup: Lookup<number>;
-
-  private groupToNodes: Lookup<Id[]>;
+  private itemsByScale: Lookup<ItemByScale>;
+  private nodeToItem: Lookup<number>;
+  private options: BarchartOptions;
+  private itemToNodes: Lookup<Id[]>;
   private isChangingRange: boolean;
   private rects: SVGRectElement[];
+  private groupDataset: DataSet<DataGroup>;
 
   /**
    * @param {HTMLDivElement} container
@@ -33,18 +37,20 @@ export class Barchart extends Chart {
    * @param {TimelineOptions} options
    */
   constructor(container: HTMLDivElement, options: BarchartOptions) {
-    super(container, { ...defaultBarchartOptions });
-    const barchart = new VGraph2d(container, this.dataset, {
-      style: 'bar',
-      barChart: { width: options.barWidth, align: options.barAlign },
-      drawPoints: false,
+    super(container);
+    this.groupDataset = new DataSet<DataGroup>();
+    const barchart = new VGraph2d(container, this.dataset, this.groupDataset, {
+      // style: 'bar',
+      // barChart: { width: options.barWidth, align: options.barAlign },
+      // drawPoints: false,
       orientation: options.barAxisOrientation,
-      graphHeight: `${container.offsetHeight - 50}px`
+      // graphHeight: `${container.offsetHeight - 50}px`
     });
+    this.options = options;
     this.chart = barchart;
-    this.groupsByScale = {};
-    this.nodeToGroup = {};
-    this.groupToNodes = {};
+    this.itemsByScale = {};
+    this.nodeToItem = {};
+    this.itemToNodes = {};
     this.isChangingRange = false;
     this.rects = [];
     this.chart.on('click', e => {
@@ -89,61 +95,96 @@ export class Barchart extends Chart {
 
     let tooZoomed = false;
     // iterate from big to small zoom and compute bars
-    this.groupsByScale = scales
+    const groupIdToNode = ids.reduce((groups, id, i) => {
+      const groupid = this.options.groupIdFunction(id);
+      if (!groups[groupid]) {
+        groups[groupid] = []
+      }
+      groups[groupid].push(i)
+      return groups;
+    }, {} as Record<string, number[]>);
+
+    const groups: DataGroup[] = Object.entries(groupIdToNode).map(([groupid, indexes]) => ({
+      id: groupid,
+      content: this.options.groupContent(groupid, indexes),
+      className: `vis-graph-group ${groupid}`,
+      options: {}
+    }));
+
+    this.itemsByScale = scales
       .slice()
       .reverse()
-      .reduce((groupsByScale, scale, i, scales) => {
+      .reduce((itemsByScale, scale, i, scales) => {
         // if we reached a zoom where there are not too many events,
         // just display timeline
-        const gpPrev = groupsByScale[scales[i - 1]] as any as GroupByScale;
+        const gpPrev = itemsByScale[scales[i - 1]] as any as ItemByScale;
 
         if (tooZoomed) {
-          groupsByScale[scale] = { ...gpPrev, tooZoomed: true };
-          return groupsByScale;
+          itemsByScale[scale] = { ...gpPrev, tooZoomed: true };
+          return itemsByScale;
         }
-        let groupToNodes: Lookup<Id[]> = {};
-        const nodeToGroup: Lookup<number> = {};
-        const groupMap = ids.reduce((groups, id, i) => {
-          // slice the data and group
-          const index = Math.floor((starts[i] - min) / scale);
-          const x = min + scale * index;
-          if (!groups[x]) {
-            groups[x] = {
-              id: index,
-              group: index,
-              className: 'group-0',
-              x,
-              y: 0
-            };
-            groupToNodes[index] = [];
-          }
-          groupToNodes[index].push(id);
-          // y is how many nodes there is within this group
-          // eslint-disable-next-line no-param-reassign
-          groups[x].y += 1;
-          return groups;
-        }, {} as Lookup<Group>);
-        const groups = Object.values(groupMap);
-        groupToNodes = Object.entries(groupToNodes)
+        const itemsPerGroup: Record<string,  Record<number, BarChartItem>> = Object.keys(groupIdToNode)
+        .reduce((acc, groupid) => {
+          acc[groupid] = {};
+          return acc;
+        }, {} as Record<string, Record<number, BarChartItem>>);
+        let itemToNodes: Lookup<Id[]> = {};
+        const nodeToItem: Lookup<number> = {};
+        const items:BarChartItem[]  = [];
+        Object.entries(groupIdToNode)
+        .forEach(([groupid, indexes]) => {
+          const itemsPerX = itemsPerGroup[groupid];
+          indexes.forEach((i) => {
+            const index = Math.floor((starts[i] - min) / scale);
+              const x = min + scale * index;
+              if (!itemsPerX[x]) {
+                itemsPerX[x] = {
+                  id: i,
+                  label: '',
+                  group: groupid,
+                  x,
+                  y: 0
+                };
+              }
+              // y is how many nodes there is within this group
+              itemsPerX[x].y += 1;
+          });
+        })
+        Object.values(itemsPerGroup).forEach((itemsPerX) => {
+          Object.values(itemsPerX).forEach(item => {
+            items.push({
+              ...item,
+              ...this.options.itemGenerator(
+                // nodeIds:
+                groupIdToNode[item.group],
+                // scale
+                scale,
+              )
+            })  
+          })
+        });
+
+        itemToNodes = Object.entries(itemToNodes)
           .sort(([a], [b]) => +a - +b)
-          .reduce((groupToNodes, [index, nodes], i) => {
-            groupToNodes[i] = nodes;
-            nodes.forEach((n) => (nodeToGroup[n] = i));
-            return groupToNodes;
+          .reduce((itemToNodes, [index, nodes], i) => {
+            itemToNodes[i] = nodes;
+            nodes.forEach((n) => (nodeToItem[n] = i));
+            return itemToNodes;
           }, {} as Lookup<Id[]>);
 
         // eslint-disable-next-line no-param-reassign
-        groupsByScale[scale] = {
-          groups,
-          groupToNodes,
+        itemsByScale[scale] = {
+          items,
+          itemToNodes,
           tooZoomed,
-          nodeToGroup
+          groups,
+          nodeToItem
         };
         // tell the next iteration if it should be on timeline or barchart mode
         tooZoomed =
-          tooZoomed || groups.reduce((maxY, g) => Math.max(maxY, g.y), 0) < 5;
-        return groupsByScale;
-      }, {} as Lookup<GroupByScale>);
+          tooZoomed || items.reduce((maxY, g) => Math.max(maxY, g.y), 0) < 5;
+        return itemsByScale;
+      }, {} as Lookup<ItemByScale>);
   }
 
   highlightNodes(nodes: NodeList| Id[]) {
@@ -154,8 +195,8 @@ export class Barchart extends Chart {
 
     ids
       .forEach(id => {
-        if (!this.rects[this.nodeToGroup[id]]) return;
-        this.rects[this.nodeToGroup[id]].classList.add('hightlight');
+        if (!this.rects[this.nodeToItem[id]]) return;
+        this.rects[this.nodeToItem[id]].classList.add('hightlight');
       });
   }
 
@@ -176,7 +217,7 @@ export class Barchart extends Chart {
         return groupX < x && groupX + groupW > x
           ? {
               rect,
-              nodeIds: this.groupToNodes[i]
+              nodeIds: this.itemToNodes[i]
             }
           : null;
       })
@@ -215,21 +256,28 @@ export class Barchart extends Chart {
     }
     this.currentScale = scale;
     // get the data depending on zoom
-    const { groups, nodeToGroup, groupToNodes, tooZoomed } =
-      this.groupsByScale[scale];
+    const { items, nodeToItem, itemToNodes,groups, tooZoomed } =
+      this.itemsByScale[scale];
     this.emit(scaleChange, { scale, tooZoomed });
-    this.nodeToGroup = nodeToGroup;
-    this.groupToNodes = groupToNodes;
+    this.nodeToItem = nodeToItem;
+    this.itemToNodes = itemToNodes;
 
     this.dataset.clear();
-    this.dataset.add(groups);
-    this.chart.setWindow(start, end);
+    // const groups = this.
+    // if(groups && groups.length) {
+    this.groupDataset.clear()
+    this.groupDataset.add(groups as unknown as DataItem[]);
+    this.dataset.add(items as unknown as DataItem[]);
+
+    // }
+
+    // this.chart.setWindow(start, end);
     this.chart.redraw();
     this.isChangingRange = false;
     this.emit(rangechanged);
   }
 
   isTooZoomed(scale: number) {
-    return this.groupsByScale[scale].tooZoomed;
+    return this.itemsByScale[scale].tooZoomed;
   }
 }

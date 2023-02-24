@@ -25,7 +25,7 @@ export class Timeline extends Chart {
 
   // private ogma: Ogma<any, any>;
   private isChangingRange: boolean;
-  private groupToNodes: Lookup<Id[]>;
+  private itemToNodes: Lookup<Id[]>;
 
   /**
    * @param {HTMLDivElement} container
@@ -39,7 +39,7 @@ export class Timeline extends Chart {
       editable: false
     });
     this.chart = timeline;
-    this.groupToNodes = {};
+    this.itemToNodes = {};
     // state flags
     this.isChangingRange = false;
     this.chart.on('click', e => {
@@ -49,23 +49,26 @@ export class Timeline extends Chart {
   }
 
   public refresh(ids: NodeId[], starts: number[], ends: number[]): void {
-    const groupToNodes: Lookup<Id[]> = {};
-    const nodeToGroup: Lookup<number> = {};
+    const itemToNodes: Lookup<Id[]> = {};
+    const nodeToItem: Lookup<number> = {};
     const elements: DataItem[] = ids.map((id, i) => {
-      groupToNodes[i] = [id];
-      nodeToGroup[id] = i;
+      itemToNodes[i] = [id];
+      nodeToItem[id] = i;
       const content = this.options.getItem(id);
       return {
         id,
         start: starts[i],
         end: ends[i],
         ...content,
-      };
+      } as DataItem;
     });
-    this.groupToNodes = groupToNodes;
+    this.itemToNodes = itemToNodes;
     this.dataset.clear();
     this.dataset.add(elements);
-    this.chart.setGroups(this.options.getGroups());
+    const groups = this.options.getGroups();
+    if(groups && groups.length) {
+      this.chart.setGroups(groups);
+    }
     this.chart.setWindow(starts[0], ends[ends.length - 1]);
      
   }
@@ -113,7 +116,7 @@ export class Timeline extends Chart {
   onBarClick(evt: TimelineEventPropertiesResult) {
     const { x, y, item } = evt;
     if (!x || !y || !item) return;
-    const nodeIds = this.groupToNodes[item]
+    const nodeIds = this.itemToNodes[item]
     this.emit(click, { nodeIds: nodeIds, evt });
   }
 

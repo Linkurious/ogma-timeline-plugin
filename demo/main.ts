@@ -8,7 +8,6 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <h1>Demo timeline plugin</h1>
     <div id="graph-container"></div>
     <div id="timeline"></div>
-
   </div>
 `;
 
@@ -24,8 +23,10 @@ ogma.styles.addNodeRule({
 });
 const range = Date.now() - +new Date('August 19, 1975 23:15:30');
 
+const types = ['person', 'car'];
+
 ogma.generate
-  .random({ nodes: 20, edges: 20 })
+  .random({ nodes: 120, edges: 20 })
   .then((graph) => {
     graph.nodes.forEach((node, i) => {
       // add a random date to the node
@@ -33,7 +34,9 @@ ogma.generate
       // randomly add a lifespan to the node
       const end =
         i % 2 ? start + 3000000 + Math.floor((Math.random() * range) / 10) : undefined;
-      node.data = { start, end };
+
+      const type = types[i%2];
+      node.data = { start, end, type };
     });
     return ogma.setGraph(
       {
@@ -55,24 +58,27 @@ ogma.generate
         strategy: 'after',
         tolerance: 'loose'
       },
-      timeline: {
-        getItem: (nodeId) => {
-          const group = `group${(+nodeId % 2) +1}`;
-          console.log(group)
-          return {
-            content: `${ogma.getNode(nodeId)!.getData('start')}`,
-            group
-          };
-        },
-        getGroups: () => {return [{
-          id: 'group1',
-          content: 'group1',
-        },{
-          id: 'group2',
-          content: 'group2',
-
-        }]}
+      barchart: {
+        groupIdFunction: (nodeId) => ogma.getNode(nodeId)?.getData('type')
       }
+      // timeline: {
+        // getItem: (nodeId) => {
+        //   const group = `group${(+nodeId % 2) +1}`;
+        //   console.log(group)
+        //   return {
+        //     content: `${ogma.getNode(nodeId)!.getData('start')}`,
+        //     group
+        //   };
+        // },
+        // getGroups: () => {return [{
+        //   id: 'group1',
+        //   content: 'group1',
+        // },{
+        //   id: 'group2',
+        //   content: 'group2',
+
+        // }]}
+      // }
     });
 
     let isBarchartClick = false;
@@ -104,7 +110,7 @@ ogma.generate
     controller.on('timechange', () => {
       filter.refresh();
     })
-
+    window.controller = controller;
     controller.refresh(ogma.getNodes());
     // controller.showBarchart();
     controller.barchart.chart.setWindow(new Date(0), Date.now())

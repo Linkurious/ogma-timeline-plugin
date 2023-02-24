@@ -18,6 +18,9 @@ export interface BarchartOptions {
   barWidth: number;
   barAlign: 'center' | 'left' | 'right';
   barAxisOrientation: 'top' | 'bottom';
+  groupIdFunction: (item: NodeId) => string;
+  groupContent: (groupId: string, nodeIds: NodeId[]) => string;
+  itemGenerator: (nodeIds: NodeId[], scale: number) => Partial<BarChartItem>;
 }
 
 export interface Options{
@@ -34,18 +37,20 @@ export type Lookup<T> = {
   [key in Id]: T;
 };
 
-export type Group = {
+export type BarChartItem = {
   id: number;
-  group: number;
+  group: string;
   className: string;
+  label: string;
   x: number;
   y: number;
 };
 
-export type GroupByScale = {
-  groups: Group[];
-  groupToNodes: Lookup<Id[]>;
-  nodeToGroup: Lookup<number>;
+export type ItemByScale = {
+  items: BarChartItem[];
+  itemToNodes: Lookup<Id[]>;
+  groups: DataGroup[];
+  nodeToItem: Lookup<number>;
   tooZoomed: boolean;
 };
 export type TimelineMode = 'barchart' | 'timeline';
