@@ -47,7 +47,7 @@ export abstract class Chart extends EventEmitter<Events> {
     return this.timebars.map(id => this.chart.getCustomTime(id));
   }
   public setTimebarsDates(dates: Date[]) {
-    // return this.timebars.forEach((id, i) => this.chart.setCustomTime(dates[i], id));
+    return this.timebars.forEach((id, i) => this.chart.setCustomTime(dates[i], id));
   }
   
   public setWindow(minTime: number, maxTime: number): void {

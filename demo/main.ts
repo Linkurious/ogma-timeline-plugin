@@ -59,6 +59,9 @@ ogma.generate
         tolerance: 'loose'
       },
       barchart: {
+        graph2dOptions: {
+          style: 'line',
+        },
         groupIdFunction: (nodeId) => ogma.getNode(nodeId)?.getData('type')
       }
       // timeline: {

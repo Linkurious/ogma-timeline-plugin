@@ -14,9 +14,9 @@ import { DataSet } from 'vis-data';
  * @property {'top'|'bottom'} [barAxisOrientan='top'] Axis position
  */
 export const defaultBarchartOptions: BarchartOptions = {
-  barWidth: 50,
-  barAlign: 'center',
-  barAxisOrientation: 'top',
+  graph2dOptions: {
+    style: 'bar'
+  },
   groupIdFunction: (id) => `group-0`,
   groupContent: (groupId: string, nodeIds: Id[]) => groupId,
   itemGenerator: () => ({}),
@@ -40,11 +40,8 @@ export class Barchart extends Chart {
     super(container);
     this.groupDataset = new DataSet<DataGroup>();
     const barchart = new VGraph2d(container, this.dataset, this.groupDataset, {
-      // style: 'bar',
-      // barChart: { width: options.barWidth, align: options.barAlign },
-      // drawPoints: false,
-      orientation: options.barAxisOrientation,
-      // graphHeight: `${container.offsetHeight - 50}px`
+      ...defaultBarchartOptions.graph2dOptions,
+      ...options.graph2dOptions,
     });
     this.options = options;
     this.chart = barchart;

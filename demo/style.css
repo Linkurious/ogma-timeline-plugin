@@ -20,3 +20,8 @@
   overflow-x: hidden;
   background: rgba(255, 255, 255, 0.7);
 }
+
+.vis-graph-group.car{
+  stroke: #ff9914;
+
+}

@@ -1,4 +1,4 @@
-import { DataItem, DataGroup, Graph2d, Timeline, TimelineEventPropertiesResult } from 'vis-timeline';
+import { DataItem, DataGroup, Graph2d, Timeline, TimelineEventPropertiesResult, Graph2dOptions } from 'vis-timeline';
 import {NodeId} from "@linkurious/ogma";
 import { click, rangechanged, scaleChange, timechange, timechanged } from './constants';
 export type FilterStrategy = 'before' | 'after' | 'between' | 'outside';
@@ -15,9 +15,7 @@ export interface TimelineOptions {
 };
 
 export interface BarchartOptions {
-  barWidth: number;
-  barAlign: 'center' | 'left' | 'right';
-  barAxisOrientation: 'top' | 'bottom';
+  graph2dOptions: Graph2dOptions;
   groupIdFunction: (item: NodeId) => string;
   groupContent: (groupId: string, nodeIds: NodeId[]) => string;
   itemGenerator: (nodeIds: NodeId[], scale: number) => Partial<BarChartItem>;
