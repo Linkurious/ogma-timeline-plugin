@@ -1,7 +1,7 @@
 import './style.css';
 import Ogma from '@linkurious/ogma';
 import { Controller } from '../src';
-import { click } from '../src/constants';
+import { click, day } from '../src/constants';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
@@ -23,19 +23,31 @@ ogma.styles.addNodeRule({
 });
 const range = Date.now() - +new Date('August 19, 1975 23:15:30');
 
-const types = ['person', 'car'];
+// const types = ['in', 'in', 'out', 'in', 'in'];
+// const types = ['in', 'out', 'out', 'out', 'in'];
+// const types = ['out', 'in', 'in', 'in', 'out'];
+// const types = ['out', 'out', 'in', 'out', 'out'];
+const types = ['in', 'in', 'in', 'out', 'out'];
+
+
+
+
+const length =2 * day;
 
 ogma.generate
-  .random({ nodes: 120, edges: 20 })
+  .random({ nodes: 5, edges: 0 })
   .then((graph) => {
     graph.nodes.forEach((node, i) => {
       // add a random date to the node
-      const start = Date.now() - Math.floor(Math.random() * range);
+      // const start = Date.now() - Math.floor(Math.random() * range);
       // randomly add a lifespan to the node
-      const end =
-        i % 2 ? start + 3000000 + Math.floor((Math.random() * range) / 10) : undefined;
+      // const end =
+      //   i % 2 ? start + 3000000 + Math.floor((Math.random() * range) / 10) : undefined;
 
-      const type = types[i%2];
+      const start = Date.now() - i * length;
+      const end = start + length;
+
+      const type = types[i];
       node.data = { start, end, type };
     });
     return ogma.setGraph(
@@ -46,12 +58,15 @@ ogma.generate
       { ignoreInvalid: true }
     );
   })
-  .then(() => ogma.view.locateGraph())
+  .then(() => ogma.view.setCenter({x: 1000, y: 1000}))
   .then(() => {
     const container = document.getElementById('timeline') as HTMLDivElement;
     const controller = new Controller(ogma, container, {
       timeBars: [
-        new Date(Date.now()),
+        // new Date(Date.now()-1.2*day),
+        // new Date(Date.now() - 4.8 * day),
+        new Date(Date.now() - (1.2+ 4.8)/2 * day),
+
       ],
       filter: {
         enabled: true,
@@ -62,30 +77,15 @@ ogma.generate
         graph2dOptions: {
           legend: {left:{position:"bottom-left"}},
           barChart:{ sideBySide: true,
-          
-            
           },
           style: 'line',
         },
         groupIdFunction: (nodeId) => ogma.getNode(nodeId)?.getData('type')
       },
       timeline: {
-        getItem: (nodeId) => {
-          const group = `group${(+nodeId % 2) +1}`;
-          console.log(group)
-          return {
-            content: `${ogma.getNode(nodeId)!.getData('start')}`,
-            group
-          };
-        },
-        getGroups: () => {return [{
-          id: 'group1',
-          content: 'group1',
-        },{
-          id: 'group2',
-          content: 'group2',
-
-        }]}
+        groupIdFunction: (nodeId) => ogma.getNode(nodeId)?.getData('type'),
+        timelineOptions: {
+        }
       }
     });
 
@@ -121,5 +121,5 @@ ogma.generate
     window.controller = controller;
     controller.refresh(ogma.getNodes());
     // controller.showBarchart();
-    controller.barchart.chart.setWindow(new Date(0), Date.now())
+    controller.barchart.chart.setWindow(new Date(Date.now() - 16 * day), new Date(Date.now() + 4 * day))
   });

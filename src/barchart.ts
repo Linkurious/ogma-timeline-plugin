@@ -6,6 +6,7 @@ import './style.css';
 import { BarchartOptions, BarChartItem, Id, Lookup, ItemByScale } from './types';
 import { Chart } from './chart';
 import { DataSet } from 'vis-data';
+import merge from 'lodash.merge';
 
 
 export const defaultBarchartOptions: BarchartOptions = {
@@ -34,10 +35,12 @@ export class Barchart extends Chart {
   constructor(container: HTMLDivElement, options: BarchartOptions) {
     super(container);
     this.groupDataset = new DataSet<DataGroup>();
-    const barchart = new VGraph2d(container, this.dataset, this.groupDataset, {
-      ...defaultBarchartOptions.graph2dOptions,
-      ...options.graph2dOptions,
-    });
+    const barchart = new VGraph2d(container, this.dataset, this.groupDataset, 
+      merge(
+        defaultBarchartOptions.graph2dOptions,
+        options.graph2dOptions
+      )
+    );
     this.options = options;
     this.chart = barchart;
     this.itemsByScale = {};
@@ -99,7 +102,7 @@ export class Barchart extends Chart {
     const groups: DataGroup[] = Object.entries(groupIdToNode).map(([groupid, indexes]) => ({
       id: groupid,
       content: this.options.groupContent(groupid, indexes),
-      className: `vis-graph-group ${groupid}`,
+      className: `vis-group ${groupid}`,
       options: {}
     }));
 
@@ -265,6 +268,6 @@ export class Barchart extends Chart {
   }
 
   isTooZoomed(scale: number) {
-    return this.itemsByScale[scale].tooZoomed;
+    return !this.itemsByScale[scale] || this.itemsByScale[scale].tooZoomed;
   }
 }

@@ -1,4 +1,4 @@
-import { DataItem, DataGroup, Graph2d, Timeline, TimelineEventPropertiesResult, Graph2dOptions } from 'vis-timeline';
+import { TimelineOptions as VTimelineOptions, DataGroup, Graph2d, Timeline, TimelineEventPropertiesResult, Graph2dOptions } from 'vis-timeline';
 import {NodeId} from "@linkurious/ogma";
 import { click, rangechanged, scaleChange, timechange, timechanged } from './constants';
 export type FilterStrategy = 'before' | 'after' | 'between' | 'outside';
@@ -9,10 +9,6 @@ export type FilterOptions = {
   strategy: FilterStrategy;
   tolerance: FilterTolerance;
 }
-export interface TimelineOptions {
-  getItem: (item: NodeId) => Partial<DataItem>;
-  getGroups: () => DataGroup[];
-};
 
 /**
  * @typedef {object} BarchartOptions
@@ -24,8 +20,15 @@ export interface BarchartOptions {
   graph2dOptions: Graph2dOptions;
   groupIdFunction: (item: NodeId) => string;
   groupContent: (groupId: string, nodeIds: NodeId[]) => string;
-  itemGenerator: (nodeIds: NodeId[], scale: number) => Partial<BarChartItem>;
+  itemGenerator: (nodeId: NodeId) => Partial<BarChartItem>;
 }
+export interface TimelineOptions extends BarchartOptions {
+  groupIdFunction: (item: NodeId) => string;
+  groupContent: (groupId: string, nodeIds: NodeId[]) => string;
+  itemGenerator: (nodeId: NodeId) => Partial<BarChartItem>;
+  timelineOptions: VTimelineOptions;
+};
+
 
 /**
  * @typedef {object} Options
@@ -34,10 +37,10 @@ export interface BarchartOptions {
  * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
  */
 export interface Options{
-  timeline: Partial<TimelineOptions>;
-  barchart: Partial<BarchartOptions>;
-  timeBars?: Date[];
-  filter: Partial<FilterOptions>;
+  timeline: TimelineOptions;
+  barchart: BarchartOptions;
+  timeBars: Date[];
+  filter: FilterOptions;
   startDatePath: string;
   endDatePath: string;
   switchOnZoom: boolean;
@@ -47,6 +50,9 @@ export type Id = number | string;
 export type Lookup<T> = {
   [key in Id]: T;
 };
+export type DeepPartial<T> = T extends object ? {
+  [P in keyof T]?: DeepPartial<T[P]>;
+} : T;
 
 export type BarChartItem = {
   id: number;

@@ -11,10 +11,14 @@ export default defineUserConfig({
   // base: "/plugin-timeline/",
   // theme: '@vuepress/theme-default',
   theme: defaultTheme({
+    sidebarDepth:3,
     logo: '/favicon.ico',
     sidebar: [
       '/',
-      '/filtering.md',
+      '/grouping',
+      '/styling',
+      '/filtering',
+
     ],
     repo: '@linkurious/ogma-timeline-plugin'
   }),

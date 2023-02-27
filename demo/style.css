@@ -21,12 +21,22 @@
   background: rgba(255, 255, 255, 0.7);
 }
 
-.vis-graph-group.car{
+.vis-group.car{
   stroke: #ff9914;
 
 }
 
-.vis-bar.car{
-  stroke: #ff9914;
-  fill: #ff9914;
+.timeline-item.in{
+  background-color: #99ff14;
+  stroke: #99ff14;
+  fill: #99ff14;
+}
+.timeline-item.out{
+  background-color: #ff1414;
+  stroke: #ff1414;
+  fill: #ff1414;
+}
+
+.timeline-item.car{
+  background-color: #ff9914;
 }

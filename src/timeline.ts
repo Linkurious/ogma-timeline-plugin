@@ -1,10 +1,11 @@
 import { NodeId, NodeList } from '@linkurious/ogma';
-import { DataItem, Timeline as VTimeline, TimelineEventPropertiesResult } from 'vis-timeline';
+import { DataGroup, DataItem, Timeline as VTimeline, TimelineEventPropertiesResult } from 'vis-timeline';
 import { click, scaleChange, scales } from './constants';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import './style.css';
 import { Id, Lookup, TimelineOptions } from './types';
 import { Chart } from './chart';
+import merge from 'lodash.merge';
 
 /**
  * @typedef {object} TimelineOptions
@@ -16,8 +17,10 @@ import { Chart } from './chart';
  *
  */
 export const defaultTimelineOptions: TimelineOptions = {
-  getItem: id => ({content: `node ${id}`}),
-  getGroups: () => [],
+  groupIdFunction: () => `group-0`,
+  groupContent: (groupId: string, nodeIds: Id[]) => groupId,
+  itemGenerator: (id) => ({content: `node ${id}`}),
+  timelineOptions: {editable: false},
 };
 
 export class Timeline extends Chart {
@@ -35,9 +38,10 @@ export class Timeline extends Chart {
   constructor(container: HTMLDivElement, options: TimelineOptions) {
     super(container);
     this.options = options;
-    const timeline = new VTimeline(container, this.dataset, {
-      editable: false
-    });
+    const timeline = new VTimeline(container, this.dataset, merge(
+      defaultTimelineOptions.timelineOptions,
+      options.timelineOptions,
+    ));
     this.chart = timeline;
     this.itemToNodes = {};
     // state flags
@@ -51,22 +55,39 @@ export class Timeline extends Chart {
   public refresh(ids: NodeId[], starts: number[], ends: number[]): void {
     const itemToNodes: Lookup<Id[]> = {};
     const nodeToItem: Lookup<number> = {};
-    const elements: DataItem[] = ids.map((id, i) => {
+
+    const items: DataItem[] = [];
+    const groupIdToNode = ids.reduce((groups, id, i) => {
+      const groupid = this.options.groupIdFunction(id);
+      if (!groups[groupid]) {
+        groups[groupid] = []
+      }
+      groups[groupid].push(i)
       itemToNodes[i] = [id];
       nodeToItem[id] = i;
-      const content = this.options.getItem(id);
-      return {
+      const content = this.options.itemGenerator(id);
+      items.push({
         id,
         start: starts[i],
         end: ends[i],
+        group: groupid,
+        className: `timeline-item ${groupid} ${id}`,
         ...content,
-      } as DataItem;
-    });
+      } as DataItem) ;
+      return groups;
+    }, {} as Record<string, number[]>);
+
+    const groups: DataGroup[] = Object.entries(groupIdToNode).map(([groupid, indexes]) => ({
+      id: groupid,
+      content: this.options.groupContent(groupid, indexes),
+      className: `vis-group ${groupid}`,
+      options: {}
+    }));
+
     this.itemToNodes = itemToNodes;
     this.dataset.clear();
-    this.dataset.add(elements);
-    const groups = this.options.getGroups();
-    if(groups && groups.length) {
+    this.dataset.add(items);
+    if(groups && groups.length > 1) {
       this.chart.setGroups(groups);
     }
     this.chart.setWindow(starts[0], ends[ends.length - 1]);

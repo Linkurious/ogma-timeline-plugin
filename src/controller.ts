@@ -1,4 +1,4 @@
-import Ogma, { Transformation, NodeList, NodeId } from '@linkurious/ogma';
+import Ogma, { NodeList, NodeId } from '@linkurious/ogma';
 import EventEmitter from 'eventemitter3';
 import throttle from 'lodash.throttle';
 import merge from 'lodash.merge';
@@ -9,7 +9,7 @@ import { Timeline, defaultTimelineOptions } from './timeline';
 import { Barchart, defaultBarchartOptions } from './barchart';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import './style.css';
-import { ControlerEvents, Id, Options, TimelineMode } from './types';
+import { ControlerEvents, DeepPartial, Id, Options, TimelineMode } from './types';
 
 export const defaultOptions: Partial<Options> = {
   startDatePath: 'start',
@@ -20,14 +20,12 @@ export const defaultOptions: Partial<Options> = {
     tolerance: 'loose'
   },
   switchOnZoom: true,
+  timeBars: [],
   barchart:defaultBarchartOptions,
   timeline: defaultTimelineOptions,
 }
 export class Controller extends EventEmitter<ControlerEvents> {
-  private ogma: Ogma<any, any>;
-
   private mode: TimelineMode;
-
   public timeline: Timeline;
   public nodes: NodeList;
   public barchart: Barchart;
@@ -37,9 +35,8 @@ export class Controller extends EventEmitter<ControlerEvents> {
   private ends: number[];
   private ids: NodeId[];
 
-  constructor(ogma: Ogma<any, any>, container: HTMLDivElement, options: Partial<Options> = {}) {
+  constructor(ogma: Ogma<any, any>, container: HTMLDivElement, options: DeepPartial<Options> = {}) {
     super();
-    this.ogma = ogma;
     this.mode = 'barchart';
     this.options = merge(
       defaultOptions,
@@ -78,7 +75,7 @@ export class Controller extends EventEmitter<ControlerEvents> {
       this.showBarchart();
     });
 
-    (options.timeBars||[])
+    (this.options.timeBars)
     .sort()
     .forEach((timeBar) => {
       this.timeline.addTimeBar(+timeBar);

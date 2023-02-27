@@ -7,29 +7,29 @@
 .vis-timeline .vis-data-axis {
   font-size: 12px;
 }
-.vis-timeline .vis-item {
+.timeline-item {
   font-family: 'Roboto';
   color: #1a1a1a;
   border-color: #1499ff;
   background-color: #d4ecff;
 }
-.vis-bar {
+.bar-item {
   stroke: #1499ff;
   fill: #d4ecff;
 }
 
-.vis-timeline .vis-item.vis-selected {
+.timeline-item.vis-selected {
   border-color: #34b9ff;
   background-color: rgb(205, 249, 255);
 }
 
-.vis-timeline .vis-bar.hightlight {
+.bar-item.hightlight {
   stroke: #34b9ff;
   fill: rgb(205, 249, 255);
 }
 
 
-.vis-graph-group{
+.vis-group{
   fill-opacity: 0;
   stroke: #1499ff;
 }
