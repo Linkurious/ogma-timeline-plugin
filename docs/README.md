@@ -83,6 +83,39 @@ controller.on('timechange', () => {
 You can place as many bars as you want, but please place either **one** or a **multiple of two** bars.
 There are many filtering options availiable, please have a look at the [filterring](./filtering.md) section for more details.
 
+### Grouping
+
+Barchart automatically groups data by date, depending on zoom, but you can specify a `groupIdFunction` to make it group together nodes with different data.
+Let's say you have two types of nodes: persons and cars, like this: 
+
+```js
+const nodes = [
+  {
+    id: 0,
+    data: {
+      type: 'car',
+      start: 1677508918326
+    }
+  },
+  {
+    id: 1,
+    data: {
+      type: 'person',
+      start: 1677508918326
+    }
+  }
+];
+```
+You can then pass a `groupIdFunction` that will create bars for cars and bars for persons.
+```ts
+const controller = new Controller(ogma, container, {
+  barchart: {
+    groupIdFunction: (nodeId) => ogma.getNode(nodeId).getData('type')
+  }
+});
+```
+
+
 ### Update the timeline on graph changes
 
 When you create the timeline, it gets all the nodes within the vizualisation and saves their ids. 
@@ -94,17 +127,86 @@ ogma.events.on(['addNodes', 'addEdges', 'removeNodes', 'removeEdges', 'clearGrap
 })
 ```
 
-## Styling and interractions
+## Styling and interactions
 
 Now that you have a working timeline, you might want to make it look neat, and to sync it with the visualisation.
 
 ### Barchart styling
 
+The simplest way to style barchart is to set `fill` and `stroke` properties in CSS: 
 
+```css
+.vis-bar{
+  stroke: #ff9914;
+  fill: #ff9914;
+}
+```
 
+If you specified a `groupIdFunction`, then your groups will have the same class as the id returned by your groupIdFunction.
+Let's say groupIdFunction returns either `car` either `person`, then you can style `car` and `person` bars like this
+
+```css
+.vis-bar.car{
+  stroke: #99ff14;
+  fill: #99ff14;
+}
+.vis-bar.person{
+  stroke: #14ff99;
+  fill: #14ff99;
+}
+```
+
+To go further into barchart customization, you can pass [options](https://visjs.github.io/vis-timeline/docs/graph2d/#Configuration_Options) within the controller: 
+
+```ts
+const controller = new Controller(ogma, container, {
+  barchart: {
+    graph2dOptions: {
+      barChart:{ sideBySide: true,},
+      // here pass more options if you like
+    },
+    groupIdFunction: (nodeId) => ogma.getNode(nodeId)?.getData('type')
+  }
+})
+```
 ### Linecahrt styling
 
+You can get the barchart to display lines by setting the `style` key to `line`
+
+```ts
+const controller = new Controller(ogma, container, {
+  barchart: {
+    graph2dOptions: {
+      style: 'line'
+    },
+  }
+})
+```
+
+Then styling of the lines is as follows: 
+```css
+.vis-graph-group{
+  fill-opacity: 0;
+}
+.vis-graph-group.person{
+  stroke: #99ff14;
+}
+```
 ### Timeline styling
+
+
+### Legend
+
+To get the legend on barchart, you can simply pass the `legend` key
+```ts
+const controller = new Controller(ogma, container, {
+  barchart: {
+    graph2dOptions: {
+      legend: {left:{position:"bottom-left"}},
+    },
+  }
+})
+```
 
 ### Groups
 

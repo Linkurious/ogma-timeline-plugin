@@ -50,7 +50,6 @@ ogma.generate
   .then(() => {
     const container = document.getElementById('timeline') as HTMLDivElement;
     const controller = new Controller(ogma, container, {
-      startDatePath
       timeBars: [
         new Date(Date.now()),
       ],
@@ -61,28 +60,33 @@ ogma.generate
       },
       barchart: {
         graph2dOptions: {
-          // style: 'line',
+          legend: {left:{position:"bottom-left"}},
+          barChart:{ sideBySide: true,
+          
+            
+          },
+          style: 'line',
         },
         groupIdFunction: (nodeId) => ogma.getNode(nodeId)?.getData('type')
-      }
-      // timeline: {
-        // getItem: (nodeId) => {
-        //   const group = `group${(+nodeId % 2) +1}`;
-        //   console.log(group)
-        //   return {
-        //     content: `${ogma.getNode(nodeId)!.getData('start')}`,
-        //     group
-        //   };
-        // },
-        // getGroups: () => {return [{
-        //   id: 'group1',
-        //   content: 'group1',
-        // },{
-        //   id: 'group2',
-        //   content: 'group2',
+      },
+      timeline: {
+        getItem: (nodeId) => {
+          const group = `group${(+nodeId % 2) +1}`;
+          console.log(group)
+          return {
+            content: `${ogma.getNode(nodeId)!.getData('start')}`,
+            group
+          };
+        },
+        getGroups: () => {return [{
+          id: 'group1',
+          content: 'group1',
+        },{
+          id: 'group2',
+          content: 'group2',
 
-        // }]}
-      // }
+        }]}
+      }
     });
 
     let isBarchartClick = false;

@@ -34,10 +34,10 @@ export interface BarchartOptions {
  * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
  */
 export interface Options{
-  timeline: TimelineOptions;
-  barchart: BarchartOptions;
+  timeline: Partial<TimelineOptions>;
+  barchart: Partial<BarchartOptions>;
   timeBars?: Date[];
-  filter: FilterOptions;
+  filter: Partial<FilterOptions>;
   startDatePath: string;
   endDatePath: string;
   switchOnZoom: boolean;
