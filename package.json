@@ -17,6 +17,10 @@
     "test:ui": "vitest --ui",
     "test:unit": "vitest run",
     "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs",
+    "predocs:build": "rm -rf docs/.vuepress/dist docs/.vuepress/.cache docs/.vuepress/.temp",
+    "predocs:publish": "npm run docs:build",
+    "docs:publish": "gh-pages -d docs/.vuepress/dist",
     "preview": "vite preview"
   },
   "devDependencies": {
@@ -28,6 +32,7 @@
     "@vuepress/plugin-search": "^2.0.0-beta.61",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-import": "^2.27.5",
+    "gh-pages": "^5.0.0",
     "lodash.throttle": "^4.1.1",
     "prettier": "^2.8.4",
     "typedoc": "^0.23.26",

@@ -8,8 +8,7 @@ export default defineUserConfig({
   title: 'Ogma-Plugin-timeline',
   description: 'Documentation for the Ogma-Timeline-Plugin',
   head:  [['link', { rel: 'icon', type:'image/x-icon', href: '/favicon.ico' }]],
-  // base: "/plugin-timeline/",
-  // theme: '@vuepress/theme-default',
+  base: "/ogma-timeline-plugin/",
   theme: defaultTheme({
     sidebarDepth:3,
     logo: '/favicon.ico',
@@ -24,9 +23,6 @@ export default defineUserConfig({
   }),
   plugins: [
     [
-      // ['@vuepress/search', {
-      //   searchMaxSuggestions: 10
-      // }]
       searchPlugin({
         locales: {
           '/': {
