@@ -1,7 +1,9 @@
 import { FilterStrategy, FilterTolerance } from "./types";
 
 
-export function getSelector(bars: number[], strategy: FilterStrategy, tolerance: FilterTolerance){
+export function getSelector(bars: number[], strategy: FilterStrategy, tolerance: FilterTolerance)
+: (a: number, b: number) => boolean
+{
 
   if(strategy === 'before'){
     if(tolerance === 'strict'){

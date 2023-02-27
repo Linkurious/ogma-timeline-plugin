@@ -7,12 +7,7 @@ import { BarchartOptions, BarChartItem, Id, Lookup, ItemByScale } from './types'
 import { Chart } from './chart';
 import { DataSet } from 'vis-data';
 
-/**
- * @typedef {object} BarchartOptions
- * @property {number} [barWidth=50] Barchart  width
- * @property {'center'|'left'|'right'} [barAl='center'] Barchart bars alignment
- * @property {'top'|'bottom'} [barAxisOrientan='top'] Axis position
- */
+
 export const defaultBarchartOptions: BarchartOptions = {
   graph2dOptions: {
     style: 'bar'
@@ -261,15 +256,9 @@ export class Barchart extends Chart {
     this.itemToNodes = itemToNodes;
 
     this.dataset.clear();
-    // const groups = this.
-    // if(groups && groups.length) {
     this.groupDataset.clear()
-    this.groupDataset.add(groups as unknown as DataItem[]);
+    this.groupDataset.add(groups);
     this.dataset.add(items as unknown as DataItem[]);
-
-    // }
-
-    // this.chart.setWindow(start, end);
     this.chart.redraw();
     this.isChangingRange = false;
     this.emit(rangechanged);

@@ -14,6 +14,12 @@ export interface TimelineOptions {
   getGroups: () => DataGroup[];
 };
 
+/**
+ * @typedef {object} BarchartOptions
+ * @property {Graph2dOptions} graph2dOptions (https://visjs.github.io/vis-timeline/docs/graph2d/#graph2dOptions) to pass to the barchart
+ * @property {Function} groupIdFunction Similar to [Ogma addNodeGrouping](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeGrouping) groupIdFunction
+ * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
+ */
 export interface BarchartOptions {
   graph2dOptions: Graph2dOptions;
   groupIdFunction: (item: NodeId) => string;
@@ -21,6 +27,12 @@ export interface BarchartOptions {
   itemGenerator: (nodeIds: NodeId[], scale: number) => Partial<BarChartItem>;
 }
 
+/**
+ * @typedef {object} Options
+ * @property {TimelineOptions} graph2dOptions (https://visjs.github.io/vis-timeline/docs/graph2d/#graph2dOptions) to pass to the barchart
+ * @property {BarchartOptions} groupIdFunction Similar to [Ogma addNodeGrouping](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeGrouping) groupIdFunction
+ * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
+ */
 export interface Options{
   timeline: TimelineOptions;
   barchart: BarchartOptions;
@@ -39,7 +51,6 @@ export type Lookup<T> = {
 export type BarChartItem = {
   id: number;
   group: string;
-  className: string;
   label: string;
   x: number;
   y: number;
@@ -72,7 +83,6 @@ export type Events = {
   [rangechanged]: () => void;
   [timechange]: () => void;
   [timechanged]: () => void;
-
 };
 
 export type ControlerEvents = {

@@ -2,6 +2,7 @@ import { NodeId, NodeList } from '@linkurious/ogma';
 import EventEmitter from 'eventemitter3';
 import { DataSet } from 'vis-data';
 import { DataItem, IdType } from 'vis-timeline';
+import { rangechanged } from './constants';
 import { Events, Id, VChart } from './types';
 
 export abstract class Chart extends EventEmitter<Events> {
@@ -59,7 +60,7 @@ export abstract class Chart extends EventEmitter<Events> {
   }
   
   protected onRangeChange(){
-    this.emit('rangechange');
+    this.emit(rangechanged);
   };
   public abstract refresh(ids: NodeId[], starts: number[], ends: number[]): void;
 

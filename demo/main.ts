@@ -50,6 +50,7 @@ ogma.generate
   .then(() => {
     const container = document.getElementById('timeline') as HTMLDivElement;
     const controller = new Controller(ogma, container, {
+      startDatePath
       timeBars: [
         new Date(Date.now()),
       ],
@@ -60,7 +61,7 @@ ogma.generate
       },
       barchart: {
         graph2dOptions: {
-          style: 'line',
+          // style: 'line',
         },
         groupIdFunction: (nodeId) => ogma.getNode(nodeId)?.getData('type')
       }

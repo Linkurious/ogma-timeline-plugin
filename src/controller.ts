@@ -44,7 +44,7 @@ export class Controller extends EventEmitter<ControlerEvents> {
     this.options = merge(
       defaultOptions,
       options,
-    );
+    ) as Options;
     this.filteredNodes = new Set();
     this.nodes = ogma.createNodeList();
     this.starts = [];
@@ -100,7 +100,7 @@ export class Controller extends EventEmitter<ControlerEvents> {
     this.timeline.on(timechanged, () => {
       throttled();
     })
-
+    this.refresh(ogma.getNodes());
   }
 
   refresh(nodes: NodeList<any, any>) {
@@ -143,7 +143,7 @@ export class Controller extends EventEmitter<ControlerEvents> {
   }
 
   onTimeChange(){
-    if(!this.options.filter.enabled)return this.emit(timechange);
+    if(!this.options.filter.enabled) return this.emit(timechange);
     const times = (this.mode === 'timeline' 
       ? this.timeline.getTimebarsDates()
       : this.barchart.getTimebarsDates())
@@ -158,6 +158,6 @@ export class Controller extends EventEmitter<ControlerEvents> {
           this.filteredNodes.add(this.ids[i]);
         }
       }
-      this.emit(timechange);
+      return this.emit(timechange);
   }
 }
