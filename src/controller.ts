@@ -19,6 +19,7 @@ export const defaultOptions: Partial<Options> = {
     strategy: 'between',
     tolerance: 'loose'
   },
+  switchOnZoom: true,
   barchart:defaultBarchartOptions,
   timeline: defaultTimelineOptions,
 }
@@ -62,16 +63,15 @@ export class Controller extends EventEmitter<ControlerEvents> {
     this.showTimeline();
     //switch from barchart to timeline on zoom
     this.barchart.on(scaleChange, ({ tooZoomed }) => {
-      if (!tooZoomed) return;
+      if (!tooZoomed || !this.options.switchOnZoom) return;
       const { start, end } = this.barchart.getWindow();
       this.timeline.setWindow(+start, +end);
       this.timeline.setTimebarsDates(this.barchart.getTimebarsDates());
-
       this.showTimeline();
     });
     //switch from timeline to barchart on zoom
     this.timeline.on(scaleChange, ({ scale }) => {
-      if (barchart.isTooZoomed(scale)) return;
+      if (barchart.isTooZoomed(scale) || !this.options.switchOnZoom) return;
       const { start, end } = this.timeline.getWindow();
       this.barchart.setWindow(+start, +end);
       this.barchart.setTimebarsDates(this.timeline.getTimebarsDates());

@@ -202,8 +202,9 @@ export class Barchart extends Chart {
   }
 
   onBarClick(evt: TimelineEventPropertiesResult) {
-    const { x, y } = evt;
-    if (!x || !y || !this.rects.length) return;
+    const { x, y, what } = evt;
+    if (!x || !y || !this.rects.length
+    || what === 'background') return;
     const svg: SVGAElement| null = this.container.querySelector('.vis-line-graph>svg');
     if(!svg) return;
     const offset = +svg.style.left.slice(0, -2);

@@ -28,6 +28,7 @@ export interface Options{
   filter: FilterOptions;
   startDatePath: string;
   endDatePath: string;
+  switchOnZoom: boolean;
 }
 
 export type Id = number | string;
