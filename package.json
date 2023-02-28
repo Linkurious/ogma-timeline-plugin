@@ -1,7 +1,21 @@
 {
   "name": "@linkurious/ogma-timeline-plugin",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
+  "keywords": [
+    "ogma",
+    "timeline",
+    "plugin"
+  ],
+  "bugs": {
+    "url": "https://github.com/Linkurious/ogma-prototype/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Linkurious/ogma-prototype.git"
+  },
+  "license": "ISC",
+  "author": "Linkurious SAS",
   "type": "module",
   "main": "dist/ogma-timeline-plugin.umd.cjs",
   "module": "dist/ogma-timeline-plugin.js",
@@ -11,20 +25,28 @@
     "dist"
   ],
   "scripts": {
-    "dev": "vite --config=demo.vite.config.js",
     "build": "tsc && vite build",
-    "lint": "eslint --ext .js,.ts,.vue demo src --fix",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:unit": "vitest run",
-    "docs:dev": "vuepress dev docs",
+    "dev": "vite --config=demo.vite.config.js",
     "docs:build": "vuepress build docs",
+    "docs:dev": "vuepress dev docs",
+    "docs:publish": "gh-pages -d docs/.vuepress/dist",
+    "lint": "eslint --ext .js,.ts,.vue demo src",
+    "lint:ci": "eslint -f checkstyle -o reports/checkstyle.xml src ./test/**/*.test.ts",
     "predocs:build": "rm -rf docs/.vuepress/dist docs/.vuepress/.cache docs/.vuepress/.temp",
     "predocs:publish": "npm run docs:build",
-    "docs:publish": "gh-pages -d docs/.vuepress/dist",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:unit": "vitest run"
+  },
+  "dependencies": {
+    "eventemitter3": "^5.0.0",
+    "lodash.merge": "^4.6.2",
+    "vis-data": "^7.1.4",
+    "vis-timeline": "^7.7.0"
   },
   "devDependencies": {
+    "@linkurious/code-tools": "^0.0.13-develop.24",
     "@types/lodash.merge": "^4.6.7",
     "@types/lodash.throttle": "^4.1.7",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
@@ -51,27 +73,7 @@
     "vitest": "^0.28.5",
     "vuepress": "v2.0.0-beta.61"
   },
-  "dependencies": {
-    "eventemitter3": "^5.0.0",
-    "lodash.merge": "^4.6.2",
-    "vis-data": "^7.1.4",
-    "vis-timeline": "^7.7.0"
-  },
   "peerDependencies": {
     "@linkurious/ogma": "^4.4.1-develop.230"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Linkurious/ogma-prototype.git"
-  },
-  "keywords": [
-    "ogma",
-    "timeline",
-    "plugin"
-  ],
-  "author": "Linkurious SAS",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Linkurious/ogma-prototype/issues"
   }
 }
