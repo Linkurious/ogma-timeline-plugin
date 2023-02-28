@@ -6,6 +6,7 @@ nodeJob {
   runForwardMerge = false
   createGitTag = true
   runPreReleaseOnUpload = false
+  runDependencyVersionCheck = false
   npmPackPath = './dist'
   gitTagPrefix = 'v'
   runBookeeping = true
