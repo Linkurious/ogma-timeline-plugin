@@ -37,6 +37,7 @@
     "predocs:publish": "npm run docs:build",
     "preview": "vite preview",
     "test": "vitest",
+    "compile": "ls -lia ./node_modules/@linkurious",
     "test:ui": "vitest --ui",
     "test:unit": "vitest run",
     "postversion": "sync_versions"
