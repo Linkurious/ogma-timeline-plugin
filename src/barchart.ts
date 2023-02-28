@@ -25,8 +25,8 @@ export const defaultBarchartOptions: BarchartOptions = {
     height: "100%",
     barChart: { sideBySide: true },
   },
-  groupIdFunction: (id) => `group-0`,
-  groupContent: (groupId: string, nodeIds: Id[]) => groupId,
+  groupIdFunction: () => `group-0`,
+  groupContent: (groupId: string) => groupId,
   itemGenerator: () => ({}),
 };
 
@@ -100,7 +100,7 @@ export class Barchart extends Chart {
       }
       groups[groupid].push(i);
       return groups;
-    }, {} as Record<string, number[]>);
+    }, {} as Record<string, NodeId[]>);
 
     const groups: DataGroup[] = Object.entries(groupIdToNode).map(
       ([groupid, indexes]) => ({
@@ -110,6 +110,10 @@ export class Barchart extends Chart {
         options: {},
       })
     );
+    const indexMap = ids.reduce((acc, id, i) => {
+      acc[id] = i;
+      return acc;
+    }, {} as Record<NodeId, number>);
 
     this.itemsByScale = scales
       .slice()
@@ -117,8 +121,7 @@ export class Barchart extends Chart {
       .reduce((itemsByScale, scale, i, scales) => {
         // if we reached a zoom where there are not too many events,
         // just display timeline
-        const gpPrev = itemsByScale[scales[i - 1]] as any as ItemByScale;
-
+        const gpPrev = itemsByScale[scales[i - 1]];
         if (tooZoomed) {
           itemsByScale[scale] = { ...gpPrev, tooZoomed: true };
           return itemsByScale;
@@ -136,7 +139,7 @@ export class Barchart extends Chart {
         Object.entries(groupIdToNode).forEach(([groupid, indexes]) => {
           const itemsPerX = itemsPerGroup[groupid];
           indexes.forEach((i) => {
-            const index = Math.floor((starts[i] - min) / scale);
+            const index = Math.floor((starts[indexMap[i]] - min) / scale);
             const x = min + scale * index;
             if (!itemsPerX[x]) {
               itemsPerX[x] = {
@@ -155,23 +158,20 @@ export class Barchart extends Chart {
           Object.values(itemsPerX).forEach((item) => {
             items.push({
               ...item,
-              ...this.options.itemGenerator(
-                // nodeIds:
-                groupIdToNode[item.group]
-              ),
+              ...this.options.itemGenerator(groupIdToNode[item.group]),
             });
           });
         });
 
         itemToNodes = Object.entries(itemToNodes)
           .sort(([a], [b]) => +a - +b)
-          .reduce((itemToNodes, [index, nodes], i) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .reduce((itemToNodes, [_, nodes], i) => {
             itemToNodes[i] = nodes;
             nodes.forEach((n) => (nodeToItem[n] = i));
             return itemToNodes;
           }, {} as Lookup<Id[]>);
 
-        // eslint-disable-next-line no-param-reassign
         itemsByScale[scale] = {
           items,
           itemToNodes,
