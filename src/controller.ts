@@ -1,29 +1,35 @@
-import Ogma, { NodeList, NodeId } from '@linkurious/ogma';
-import EventEmitter from 'eventemitter3';
-import throttle from 'lodash.throttle';
-import merge from 'lodash.merge';
+import Ogma, { NodeList, NodeId } from "@linkurious/ogma";
+import EventEmitter from "eventemitter3";
+import throttle from "lodash.throttle";
+import merge from "lodash.merge";
 
-import { scaleChange, timechange, timechanged} from './constants';
-import {getSelector} from "./barFilter"
-import { Timeline, defaultTimelineOptions } from './timeline';
-import { Barchart, defaultBarchartOptions } from './barchart';
-import 'vis-timeline/styles/vis-timeline-graph2d.css';
-import './style.css';
-import { ControlerEvents, DeepPartial, Id, Options, TimelineMode } from './types';
+import { scaleChange, timechange, timechanged } from "./constants";
+import { getSelector } from "./barFilter";
+import { Timeline, defaultTimelineOptions } from "./timeline";
+import { Barchart, defaultBarchartOptions } from "./barchart";
+import "vis-timeline/styles/vis-timeline-graph2d.css";
+import "./style.css";
+import {
+  ControlerEvents,
+  DeepPartial,
+  Id,
+  Options,
+  TimelineMode,
+} from "./types";
 
 export const defaultOptions: Partial<Options> = {
-  startDatePath: 'start',
-  endDatePath: 'end',
+  startDatePath: "start",
+  endDatePath: "end",
   filter: {
     enabled: true,
-    strategy: 'between',
-    tolerance: 'loose'
+    strategy: "between",
+    tolerance: "loose",
   },
   switchOnZoom: true,
   timeBars: [],
-  barchart:defaultBarchartOptions,
+  barchart: defaultBarchartOptions,
   timeline: defaultTimelineOptions,
-}
+};
 export class Controller extends EventEmitter<ControlerEvents> {
   private mode: TimelineMode;
   public timeline: Timeline;
@@ -35,20 +41,21 @@ export class Controller extends EventEmitter<ControlerEvents> {
   private ends: number[];
   private ids: NodeId[];
 
-  constructor(ogma: Ogma<any, any>, container: HTMLDivElement, options: DeepPartial<Options> = {}) {
+  constructor(
+    ogma: Ogma<any, any>,
+    container: HTMLDivElement,
+    options: DeepPartial<Options> = {}
+  ) {
     super();
-    this.mode = 'barchart';
-    this.options = merge(
-      defaultOptions,
-      options,
-    ) as Options;
+    this.mode = "barchart";
+    this.options = merge(defaultOptions, options) as Options;
     this.filteredNodes = new Set();
     this.nodes = ogma.createNodeList();
     this.starts = [];
     this.ends = [];
     this.ids = [];
-    const timelineContainer = document.createElement('div');
-    const barchartContainer = document.createElement('div');
+    const timelineContainer = document.createElement("div");
+    const barchartContainer = document.createElement("div");
     container.appendChild(timelineContainer);
     container.appendChild(barchartContainer);
 
@@ -75,28 +82,26 @@ export class Controller extends EventEmitter<ControlerEvents> {
       this.showBarchart();
     });
 
-    (this.options.timeBars)
-    .sort()
-    .forEach((timeBar) => {
+    this.options.timeBars.sort().forEach((timeBar) => {
       this.timeline.addTimeBar(+timeBar);
       this.barchart.addTimeBar(+timeBar);
-    })
+    });
 
     // update the list of filtered nodes
     const throttled = throttle(() => this.onTimeChange(), 50);
     this.barchart.on(timechange, () => {
       throttled();
-    })
+    });
     this.barchart.on(timechanged, () => {
       throttled();
-    })
+    });
 
     this.timeline.on(timechange, () => {
       throttled();
-    })
+    });
     this.timeline.on(timechanged, () => {
       throttled();
-    })
+    });
     this.refresh(ogma.getNodes());
   }
 
@@ -111,50 +116,56 @@ export class Controller extends EventEmitter<ControlerEvents> {
   }
 
   showTimeline() {
-    this.barchart.container.style.display = 'none';
-    this.timeline.container.style.display = '';
-    this.mode = 'timeline';
+    this.barchart.container.style.display = "none";
+    this.timeline.container.style.display = "";
+    this.mode = "timeline";
   }
 
   showBarchart() {
-    this.barchart.container.style.display = '';
-    this.timeline.container.style.display = 'none';
-    this.mode = 'barchart';
+    this.barchart.container.style.display = "";
+    this.timeline.container.style.display = "none";
+    this.mode = "barchart";
   }
 
   addTimeBar(time: number): void {
     this.timeline.addTimeBar(time);
     this.barchart.addTimeBar(time);
   }
-  removeTimeBar(index: number){
+  removeTimeBar(index: number) {
     this.timeline.removeTimeBar(index);
     this.barchart.removeTimeBar(index);
   }
 
   getTimebarsDates(): Date[] {
-    return this.mode==='timeline' ? this.timeline.getTimebarsDates() : this.barchart.getTimebarsDates();
+    return this.mode === "timeline"
+      ? this.timeline.getTimebarsDates()
+      : this.barchart.getTimebarsDates();
   }
   setTimebarsDates(dates: Date[]) {
-      this.timeline.setTimebarsDates(dates);
-      this.barchart.setTimebarsDates(dates);
+    this.timeline.setTimebarsDates(dates);
+    this.barchart.setTimebarsDates(dates);
   }
 
-  onTimeChange(){
-    if(!this.options.filter.enabled) return this.emit(timechange);
-    const times = (this.mode === 'timeline' 
-      ? this.timeline.getTimebarsDates()
-      : this.barchart.getTimebarsDates())
-      .map(d => +d).sort((a,b) => a - b);
+  onTimeChange() {
+    if (!this.options.filter.enabled) return this.emit(timechange);
+    const times = (
+      this.mode === "timeline"
+        ? this.timeline.getTimebarsDates()
+        : this.barchart.getTimebarsDates()
+    )
+      .map((d) => +d)
+      .sort((a, b) => a - b);
     const selector = getSelector(
       times,
       this.options.filter.strategy,
-      this.options.filter.tolerance);
-      this.filteredNodes.clear();
-      for(let i=0; i< this.ids.length; i++){
-        if(selector(this.starts[i], this.ends[i])){
-          this.filteredNodes.add(this.ids[i]);
-        }
+      this.options.filter.tolerance
+    );
+    this.filteredNodes.clear();
+    for (let i = 0; i < this.ids.length; i++) {
+      if (selector(this.starts[i], this.ends[i])) {
+        this.filteredNodes.add(this.ids[i]);
       }
-      return this.emit(timechange);
+    }
+    return this.emit(timechange);
   }
 }

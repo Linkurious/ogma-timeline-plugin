@@ -42,16 +42,13 @@ export const scales = [
   // 500 years
   500 * year,
   // 1000 years
-  1000 * year
+  1000 * year,
 ];
 
-export const zoomIn = 'zoom-in';
-export const zoomOut = 'zoom-out';
-export const scaleChange = 'scale-change';
-export const click = 'click';
-export const rangechanged = 'rangechanged';
-export const timechange = 'timechange';
-export const timechanged = 'timechanged';
-
-
-
+export const zoomIn = "zoom-in";
+export const zoomOut = "zoom-out";
+export const scaleChange = "scale-change";
+export const click = "click";
+export const rangechanged = "rangechanged";
+export const timechange = "timechange";
+export const timechanged = "timechanged";

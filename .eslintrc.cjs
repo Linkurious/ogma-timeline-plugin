@@ -1,18 +1,24 @@
-export default {
+module.exports = {
+  env: {
+    es6: true,
+    node: true,
+    mocha: true,
+  },
+  parser: "@typescript-eslint/parser",
   extends: [
-    'eslint:recommended',
-    'plugin:import/recommended',
-    'plugin:@typescript-eslint/recommended',
-    'eslint-config-prettier',
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended",
   ],
+  parserOptions: {
+    ecmaVersion: 2018,
+    sourceType: "module",
+  },
   settings: {
-    'import/resolver': {
-      node: {
-        paths: ['src'],
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
-      },
-    },
+    "html/html-extensions": [".html", ".we"],  // consider .html and .we files as HTML
   },
-  rules: {
+  globals: {
+    document: true,
+    window: true,
   },
+  plugins: ["promise", "import-order", "jsdoc", "html"],
 };

@@ -1,11 +1,16 @@
-import { NodeId, NodeList } from '@linkurious/ogma';
-import { DataGroup, DataItem, Timeline as VTimeline, TimelineEventPropertiesResult } from 'vis-timeline';
-import { click, scaleChange, scales } from './constants';
-import 'vis-timeline/styles/vis-timeline-graph2d.css';
-import './style.css';
-import { Id, Lookup, TimelineOptions } from './types';
-import { Chart } from './chart';
-import merge from 'lodash.merge';
+import { NodeId, NodeList } from "@linkurious/ogma";
+import {
+  DataGroup,
+  DataItem,
+  Timeline as VTimeline,
+  TimelineEventPropertiesResult,
+} from "vis-timeline";
+import { click, scaleChange, scales } from "./constants";
+import "vis-timeline/styles/vis-timeline-graph2d.css";
+import "./style.css";
+import { Id, Lookup, TimelineOptions } from "./types";
+import { Chart } from "./chart";
+import merge from "lodash.merge";
 
 /**
  * @typedef {object} TimelineOptions
@@ -19,8 +24,8 @@ import merge from 'lodash.merge';
 export const defaultTimelineOptions: TimelineOptions = {
   groupIdFunction: () => `group-0`,
   groupContent: (groupId: string, nodeIds: Id[]) => groupId,
-  itemGenerator: (id) => ({content: `node ${id}`}),
-  timelineOptions: {editable: false},
+  itemGenerator: (id) => ({ content: `node ${id}` }),
+  timelineOptions: { editable: false },
 };
 
 export class Timeline extends Chart {
@@ -38,17 +43,18 @@ export class Timeline extends Chart {
   constructor(container: HTMLDivElement, options: TimelineOptions) {
     super(container);
     this.options = options;
-    const timeline = new VTimeline(container, this.dataset, merge(
-      defaultTimelineOptions.timelineOptions,
-      options.timelineOptions,
-    ));
+    const timeline = new VTimeline(
+      container,
+      this.dataset,
+      merge(defaultTimelineOptions.timelineOptions, options.timelineOptions)
+    );
     this.chart = timeline;
     this.itemToNodes = {};
     // state flags
     this.isChangingRange = false;
-    this.chart.on('click', e => {
+    this.chart.on("click", (e) => {
       this.onBarClick(e);
-    })
+    });
     super.registerEvents();
   }
 
@@ -60,9 +66,9 @@ export class Timeline extends Chart {
     const groupIdToNode = ids.reduce((groups, id, i) => {
       const groupid = this.options.groupIdFunction(id);
       if (!groups[groupid]) {
-        groups[groupid] = []
+        groups[groupid] = [];
       }
-      groups[groupid].push(i)
+      groups[groupid].push(i);
       itemToNodes[i] = [id];
       nodeToItem[id] = i;
       const content = this.options.itemGenerator(id);
@@ -73,25 +79,26 @@ export class Timeline extends Chart {
         group: groupid,
         className: `timeline-item ${groupid} ${id}`,
         ...content,
-      } as DataItem) ;
+      } as DataItem);
       return groups;
     }, {} as Record<string, number[]>);
 
-    const groups: DataGroup[] = Object.entries(groupIdToNode).map(([groupid, indexes]) => ({
-      id: groupid,
-      content: this.options.groupContent(groupid, indexes),
-      className: `vis-group ${groupid}`,
-      options: {}
-    }));
+    const groups: DataGroup[] = Object.entries(groupIdToNode).map(
+      ([groupid, indexes]) => ({
+        id: groupid,
+        content: this.options.groupContent(groupid, indexes),
+        className: `vis-group ${groupid}`,
+        options: {},
+      })
+    );
 
     this.itemToNodes = itemToNodes;
     this.dataset.clear();
     this.dataset.add(items);
-    if(groups && groups.length > 1) {
+    if (groups && groups.length > 1) {
       this.chart.setGroups(groups);
     }
     this.chart.setWindow(starts[0], ends[ends.length - 1]);
-     
   }
 
   protected onRangeChange() {
@@ -108,7 +115,7 @@ export class Timeline extends Chart {
         if (bars < scale.bars && bars > 10) {
           return {
             bars,
-            scale: candidate
+            scale: candidate,
           };
         }
         return scale;
@@ -120,25 +127,22 @@ export class Timeline extends Chart {
     }
     this.emit(scaleChange, { scale, tooZoomed: false });
     this.isChangingRange = false;
-  };
-
-  highlightNodes(nodes: NodeList| Id[]) {
-
-    this.resethighlight();
-    const ids = 'getId' in nodes ?  
-    nodes.getId() : nodes;
-    this.chart.setSelection(ids)
   }
 
-  resethighlight(){
-    this.chart.setSelection([])
+  highlightNodes(nodes: NodeList | Id[]) {
+    this.resethighlight();
+    const ids = "getId" in nodes ? nodes.getId() : nodes;
+    this.chart.setSelection(ids);
+  }
+
+  resethighlight() {
+    this.chart.setSelection([]);
   }
 
   onBarClick(evt: TimelineEventPropertiesResult) {
     const { x, y, item } = evt;
     if (!x || !y || !item) return;
-    const nodeIds = this.itemToNodes[item]
+    const nodeIds = this.itemToNodes[item];
     this.emit(click, { nodeIds: nodeIds, evt });
   }
-
 }

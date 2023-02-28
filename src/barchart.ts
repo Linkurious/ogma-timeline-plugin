@@ -1,17 +1,27 @@
-import { NodeId, NodeList } from '@linkurious/ogma';
-import { DataItem, Graph2d as VGraph2d, TimelineEventPropertiesResult,DataGroup } from 'vis-timeline';
-import { click, rangechanged, scaleChange, scales } from './constants';
-import 'vis-timeline/styles/vis-timeline-graph2d.css';
-import './style.css';
-import { BarchartOptions, BarChartItem, Id, Lookup, ItemByScale } from './types';
-import { Chart } from './chart';
-import { DataSet } from 'vis-data';
-import merge from 'lodash.merge';
-
+import { NodeId, NodeList } from "@linkurious/ogma";
+import {
+  DataItem,
+  Graph2d as VGraph2d,
+  TimelineEventPropertiesResult,
+  DataGroup,
+} from "vis-timeline";
+import { click, rangechanged, scaleChange, scales } from "./constants";
+import "vis-timeline/styles/vis-timeline-graph2d.css";
+import "./style.css";
+import {
+  BarchartOptions,
+  BarChartItem,
+  Id,
+  Lookup,
+  ItemByScale,
+} from "./types";
+import { Chart } from "./chart";
+import { DataSet } from "vis-data";
+import merge from "lodash.merge";
 
 export const defaultBarchartOptions: BarchartOptions = {
   graph2dOptions: {
-    style: 'bar'
+    style: "bar",
   },
   groupIdFunction: (id) => `group-0`,
   groupContent: (groupId: string, nodeIds: Id[]) => groupId,
@@ -35,11 +45,11 @@ export class Barchart extends Chart {
   constructor(container: HTMLDivElement, options: BarchartOptions) {
     super(container);
     this.groupDataset = new DataSet<DataGroup>();
-    const barchart = new VGraph2d(container, this.dataset, this.groupDataset, 
-      merge(
-        defaultBarchartOptions.graph2dOptions,
-        options.graph2dOptions
-      )
+    const barchart = new VGraph2d(
+      container,
+      this.dataset,
+      this.groupDataset,
+      merge(defaultBarchartOptions.graph2dOptions, options.graph2dOptions)
     );
     this.options = options;
     this.chart = barchart;
@@ -48,12 +58,14 @@ export class Barchart extends Chart {
     this.itemToNodes = {};
     this.isChangingRange = false;
     this.rects = [];
-    this.chart.on('click', e => {
+    this.chart.on("click", (e) => {
       this.onBarClick(e);
-    })
+    });
     this.chart.on("rangechanged", () => {
-      this.rects = Array.from(this.container.querySelectorAll('.vis-line-graph>svg>rect')) as SVGRectElement[];
-    })
+      this.rects = Array.from(
+        this.container.querySelectorAll(".vis-line-graph>svg>rect")
+      ) as SVGRectElement[];
+    });
     super.registerEvents();
   }
 
@@ -93,18 +105,20 @@ export class Barchart extends Chart {
     const groupIdToNode = ids.reduce((groups, id, i) => {
       const groupid = this.options.groupIdFunction(id);
       if (!groups[groupid]) {
-        groups[groupid] = []
+        groups[groupid] = [];
       }
-      groups[groupid].push(i)
+      groups[groupid].push(i);
       return groups;
     }, {} as Record<string, number[]>);
 
-    const groups: DataGroup[] = Object.entries(groupIdToNode).map(([groupid, indexes]) => ({
-      id: groupid,
-      content: this.options.groupContent(groupid, indexes),
-      className: `vis-group ${groupid}`,
-      options: {}
-    }));
+    const groups: DataGroup[] = Object.entries(groupIdToNode).map(
+      ([groupid, indexes]) => ({
+        id: groupid,
+        content: this.options.groupContent(groupid, indexes),
+        className: `vis-group ${groupid}`,
+        options: {},
+      })
+    );
 
     this.itemsByScale = scales
       .slice()
@@ -118,45 +132,46 @@ export class Barchart extends Chart {
           itemsByScale[scale] = { ...gpPrev, tooZoomed: true };
           return itemsByScale;
         }
-        const itemsPerGroup: Record<string,  Record<number, BarChartItem>> = Object.keys(groupIdToNode)
-        .reduce((acc, groupid) => {
+        const itemsPerGroup: Record<
+          string,
+          Record<number, BarChartItem>
+        > = Object.keys(groupIdToNode).reduce((acc, groupid) => {
           acc[groupid] = {};
           return acc;
         }, {} as Record<string, Record<number, BarChartItem>>);
         let itemToNodes: Lookup<Id[]> = {};
         const nodeToItem: Lookup<number> = {};
-        const items:BarChartItem[]  = [];
-        Object.entries(groupIdToNode)
-        .forEach(([groupid, indexes]) => {
+        const items: BarChartItem[] = [];
+        Object.entries(groupIdToNode).forEach(([groupid, indexes]) => {
           const itemsPerX = itemsPerGroup[groupid];
           indexes.forEach((i) => {
             const index = Math.floor((starts[i] - min) / scale);
-              const x = min + scale * index;
-              if (!itemsPerX[x]) {
-                itemsPerX[x] = {
-                  id: i,
-                  label: '',
-                  group: groupid,
-                  x,
-                  y: 0
-                };
-              }
-              // y is how many nodes there is within this group
-              itemsPerX[x].y += 1;
+            const x = min + scale * index;
+            if (!itemsPerX[x]) {
+              itemsPerX[x] = {
+                id: i,
+                label: "",
+                group: groupid,
+                x,
+                y: 0,
+              };
+            }
+            // y is how many nodes there is within this group
+            itemsPerX[x].y += 1;
           });
-        })
+        });
         Object.values(itemsPerGroup).forEach((itemsPerX) => {
-          Object.values(itemsPerX).forEach(item => {
+          Object.values(itemsPerX).forEach((item) => {
             items.push({
               ...item,
               ...this.options.itemGenerator(
                 // nodeIds:
                 groupIdToNode[item.group],
                 // scale
-                scale,
-              )
-            })  
-          })
+                scale
+              ),
+            });
+          });
         });
 
         itemToNodes = Object.entries(itemToNodes)
@@ -173,7 +188,7 @@ export class Barchart extends Chart {
           itemToNodes,
           tooZoomed,
           groups,
-          nodeToItem
+          nodeToItem,
         };
         // tell the next iteration if it should be on timeline or barchart mode
         tooZoomed =
@@ -182,47 +197,46 @@ export class Barchart extends Chart {
       }, {} as Lookup<ItemByScale>);
   }
 
-  highlightNodes(nodes: NodeList| Id[]) {
-
+  highlightNodes(nodes: NodeList | Id[]) {
     this.resethighlight();
-    const ids = 'getId' in nodes ?  
-    nodes.getId() : nodes;
+    const ids = "getId" in nodes ? nodes.getId() : nodes;
 
-    ids
-      .forEach(id => {
-        if (!this.rects[this.nodeToItem[id]]) return;
-        this.rects[this.nodeToItem[id]].classList.add('hightlight');
-      });
+    ids.forEach((id) => {
+      if (!this.rects[this.nodeToItem[id]]) return;
+      this.rects[this.nodeToItem[id]].classList.add("hightlight");
+    });
   }
 
-  resethighlight(){
-    this.rects.forEach(group => group.classList.remove('hightlight'));
+  resethighlight() {
+    this.rects.forEach((group) => group.classList.remove("hightlight"));
   }
 
   onBarClick(evt: TimelineEventPropertiesResult) {
     const { x, y, what } = evt;
-    if (!x || !y || !this.rects.length
-    || what === 'background') return;
-    const svg: SVGAElement| null = this.container.querySelector('.vis-line-graph>svg');
-    if(!svg) return;
+    if (!x || !y || !this.rects.length || what === "background") return;
+    const svg: SVGAElement | null = this.container.querySelector(
+      ".vis-line-graph>svg"
+    );
+    if (!svg) return;
     const offset = +svg.style.left.slice(0, -2);
-    const nodeIds = (this.rects
-      .map((rect, i) => {
-        const groupX = +(rect.getAttribute('x') as string) + offset;
-        const groupW = +(rect.getAttribute('width') as string);
-        return groupX < x && groupX + groupW > x
-          ? {
-              rect,
-              nodeIds: this.itemToNodes[i]
-            }
-          : null;
-      })
-      .filter(e => e)as ({ nodeIds: Id[], rect: SVGRectElement}[]))
-      .reduce((acc, { nodeIds }) => {
-        acc.push(...nodeIds);
-        return acc;
-      },  []  as Id[] );
-    this.emit(click, {nodeIds, evt});
+    const nodeIds = (
+      this.rects
+        .map((rect, i) => {
+          const groupX = +(rect.getAttribute("x") as string) + offset;
+          const groupW = +(rect.getAttribute("width") as string);
+          return groupX < x && groupX + groupW > x
+            ? {
+                rect,
+                nodeIds: this.itemToNodes[i],
+              }
+            : null;
+        })
+        .filter((e) => e) as { nodeIds: Id[]; rect: SVGRectElement }[]
+    ).reduce((acc, { nodeIds }) => {
+      acc.push(...nodeIds);
+      return acc;
+    }, [] as Id[]);
+    this.emit(click, { nodeIds, evt });
   }
 
   protected onRangeChange() {
@@ -239,7 +253,7 @@ export class Barchart extends Chart {
         if (bars < scale.bars && bars > 10) {
           return {
             bars,
-            scale: candidate
+            scale: candidate,
           };
         }
         return scale;
@@ -252,14 +266,14 @@ export class Barchart extends Chart {
     }
     this.currentScale = scale;
     // get the data depending on zoom
-    const { items, nodeToItem, itemToNodes,groups, tooZoomed } =
+    const { items, nodeToItem, itemToNodes, groups, tooZoomed } =
       this.itemsByScale[scale];
     this.emit(scaleChange, { scale, tooZoomed });
     this.nodeToItem = nodeToItem;
     this.itemToNodes = itemToNodes;
 
     this.dataset.clear();
-    this.groupDataset.clear()
+    this.groupDataset.clear();
     this.groupDataset.add(groups);
     this.dataset.add(items as unknown as DataItem[]);
     this.chart.redraw();
