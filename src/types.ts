@@ -5,6 +5,7 @@ import {
   Timeline,
   TimelineEventPropertiesResult,
   Graph2dOptions,
+  DataItem,
 } from "vis-timeline";
 import { NodeId } from "@linkurious/ogma";
 import {
@@ -38,7 +39,7 @@ export interface BarchartOptions {
 export interface TimelineOptions {
   groupIdFunction: (item: NodeId) => string;
   groupContent: (groupId: string, nodeIds: NodeId[]) => string;
-  itemGenerator: (nodeId: NodeId) => Partial<BarChartItem>;
+  itemGenerator: (nodeId: NodeId) => Partial<DataItem>;
   timelineOptions: VTimelineOptions;
 }
 

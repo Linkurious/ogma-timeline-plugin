@@ -23,7 +23,7 @@ import merge from "lodash.merge";
  */
 export const defaultTimelineOptions: TimelineOptions = {
   groupIdFunction: () => `group-0`,
-  groupContent: (groupId: string, nodeIds: Id[]) => groupId,
+  groupContent: (groupId: string) => groupId,
   itemGenerator: (id) => ({ content: `node ${id}` }),
   timelineOptions: { editable: false },
 };
