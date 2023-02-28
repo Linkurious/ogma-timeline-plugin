@@ -30,7 +30,7 @@ export const defaultOptions: Partial<Options> = {
   barchart: defaultBarchartOptions,
   timeline: defaultTimelineOptions,
 };
-export class Controller extends EventEmitter<ControlerEvents> {
+export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
   private mode: TimelineMode;
   public timeline: Timeline;
   public nodes: NodeList;
@@ -42,7 +42,7 @@ export class Controller extends EventEmitter<ControlerEvents> {
   private ids: NodeId[];
 
   constructor(
-    ogma: Ogma<any, any>,
+    ogma: Ogma<ND, ED>,
     container: HTMLDivElement,
     options: DeepPartial<Options> = {}
   ) {
@@ -105,7 +105,7 @@ export class Controller extends EventEmitter<ControlerEvents> {
     this.refresh(ogma.getNodes());
   }
 
-  refresh(nodes: NodeList<any, any>) {
+  refresh(nodes: NodeList<ND, ED>) {
     this.nodes = nodes;
     this.ids = nodes.getId();
     this.starts = nodes.getData(this.options.startDatePath);

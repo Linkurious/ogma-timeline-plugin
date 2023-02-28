@@ -91,17 +91,6 @@ export class Barchart extends Chart {
         Infinity
       )
     );
-    const max = Math.max(
-      starts.reduce(
-        (max, start) => (isNaN(start) ? max : Math.max(max, start)),
-        -Infinity
-      ),
-      ends.reduce(
-        (max, end) => (isNaN(end) ? max : Math.max(max, end)),
-        -Infinity
-      )
-    );
-
     let tooZoomed = false;
     // iterate from big to small zoom and compute bars
     const groupIdToNode = ids.reduce((groups, id, i) => {
