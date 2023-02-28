@@ -1,7 +1,6 @@
 {
   "name": "@linkurious/ogma-timeline-plugin",
   "version": "0.0.0",
-  "private": true,
   "keywords": [
     "ogma",
     "timeline",
@@ -14,7 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/Linkurious/ogma-prototype.git"
   },
-  "license": "ISC",
+  "license": "Apache-2.0",
   "author": "Linkurious SAS",
   "type": "module",
   "main": "dist/ogma-timeline-plugin.umd.cjs",
@@ -39,7 +38,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run",
+    "postversion": "sync_versions"
   },
   "dependencies": {
     "eventemitter3": "^5.0.0",
@@ -78,5 +78,7 @@
   },
   "peerDependencies": {
     "@linkurious/ogma": "^4.4.1-develop.230"
-  }
+  },
+  "private": false
+
 }
