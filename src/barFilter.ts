@@ -77,7 +77,8 @@ export function getSelector(
       for (let i = 0; i < bars.length - 1; i += 2) {
         const min = bars[i];
         const max = bars[i + 1];
-        res = res && (isNanA || isNanB || a < min || b < min || a > max || b > max);
+        res =
+          res && (isNanA || isNanB || a < min || b < min || a > max || b > max);
       }
       return res;
     };
