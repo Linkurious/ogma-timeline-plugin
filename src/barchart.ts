@@ -166,9 +166,7 @@ export class Barchart extends Chart {
               ...item,
               ...this.options.itemGenerator(
                 // nodeIds:
-                groupIdToNode[item.group],
-                // scale
-                scale
+                groupIdToNode[item.group]
               ),
             });
           });

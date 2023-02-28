@@ -1,18 +1,20 @@
-
 .vis-text,
 .vis-data-axis {
   font-family: 'Roboto';
   font-weight: 500;
 }
+
 .vis-timeline .vis-data-axis {
   font-size: 12px;
 }
+
 .timeline-item {
   font-family: 'Roboto';
   color: #1a1a1a;
   border-color: #1499ff;
   background-color: #d4ecff;
 }
+
 .bar-item {
   stroke: #1499ff;
   fill: #d4ecff;
@@ -29,7 +31,7 @@
 }
 
 
-.vis-group{
+.vis-group {
   fill-opacity: 0;
   stroke: #1499ff;
 }

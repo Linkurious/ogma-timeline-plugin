@@ -6,7 +6,7 @@
   position: absolute;
 }
 
-#timeline > div {
+#timeline>div {
   position: absolute !important;
   bottom: 2px;
   left: 0;
@@ -21,22 +21,23 @@
   background: rgba(255, 255, 255, 0.7);
 }
 
-.vis-group.car{
+.vis-group.car {
   stroke: #ff9914;
 
 }
 
-.timeline-item.in{
+.timeline-item.in {
   background-color: #99ff14;
   stroke: #99ff14;
   fill: #99ff14;
 }
-.timeline-item.out{
+
+.timeline-item.out {
   background-color: #ff1414;
   stroke: #ff1414;
   fill: #ff1414;
 }
 
-.timeline-item.car{
+.timeline-item.car {
   background-color: #ff9914;
 }
