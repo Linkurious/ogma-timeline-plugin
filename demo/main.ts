@@ -24,7 +24,7 @@ ogma.styles.addNodeRule({
 const range = Date.now() - +new Date("August 19, 1975 23:15:30");
 
 ogma.generate
-  .flower({})
+  .random({nodes: 200, edges: 200})
   .then((graph) => {
     graph.nodes.forEach((node, i) => {
       // add a random date to the node
@@ -61,8 +61,9 @@ ogma.generate
         graph2dOptions: {
           legend: { left: { position: "bottom-left" } },
           moment: function (date) {
-            return moment(date).utcOffset("+08:00").locale("fr");
+            return moment(date).utcOffset("+08:00").locale("ru");
           },
+          style: "line",
           // locale: "fr",
         },
         groupIdFunction: (nodeId) => ogma.getNode(nodeId)?.getData("type"),
@@ -71,7 +72,7 @@ ogma.generate
         // groupIdFunction: (nodeId) => ogma.getNode(nodeId)?.getData("type"),
         timelineOptions: {
           moment: function (date) {
-            return moment(date).utcOffset("+08:00").locale("fr");
+            return moment(date).utcOffset("+08:00").locale("ru");
           },
           // locale: "fr",
         },
