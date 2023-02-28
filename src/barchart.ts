@@ -22,6 +22,8 @@ import merge from "lodash.merge";
 export const defaultBarchartOptions: BarchartOptions = {
   graph2dOptions: {
     style: "bar",
+    height: "100%",
+    barChart: { sideBySide: true },
   },
   groupIdFunction: (id) => `group-0`,
   groupContent: (groupId: string, nodeIds: Id[]) => groupId,

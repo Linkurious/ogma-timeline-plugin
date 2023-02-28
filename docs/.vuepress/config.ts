@@ -17,7 +17,7 @@ export default defineUserConfig({
       '/grouping',
       '/styling',
       '/filtering',
-
+      '/timezone',
     ],
     repo: '@linkurious/ogma-timeline-plugin'
   }),

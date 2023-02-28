@@ -40,6 +40,22 @@ const timelinePlugin = new TimelinePlugin(ogma, container, {
   }
 })
 ```
+
+### Bar groups
+
+By default, the barchart y scale is set to `100%`, to prevent this, just set the `height` property to `100%` in graph2d options: 
+
+```ts
+ const controller = new Controller(ogma, container, {
+      barchart: {
+        graph2dOptions: {
+          height: "100%",
+        },
+      },
+    });
+```
+
+
 ## Linechart styling
 
 You can get the barchart to display lines by setting the `style` key to `line`

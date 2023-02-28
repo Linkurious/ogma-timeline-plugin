@@ -15,7 +15,7 @@
   z-index: 100;
   flex-direction: column;
   justify-content: flex-end;
-  height: 512px;
+  height: 256px;
   box-shadow: rgb(0 0 0 / 80%) 0 0 10px;
   overflow-x: hidden;
   background: rgba(255, 255, 255, 0.7);
@@ -24,20 +24,4 @@
 .vis-group.car {
   stroke: #ff9914;
 
-}
-
-.timeline-item.in {
-  background-color: #99ff14;
-  stroke: #99ff14;
-  fill: #99ff14;
-}
-
-.timeline-item.out {
-  background-color: #ff1414;
-  stroke: #ff1414;
-  fill: #ff1414;
-}
-
-.timeline-item.car {
-  background-color: #ff9914;
 }
