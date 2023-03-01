@@ -13,7 +13,6 @@ package.devDependencies = {};
 delete package.dependencies["@linkurious/ogma"];
 delete package.scripts;
 package.peerDependencies["@linkurious/ogma"] = ogmaVersion;
-
 fs.writeFile(
   path.resolve("dist/package.json"),
   JSON.stringify(package, 0, 2),
