@@ -1,1 +1,86 @@
-{"name":"@linkurious/ogma-timeline-plugin","version":"0.1.0","keywords":["ogma","timeline","plugin"],"bugs":{"url":"https://github.com/Linkurious/ogma-prototype/issues"},"repository":{"type":"git","url":"git+https://github.com/Linkurious/ogma-prototype.git"},"license":"Apache-2.0","author":"Linkurious SAS","type":"module","main":"dist/ogma-timeline-plugin.umd.cjs","module":"dist/ogma-timeline-plugin.js","types":"dist/types/index.d.ts","files":["LICENCE","dist"],"scripts":{"build":"tsc && vite build","types":"tsc","dev":"vite --config=demo.vite.config.js","docs:build":"vuepress build docs","docs:dev":"vuepress dev docs","docs:publish":"gh-pages -d docs/.vuepress/dist","lint":"eslint --ext .js,.ts,.vue demo src","lint:fix":"eslint --ext .js,.ts,.vue demo src --fix","lint:ci":"eslint -f checkstyle -o reports/checkstyle.xml src ./test/**/*.test.ts","predocs:build":"rm -rf docs/.vuepress/dist docs/.vuepress/.cache docs/.vuepress/.temp","predocs:publish":"npm run docs:build","preview":"vite preview","test":"vitest","test:ui":"vitest --ui","test:unit":"vitest run --reporter=junit --outputFile=reports/junit-test-results.xml","prepack":"./scripts/prepack.js","postversion":"sync_versions"},"dependencies":{"eventemitter3":"^5.0.0","lodash.merge":"^4.6.2","vis-data":"^7.1.4","vis-timeline":"^7.7.0","@linkurious/ogma":"^4.4.0"},"devDependencies":{"@linkurious/code-tools":"^0.0.13-develop.24","@types/lodash.merge":"^4.6.7","@types/lodash.throttle":"^4.1.7","@typescript-eslint/eslint-plugin":"^5.54.0","@typescript-eslint/parser":"^5.54.0","@vitest/ui":"^0.28.5","@vuepress/plugin-search":"^2.0.0-beta.61","eslint":"^8.35.0","eslint-config-prettier":"^8.6.0","eslint-plugin-es5":"^1.5.0","eslint-plugin-html":"^7.1.0","eslint-plugin-import":"^2.27.5","eslint-plugin-import-order":"^2.1.4","eslint-plugin-jsdoc":"^40.0.0","eslint-plugin-prefer-arrow":"^1.2.3","eslint-plugin-prettier":"^4.2.1","eslint-plugin-promise":"^6.1.1","gh-pages":"^5.0.0","lodash.throttle":"^4.1.1","moment":"^2.29.4","prettier":"^2.8.4","typedoc":"^0.23.26","typedoc-plugin-markdown":"^3.14.0","typescript":"^4.9.3","vite":"^4.1.0","vitest":"^0.28.5","vuepress":"v2.0.0-beta.61"},"peerDependencies":{},"private":false}
+{
+  "name": "@linkurious/ogma-timeline-plugin",
+  "version": "0.1.0",
+  "keywords": [
+    "ogma",
+    "timeline",
+    "plugin"
+  ],
+  "bugs": {
+    "url": "https://github.com/Linkurious/ogma-prototype/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Linkurious/ogma-prototype.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Linkurious SAS",
+  "type": "module",
+  "main": "dist/ogma-timeline-plugin.umd.cjs",
+  "module": "dist/ogma-timeline-plugin.js",
+  "types": "dist/types.d.ts",
+  "files": [
+    "LICENCE",
+    "dist/ogma-timeline-plugin.js",
+    "dist/ogma-timeline-plugin.umd.cjs",
+    "dist/types.d.ts",
+    "dist/style.css"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite --config=demo.vite.config.js",
+    "docs:build": "vuepress build docs",
+    "docs:dev": "vuepress dev docs",
+    "docs:publish": "gh-pages -d docs/.vuepress/dist",
+    "lint": "eslint --ext .js,.ts,.vue demo src",
+    "lint:fix": "eslint --ext .js,.ts,.vue demo src --fix",
+    "lint:ci": "eslint -f checkstyle -o reports/checkstyle.xml src ./test/**/*.test.ts",
+    "predocs:build": "rm -rf docs/.vuepress/dist docs/.vuepress/.cache docs/.vuepress/.temp",
+    "predocs:publish": "npm run docs:build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:unit": "vitest run --reporter=junit --outputFile=reports/junit-test-results.xml",
+    "prebuild": "tsc",
+    "postbuild": "./scripts/postbuild.js",
+    "postversion": "sync_versions"
+  },
+  "dependencies": {
+    "eventemitter3": "^5.0.0",
+    "lodash.merge": "^4.6.2",
+    "vis-data": "^7.1.4",
+    "vis-timeline": "^7.7.0",
+    "@linkurious/ogma": "^4.4.0"
+  },
+  "devDependencies": {
+    "@linkurious/code-tools": "^0.0.13-develop.24",
+    "@types/lodash.merge": "^4.6.7",
+    "@types/lodash.throttle": "^4.1.7",
+    "@typescript-eslint/eslint-plugin": "^5.54.0",
+    "@typescript-eslint/parser": "^5.54.0",
+    "@vitest/ui": "^0.28.5",
+    "@vuepress/plugin-search": "^2.0.0-beta.61",
+    "eslint": "^8.35.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-es5": "^1.5.0",
+    "eslint-plugin-html": "^7.1.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-import-order": "^2.1.4",
+    "eslint-plugin-jsdoc": "^40.0.0",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "gh-pages": "^5.0.0",
+    "lodash.throttle": "^4.1.1",
+    "moment": "^2.29.4",
+    "prettier": "^2.8.4",
+    "typedoc": "^0.23.26",
+    "typedoc-plugin-markdown": "^3.14.0",
+    "typescript": "^4.9.3",
+    "vite": "^4.1.0",
+    "vitest": "^0.28.5",
+    "vuepress": "v2.0.0-beta.61"
+  },
+  "peerDependencies": {},
+  "private": false
+}
