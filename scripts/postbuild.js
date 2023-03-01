@@ -11,6 +11,7 @@ fs.readFile("package.json", { encoding: "utf-8" })
     pkg.files = pkg.files.map((filename) => filename.replace("dist", "."));
     pkg.devDependencies = {};
     delete pkg.dependencies["@linkurious/ogma"];
+    delete pkg.engines;
     delete pkg.scripts;
     pkg.peerDependencies["@linkurious/ogma"] = ogmaVersion;
     return fs.writeFile(
