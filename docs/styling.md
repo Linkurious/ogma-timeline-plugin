@@ -40,6 +40,7 @@ const timelinePlugin = new TimelinePlugin(ogma, container, {
   }
 })
 ```
+
 ## Linechart styling
 
 You can get the barchart to display lines by setting the `style` key to `line`

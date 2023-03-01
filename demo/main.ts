@@ -1,7 +1,7 @@
 import "./style.css";
 import Ogma from "@linkurious/ogma";
-import { Controller } from "../src";
-import { click, day } from "../src/constants";
+import moment from "moment/min/moment-with-locales";
+import { Controller, vis, click } from "../src";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
@@ -23,28 +23,19 @@ ogma.styles.addNodeRule({
 });
 const range = Date.now() - +new Date("August 19, 1975 23:15:30");
 
-// const types = ['in', 'in', 'out', 'in', 'in'];
-// const types = ['in', 'out', 'out', 'out', 'in'];
-// const types = ['out', 'in', 'in', 'in', 'out'];
-// const types = ['out', 'out', 'in', 'out', 'out'];
-const types = ["in", "in", "in", "out", "out"];
-
-const length = 2 * day;
-
 ogma.generate
-  .random({ nodes: 5, edges: 0 })
+  .random({nodes: 200, edges: 200})
   .then((graph) => {
     graph.nodes.forEach((node, i) => {
       // add a random date to the node
-      // const start = Date.now() - Math.floor(Math.random() * range);
+      const start = Date.now() - Math.floor(Math.random() * range);
       // randomly add a lifespan to the node
-      // const end =
-      //   i % 2 ? start + 3000000 + Math.floor((Math.random() * range) / 10) : undefined;
+      const end =
+        i % 2
+          ? start + 3000000 + Math.floor((Math.random() * range) / 10)
+          : undefined;
 
-      const start = Date.now() - i * length;
-      const end = start + length;
-
-      const type = types[i];
+      const type = i % 2 ? "car" : "bike";
       node.data = { start, end, type };
     });
     return ogma.setGraph(
@@ -55,31 +46,36 @@ ogma.generate
       { ignoreInvalid: true }
     );
   })
-  .then(() => ogma.view.setCenter({ x: 1000, y: 1000 }))
+  .then(() => ogma.layouts.force({ locate: true }))
   .then(() => {
+    console.log(ogma.getNodes().size);
     const container = document.getElementById("timeline") as HTMLDivElement;
     const controller = new Controller(ogma, container, {
-      timeBars: [
-        // new Date(Date.now()-1.2*day),
-        // new Date(Date.now() - 4.8 * day),
-        new Date(Date.now() - ((1.2 + 4.8) / 2) * day),
-      ],
+      timeBars: [new Date(0), new Date(Date.now())],
       filter: {
         enabled: true,
-        strategy: "after",
+        strategy: "between",
         tolerance: "loose",
       },
       barchart: {
         graph2dOptions: {
           legend: { left: { position: "bottom-left" } },
-          barChart: { sideBySide: true },
+          moment: function (date) {
+            return moment(date).utcOffset("+08:00").locale("ru");
+          },
           style: "line",
+          // locale: "fr",
         },
         groupIdFunction: (nodeId) => ogma.getNode(nodeId)?.getData("type"),
       },
       timeline: {
-        groupIdFunction: (nodeId) => ogma.getNode(nodeId)?.getData("type"),
-        timelineOptions: {},
+        // groupIdFunction: (nodeId) => ogma.getNode(nodeId)?.getData("type"),
+        timelineOptions: {
+          moment: function (date) {
+            return moment(date).utcOffset("+08:00").locale("ru");
+          },
+          // locale: "fr",
+        },
       },
     });
 
@@ -112,11 +108,6 @@ ogma.generate
     controller.on("timechange", () => {
       filter.refresh();
     });
-    window.controller = controller;
     controller.refresh(ogma.getNodes());
-    // controller.showBarchart();
-    controller.barchart.chart.setWindow(
-      new Date(Date.now() - 16 * day),
-      new Date(Date.now() + 4 * day)
-    );
+    controller.barchart.chart.setWindow(new Date(0), new Date(Date.now()));
   });

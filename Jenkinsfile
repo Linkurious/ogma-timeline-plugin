@@ -1,7 +1,14 @@
-@Library('linkurious-shared@feature/authenticated-prepare')_
+@Library('linkurious-shared')_
 
 nodeJob {
-  projectName = "linkurious/force-layout"
-  runBenchTests = true
+  projectName = "linkurious/ogma-timeline-plugin"
+  podTemplateNames = ['jnlp-agent-node']
+  runForwardMerge = false
   createGitTag = true
+  runPreReleaseOnUpload = false
+  runDependencyVersionCheck = false
+  npmPackPath = './dist'
+  gitTagPrefix = 'v'
+  runBookeeping = true
+  runNpmPublish = true
 }
