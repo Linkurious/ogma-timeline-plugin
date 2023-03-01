@@ -20,6 +20,4 @@ fs.readFile("package.json", { encoding: "utf-8" })
       "utf-8"
     );
   })
-  .catch((e) => {
-    console.log("Error writing JSON", err);
-  });
+  .catch((err) => console.log("Error writing JSON", err));

@@ -1,10 +1,15 @@
-import {name} from './package.json'
+import { name } from "./package.json";
+import { defineConfig } from "vite";
 
-export default {
+export default defineConfig({
   build: {
     lib: {
-      entry: 'src/index.ts',
+      entry: "src/index.ts",
       name,
-    }
-  }
-}
+    },
+    rollupOptions: {
+      external: ["@linkurious/ogma"],
+    },
+    emptyOutDir: false,
+  },
+});

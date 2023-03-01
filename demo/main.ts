@@ -24,7 +24,7 @@ ogma.styles.addNodeRule({
 const range = Date.now() - +new Date("August 19, 1975 23:15:30");
 
 ogma.generate
-  .random({nodes: 200, edges: 200})
+  .random({ nodes: 200, edges: 200 })
   .then((graph) => {
     graph.nodes.forEach((node, i) => {
       // add a random date to the node
