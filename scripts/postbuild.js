@@ -1,23 +1,24 @@
-const fs = require("fs");
-const path = require("path");
-const package = require("../package.json");
+import fs from "fs/promises";
+import path from "path";
 
-const ogmaVersion = package.dependencies["@linkurious/ogma"];
-
-["main", "module", "types"].forEach((key) => {
-  package[key] = package[key].replace("dist", ".");
-});
-package.files = package.files.map((filename) => filename.replace("dist", "."));
-package.devDependencies = {};
-delete package.dependencies["@linkurious/ogma"];
-delete package.scripts;
-package.peerDependencies["@linkurious/ogma"] = ogmaVersion;
-fs.writeFile(
-  path.resolve("dist/package.json"),
-  JSON.stringify(package, 0, 2),
-  "utf-8",
-  (err) => {
-    if (!err) return;
+fs.readFile("package.json", { encoding: "utf-8" })
+  .then((file) => {
+    const pkg = JSON.parse(file);
+    const ogmaVersion = pkg.dependencies["@linkurious/ogma"];
+    ["main", "module", "types"].forEach((key) => {
+      pkg[key] = pkg[key].replace("dist", ".");
+    });
+    pkg.files = pkg.files.map((filename) => filename.replace("dist", "."));
+    pkg.devDependencies = {};
+    delete pkg.dependencies["@linkurious/ogma"];
+    delete pkg.scripts;
+    pkg.peerDependencies["@linkurious/ogma"] = ogmaVersion;
+    return fs.writeFile(
+      path.resolve("dist/package.json"),
+      JSON.stringify(pkg, 0, 2),
+      "utf-8"
+    );
+  })
+  .catch((e) => {
     console.log("Error writing JSON", err);
-  }
-);
+  });

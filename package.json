@@ -7,11 +7,11 @@
     "plugin"
   ],
   "bugs": {
-    "url": "https://github.com/Linkurious/ogma-prototype/issues"
+    "url": "https://github.com/Linkurious/ogma-timeline-plugin/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Linkurious/ogma-prototype.git"
+    "url": "git+https://github.com/Linkurious/ogma-timeline-plugin.git"
   },
   "license": "Apache-2.0",
   "author": "Linkurious SAS",
