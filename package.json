@@ -42,7 +42,7 @@
     "test:ui": "vitest --ui",
     "test:unit": "vitest run --reporter=junit --outputFile=reports/junit-test-results.xml",
     "prebuild": "tsc",
-    "postbuild": "./scripts/postbuild.js",
+    "postbuild": "node ./scripts/postbuild.js",
     "postversion": "sync_versions"
   },
   "dependencies": {
