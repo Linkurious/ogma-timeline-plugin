@@ -39,7 +39,7 @@
     "test": "vitest",
     "compile": "scripts/debug.sh",
     "test:ui": "vitest --ui",
-    "test:unit": "vitest run",
+    "test:unit": "vitest run --reporter=junit --outputFile=reports/junit.xml",
     "postversion": "sync_versions"
   },
   "dependencies": {
