@@ -47,12 +47,14 @@
     "prebuild": "tsc",
     "postversion": "sync_versions"
   },
+  "peerDependencies": {
+    "@linkurious/ogma": "^4.4.0"
+  },
   "dependencies": {
     "eventemitter3": "^5.0.0",
     "lodash.merge": "^4.6.2",
     "vis-data": "^7.1.4",
-    "vis-timeline": "^7.7.0",
-    "@linkurious/ogma": "^4.4.0"
+    "vis-timeline": "^7.7.0"
   },
   "devDependencies": {
     "@linkurious/code-tools": "0.0.12",
@@ -83,6 +85,5 @@
     "vitest": "^0.28.5",
     "vuepress": "v2.0.0-beta.61"
   },
-  "peerDependencies": {},
   "private": false
 }
