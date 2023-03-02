@@ -7,10 +7,10 @@ export default defineUserConfig({
   lang: 'en-US',
   title: 'Ogma-Plugin-timeline',
   description: 'Documentation for the Ogma-Timeline-Plugin',
-  head:  [['link', { rel: 'icon', type:'image/x-icon', href: '/favicon.ico' }]],
+  head: [['link', { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]],
   base: "/ogma-timeline-plugin/",
   theme: defaultTheme({
-    sidebarDepth:3,
+    sidebarDepth: 3,
     logo: '/favicon.ico',
     sidebar: [
       '/',
@@ -19,7 +19,7 @@ export default defineUserConfig({
       '/filtering',
       '/timezone',
     ],
-    repo: '@linkurious/ogma-timeline-plugin'
+    repo: 'Linkurious/ogma-timeline-plugin'
   }),
   plugins: [
     [
