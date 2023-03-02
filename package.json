@@ -37,6 +37,9 @@
     "./style.css": "./dist/style.css",
     "./types": "./dist/types.d.ts"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "vite build",
     "dev": "vite --config=demo.vite.config.js",
