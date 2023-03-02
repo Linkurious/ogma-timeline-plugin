@@ -8,7 +8,14 @@ export default defineConfig({
       name,
     },
     rollupOptions: {
-      external: ["@linkurious/ogma"],
+      external: ["@linkurious/ogma", "vis-timeline", "vis-data"],
+      output: {
+        globals: {
+          "@linkurious/ogma": "Ogma",
+          "vis-timeline": "vis",
+          "vis-data": "vis",
+        },
+      },
     },
     emptyOutDir: false,
   },

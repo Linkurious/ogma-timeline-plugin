@@ -29,6 +29,14 @@
     "dist/types.d.ts",
     "dist/style.css"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/ogma-timeline-plugin.js",
+      "require": "./dist/ogma-timeline-plugin.umd.cjs"
+    },
+    "./style.css": "./dist/style.css",
+    "./types": "./dist/types.d.ts"
+  },
   "scripts": {
     "build": "vite build",
     "dev": "vite --config=demo.vite.config.js",
