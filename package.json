@@ -29,6 +29,14 @@
     "dist/types.d.ts",
     "dist/style.css"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/ogma-timeline-plugin.js",
+      "require": "./dist/ogma-timeline-plugin.umd.cjs"
+    },
+    "./style.css": "./dist/style.css",
+    "./types": "./dist/types.d.ts"
+  },
   "scripts": {
     "build": "vite build",
     "dev": "vite --config=demo.vite.config.js",
@@ -45,15 +53,16 @@
     "test:ui": "vitest --ui",
     "test:unit": "vitest run --reporter=junit --outputFile=reports/junit-test-results.xml",
     "prebuild": "tsc",
-    "postbuild": "node ./scripts/postbuild.js",
     "postversion": "sync_versions"
+  },
+  "peerDependencies": {
+    "@linkurious/ogma": "^4.4.0"
   },
   "dependencies": {
     "eventemitter3": "^5.0.0",
     "lodash.merge": "^4.6.2",
     "vis-data": "^7.1.4",
-    "vis-timeline": "^7.7.0",
-    "@linkurious/ogma": "^4.4.0"
+    "vis-timeline": "^7.7.0"
   },
   "devDependencies": {
     "@linkurious/code-tools": "0.0.12",
@@ -84,6 +93,5 @@
     "vitest": "^0.28.5",
     "vuepress": "v2.0.0-beta.61"
   },
-  "peerDependencies": {},
   "private": false
 }
