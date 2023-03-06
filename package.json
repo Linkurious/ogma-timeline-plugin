@@ -19,20 +19,20 @@
   "license": "Apache-2.0",
   "author": "Linkurious SAS",
   "type": "module",
-  "main": "dist/ogma-timeline-plugin.umd.cjs",
+  "main": "dist/ogma-timeline-plugin.umd.js",
   "module": "dist/ogma-timeline-plugin.js",
   "types": "dist/types.d.ts",
   "files": [
     "LICENCE",
     "dist/ogma-timeline-plugin.js",
-    "dist/ogma-timeline-plugin.umd.cjs",
+    "dist/ogma-timeline-plugin.umd.js",
     "dist/types.d.ts",
     "dist/style.css"
   ],
   "exports": {
     ".": {
       "import": "./dist/ogma-timeline-plugin.js",
-      "require": "./dist/ogma-timeline-plugin.umd.cjs"
+      "require": "./dist/ogma-timeline-plugin.umd.js"
     },
     "./style.css": "./dist/style.css",
     "./types": "./dist/types.d.ts"
@@ -56,6 +56,8 @@
     "test:ui": "vitest --ui",
     "test:unit": "vitest run --reporter=junit --outputFile=reports/junit-test-results.xml",
     "prebuild": "tsc",
+    "postbuild": "scripts/postbuild.sh",
+
     "postversion": "sync_versions",
     "bump:patch": "npm version --no-git-tag-version patch"
   },
