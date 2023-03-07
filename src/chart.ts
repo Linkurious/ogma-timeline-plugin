@@ -2,7 +2,7 @@ import { NodeId } from "@linkurious/ogma";
 import EventEmitter from "eventemitter3";
 import { DataSet } from "vis-data";
 import { DataItem, IdType } from "vis-timeline";
-import { rangechanged } from "./constants";
+import { rangechanged, scales } from "./constants";
 import { Events, VChart } from "./types";
 
 export abstract class Chart extends EventEmitter<Events> {
@@ -13,6 +13,8 @@ export abstract class Chart extends EventEmitter<Events> {
   public container: HTMLDivElement;
   protected currentScale: number;
   protected timebars: IdType[];
+  protected isChangingRange: boolean;
+  public visible: boolean;
 
   constructor(container: HTMLDivElement) {
     super();
@@ -20,11 +22,17 @@ export abstract class Chart extends EventEmitter<Events> {
     this.container = container;
     this.currentScale = 0;
     this.timebars = [];
+    this.isChangingRange = false;
+    this.visible = false;
   }
 
   protected registerEvents(): void {
     this.chart.on("rangechange", () => {
+      // prevent from infinite loop: setdata and window trigger this event
+      if (this.isChangingRange || !this.visible) return;
+      this.isChangingRange = true;
       this.onRangeChange();
+      this.isChangingRange = false;
     });
     this.chart.on("timechange", () => {
       this.emit("timechange");
@@ -68,4 +76,24 @@ export abstract class Chart extends EventEmitter<Events> {
     starts: number[],
     ends: number[]
   ): void;
+
+  protected getScale(): number {
+    const { start, end } = this.chart.getWindow();
+    const length = +end - +start;
+    // choose a scale adapted to zoom
+    const { scale } = scales.reduce(
+      (scale, candidate) => {
+        const bars = Math.round(length / candidate);
+        if (bars < scale.bars && bars > 10) {
+          return {
+            bars,
+            scale: candidate,
+          };
+        }
+        return scale;
+      },
+      { bars: Infinity, scale: Infinity }
+    );
+    return scale;
+  }
 }

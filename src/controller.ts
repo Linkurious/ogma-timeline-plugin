@@ -69,7 +69,7 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
     this.barchart.on(scaleChange, ({ tooZoomed }) => {
       if (!tooZoomed || !this.options.switchOnZoom) return;
       const { start, end } = this.barchart.getWindow();
-      this.timeline.setWindow(+start, +end);
+      this.timeline.chart.setWindow(+start, +end, { animation: false });
       this.timeline.setTimebarsDates(this.barchart.getTimebarsDates());
       this.showTimeline();
     });
@@ -77,7 +77,7 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
     this.timeline.on(scaleChange, ({ scale }) => {
       if (barchart.isTooZoomed(scale) || !this.options.switchOnZoom) return;
       const { start, end } = this.timeline.getWindow();
-      this.barchart.setWindow(+start, +end);
+      this.barchart.chart.setWindow(+start, +end, { animation: false });
       this.barchart.setTimebarsDates(this.timeline.getTimebarsDates());
       this.showBarchart();
     });
@@ -119,12 +119,16 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
     this.barchart.container.style.display = "none";
     this.timeline.container.style.display = "";
     this.mode = "timeline";
+    this.timeline.visible = true;
+    this.barchart.visible = false;
   }
 
   showBarchart() {
     this.barchart.container.style.display = "";
     this.timeline.container.style.display = "none";
     this.mode = "barchart";
+    this.timeline.visible = false;
+    this.barchart.visible = true;
   }
 
   addTimeBar(time: number): void {

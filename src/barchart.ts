@@ -35,7 +35,6 @@ export class Barchart extends Chart {
   private nodeToItem: Lookup<number>;
   private options: BarchartOptions;
   private itemToNodes: Lookup<Id[]>;
-  private isChangingRange: boolean;
   private rects: SVGRectElement[];
   private groupDataset: DataSet<DataGroup>;
 
@@ -110,11 +109,6 @@ export class Barchart extends Chart {
         options: {},
       })
     );
-    // const idMap = ids.reduce((acc, id, i) => {
-    //   acc[id] = i;
-    //   return acc;
-    // }, {} as Record<NodeId, NodeId>);
-
     this.itemsByScale = scales
       .slice()
       .reverse()
@@ -231,40 +225,22 @@ export class Barchart extends Chart {
   }
 
   protected onRangeChange() {
-    // prevent from infinite loop: setdata and window trigger this event
-    if (this.isChangingRange) return;
-
-    this.isChangingRange = true;
-    const { start, end } = this.chart.getWindow();
-    const length = +end - +start;
-    // choose a scale adapted to zoom
-    const { scale } = scales.reduce(
-      (scale, candidate) => {
-        const bars = Math.round(length / candidate);
-        if (bars < scale.bars && bars > 10) {
-          return {
-            bars,
-            scale: candidate,
-          };
-        }
-        return scale;
-      },
-      { bars: Infinity, scale: Infinity }
-    );
+    const scale = this.getScale();
     if (scale === this.currentScale) {
-      this.isChangingRange = false;
       return;
     }
     this.currentScale = scale;
     // get the data depending on zoom
     const { items, nodeToItem, itemToNodes, groups, tooZoomed } =
       this.itemsByScale[scale];
+    if (tooZoomed) {
+      console.log("scale", this.chart.getWindow(), scale, tooZoomed);
+    }
     this.emit(scaleChange, { scale, tooZoomed });
     this.nodeToItem = nodeToItem;
     this.itemToNodes = itemToNodes;
 
     if (tooZoomed) {
-      this.isChangingRange = false;
       return;
     }
     this.dataset.clear();
