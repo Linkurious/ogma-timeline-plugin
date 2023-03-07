@@ -215,9 +215,9 @@ export class Barchart extends Chart {
           const groupW = +(rect.getAttribute("width") as string);
           return groupX < x && groupX + groupW > x
             ? {
-              rect,
-              nodeIds: this.itemToNodes[i],
-            }
+                rect,
+                nodeIds: this.itemToNodes[i],
+              }
             : null;
         })
         .filter((e) => e) as { nodeIds: Id[]; rect: SVGRectElement }[]
