@@ -93,16 +93,16 @@ export class Barchart extends Chart {
     );
     let tooZoomed = false;
     // iterate from big to small zoom and compute bars
-    const groupIdToNode = ids.reduce((groups, id, i) => {
+    const groupIdToIndex = ids.reduce((groups, id, i) => {
       const groupid = this.options.groupIdFunction(id);
       if (!groups[groupid]) {
         groups[groupid] = [];
       }
       groups[groupid].push(i);
       return groups;
-    }, {} as Record<string, NodeId[]>);
+    }, {} as Record<string, number[]>);
 
-    const groups: DataGroup[] = Object.entries(groupIdToNode).map(
+    const groups: DataGroup[] = Object.entries(groupIdToIndex).map(
       ([groupid, indexes]) => ({
         id: groupid,
         content: this.options.groupContent(groupid, indexes),
@@ -110,10 +110,10 @@ export class Barchart extends Chart {
         options: {},
       })
     );
-    const indexMap = ids.reduce((acc, id, i) => {
-      acc[id] = i;
-      return acc;
-    }, {} as Record<NodeId, number>);
+    // const idMap = ids.reduce((acc, id, i) => {
+    //   acc[id] = i;
+    //   return acc;
+    // }, {} as Record<NodeId, NodeId>);
 
     this.itemsByScale = scales
       .slice()
@@ -129,17 +129,17 @@ export class Barchart extends Chart {
         const itemsPerGroup: Record<
           string,
           Record<number, BarChartItem>
-        > = Object.keys(groupIdToNode).reduce((acc, groupid) => {
+        > = Object.keys(groupIdToIndex).reduce((acc, groupid) => {
           acc[groupid] = {};
           return acc;
         }, {} as Record<string, Record<number, BarChartItem>>);
         let itemToNodes: Lookup<Id[]> = {};
         const nodeToItem: Lookup<number> = {};
         const items: BarChartItem[] = [];
-        Object.entries(groupIdToNode).forEach(([groupid, indexes]) => {
+        Object.entries(groupIdToIndex).forEach(([groupid, indexes]) => {
           const itemsPerX = itemsPerGroup[groupid];
           indexes.forEach((i) => {
-            const index = Math.floor((starts[indexMap[i]] - min) / scale);
+            const index = Math.floor((starts[i] - min) / scale);
             const x = min + scale * index;
             if (!itemsPerX[x]) {
               itemsPerX[x] = {
@@ -158,7 +158,9 @@ export class Barchart extends Chart {
           Object.values(itemsPerX).forEach((item) => {
             items.push({
               ...item,
-              ...this.options.itemGenerator(groupIdToNode[item.group]),
+              ...this.options.itemGenerator(
+                groupIdToIndex[item.group].map((i) => ids[i])
+              ),
             });
           });
         });
