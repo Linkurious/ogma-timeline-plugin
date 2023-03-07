@@ -5,7 +5,7 @@ import {
   Timeline as VTimeline,
   TimelineEventPropertiesResult,
 } from "vis-timeline";
-import { click, scaleChange, scales } from "./constants";
+import { click, scaleChange } from "./constants";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 import "./style.css";
 import { Id, Lookup, TimelineOptions } from "./types";

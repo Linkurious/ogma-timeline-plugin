@@ -57,6 +57,8 @@ export interface Options {
   startDatePath: string;
   endDatePath: string;
   switchOnZoom: boolean;
+  start?: number;
+  end?: number;
 }
 
 export type Id = number | string;

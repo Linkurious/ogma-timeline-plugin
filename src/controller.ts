@@ -16,6 +16,7 @@ import {
   Options,
   TimelineMode,
 } from "./types";
+import { TimelineAnimationOptions } from "vis-timeline";
 
 export const defaultOptions: Partial<Options> = {
   startDatePath: "start",
@@ -68,17 +69,11 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
     //switch from barchart to timeline on zoom
     this.barchart.on(scaleChange, ({ tooZoomed }) => {
       if (!tooZoomed || !this.options.switchOnZoom) return;
-      const { start, end } = this.barchart.getWindow();
-      this.timeline.chart.setWindow(+start, +end, { animation: false });
-      this.timeline.setTimebarsDates(this.barchart.getTimebarsDates());
       this.showTimeline();
     });
     //switch from timeline to barchart on zoom
     this.timeline.on(scaleChange, ({ scale }) => {
       if (barchart.isTooZoomed(scale) || !this.options.switchOnZoom) return;
-      const { start, end } = this.timeline.getWindow();
-      this.barchart.chart.setWindow(+start, +end, { animation: false });
-      this.barchart.setTimebarsDates(this.timeline.getTimebarsDates());
       this.showBarchart();
     });
 
@@ -103,6 +98,13 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
       throttled();
     });
     this.refresh(ogma.getNodes());
+    this.setWindow(
+      this.options.start ||
+        this.starts.reduce((min, s) => Math.min(min, s), Infinity),
+      this.options.end ||
+        this.starts.reduce((max, s) => Math.max(max, s), -Infinity),
+      { animation: false }
+    );
   }
 
   refresh(nodes: NodeList<ND, ED>) {
@@ -116,6 +118,9 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
   }
 
   showTimeline() {
+    const { start, end } = this.barchart.getWindow();
+    this.timeline.chart.setWindow(+start, +end, { animation: false });
+    this.timeline.setTimebarsDates(this.barchart.getTimebarsDates());
     this.barchart.container.style.display = "none";
     this.timeline.container.style.display = "";
     this.mode = "timeline";
@@ -124,6 +129,9 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
   }
 
   showBarchart() {
+    const { start, end } = this.timeline.getWindow();
+    this.barchart.chart.setWindow(+start, +end, { animation: false });
+    this.barchart.setTimebarsDates(this.timeline.getTimebarsDates());
     this.barchart.container.style.display = "";
     this.timeline.container.style.display = "none";
     this.mode = "barchart";
@@ -148,6 +156,15 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
   setTimebarsDates(dates: Date[]) {
     this.timeline.setTimebarsDates(dates);
     this.barchart.setTimebarsDates(dates);
+  }
+
+  setWindow(start: number, end: number, options?: TimelineAnimationOptions) {
+    if (this.mode === "timeline") {
+      this.timeline.setWindow(start, end, options);
+    } else {
+      this.barchart.setWindow(start, end, options);
+    }
+    this.onTimeChange();
   }
 
   onTimeChange() {

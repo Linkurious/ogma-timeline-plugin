@@ -233,23 +233,18 @@ export class Barchart extends Chart {
     // get the data depending on zoom
     const { items, nodeToItem, itemToNodes, groups, tooZoomed } =
       this.itemsByScale[scale];
-    if (tooZoomed) {
-      console.log("scale", this.chart.getWindow(), scale, tooZoomed);
-    }
     this.emit(scaleChange, { scale, tooZoomed });
     this.nodeToItem = nodeToItem;
     this.itemToNodes = itemToNodes;
 
-    if (tooZoomed) {
-      return;
-    }
     this.dataset.clear();
     this.groupDataset.clear();
     this.groupDataset.add(groups);
     this.dataset.add(items as unknown as DataItem[]);
     this.chart.redraw();
-    this.isChangingRange = false;
-    this.emit(rangechanged);
+    if (!tooZoomed) {
+      this.emit(rangechanged);
+    }
   }
 
   isTooZoomed(scale: number) {

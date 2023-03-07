@@ -1,7 +1,7 @@
 import { NodeId } from "@linkurious/ogma";
 import EventEmitter from "eventemitter3";
 import { DataSet } from "vis-data";
-import { DataItem, IdType } from "vis-timeline";
+import { DataItem, IdType, TimelineAnimationOptions } from "vis-timeline";
 import { rangechanged, scales } from "./constants";
 import { Events, VChart } from "./types";
 
@@ -60,8 +60,12 @@ export abstract class Chart extends EventEmitter<Events> {
     );
   }
 
-  public setWindow(minTime: number, maxTime: number): void {
-    this.chart.setWindow(minTime, maxTime);
+  public setWindow(
+    minTime: number,
+    maxTime: number,
+    options?: TimelineAnimationOptions
+  ): void {
+    this.chart.setWindow(minTime, maxTime, options);
   }
 
   public getWindow() {
