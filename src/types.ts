@@ -12,6 +12,7 @@ import {
   click,
   rangechanged,
   scaleChange,
+  redraw,
   timechange,
   timechanged,
 } from "./constants";
@@ -106,6 +107,7 @@ export type Events = {
   [rangechanged]: () => void;
   [timechange]: () => void;
   [timechanged]: () => void;
+  [redraw]: () => void;
 };
 
 export type ControlerEvents = {

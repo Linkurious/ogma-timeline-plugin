@@ -31,13 +31,17 @@ export const defaultOptions: Partial<Options> = {
   barchart: defaultBarchartOptions,
   timeline: defaultTimelineOptions,
 };
-export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
+export class Controller<
+  ND = unknown,
+  ED = unknown
+> extends EventEmitter<ControlerEvents> {
   private mode: TimelineMode;
   public timeline: Timeline;
   public nodes: NodeList;
   public barchart: Barchart;
   public filteredNodes: Set<Id>;
   private options: Options;
+  private container: HTMLDivElement;
   private starts: number[];
   private ends: number[];
   private ids: NodeId[];
@@ -59,7 +63,7 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
     const barchartContainer = document.createElement("div");
     container.appendChild(timelineContainer);
     container.appendChild(barchartContainer);
-
+    this.container = container;
     const timeline = new Timeline(timelineContainer, this.options.timeline);
     const barchart = new Barchart(barchartContainer, this.options.barchart);
     this.timeline = timeline;

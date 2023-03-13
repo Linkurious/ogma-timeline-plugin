@@ -6,8 +6,6 @@ import {
   DataGroup,
 } from "vis-timeline";
 import { click, rangechanged, scaleChange, scales } from "./constants";
-import "vis-timeline/styles/vis-timeline-graph2d.css";
-import "./style.css";
 import {
   BarchartOptions,
   BarChartItem,

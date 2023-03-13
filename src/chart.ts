@@ -40,6 +40,12 @@ export abstract class Chart extends EventEmitter<Events> {
     this.chart.on("timechanged", () => {
       this.emit("timechanged");
     });
+    this.chart.on("timechanged", () => {
+      this.emit("timechanged");
+    });
+    this.chart.on("changed", () => {
+      this.emit("redraw");
+    });
   }
 
   public addTimeBar(time: number): void {
