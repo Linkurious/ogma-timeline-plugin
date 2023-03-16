@@ -5,7 +5,7 @@ import { searchPlugin } from '@vuepress/plugin-search'
 export default defineUserConfig({
   // site config
   lang: 'en-US',
-  title: 'Ogma-Plugin-timeline',
+  title: 'Ogma-timeline-plugin',
   description: 'Documentation for the Ogma-Timeline-Plugin',
   head:  [['link', { rel: 'icon', type:'image/x-icon', href: '/favicon.ico' }]],
   base: "/ogma-timeline-plugin/",
