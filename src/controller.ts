@@ -3,7 +3,7 @@ import EventEmitter from "eventemitter3";
 import throttle from "lodash.throttle";
 import merge from "lodash.merge";
 
-import { scaleChange, timechange, timechanged } from "./constants";
+import { rangechange, scaleChange, timechange, timechanged } from "./constants";
 import { getSelector } from "./barFilter";
 import { Timeline, defaultTimelineOptions } from "./timeline";
 import { Barchart, defaultBarchartOptions } from "./barchart";
@@ -14,6 +14,7 @@ import {
   DeepPartial,
   Id,
   Options,
+  TimebarOptions,
   TimelineMode,
 } from "./types";
 import { TimelineAnimationOptions } from "vis-timeline";
@@ -81,21 +82,37 @@ export class Controller<
       this.showBarchart();
     });
 
-    this.options.timeBars.sort().forEach((timeBar) => {
-      this.timeline.addTimeBar(+timeBar);
-      this.barchart.addTimeBar(+timeBar);
-    });
-
     // update the list of filtered nodes
     const throttled = throttle(() => this.onTimeChange(), 50);
     this.barchart.on(timechange, () => {
-      console.log("timechange1");
+      throttled();
+    });
+    this.timeline.on(timechange, () => {
+      throttled();
+    });
+    this.barchart.on(timechanged, () => {
       throttled();
     });
     this.timeline.on(timechanged, () => {
       throttled();
     });
-    this.refresh(ogma.getNodes());
+    this.barchart.on(rangechange, () => {
+      throttled();
+    });
+    this.timeline.on(rangechange, () => {
+      throttled();
+    });
+    const nodes = ogma.getNodes();
+
+    this.options.timeBars
+      // @ts-ignore
+      .sort((a, b) => +(a.date || a) - +(b.date || b))
+      .forEach((timeBar) => {
+        this.timeline.addTimeBar(timeBar);
+        this.barchart.addTimeBar(timeBar);
+      });
+
+    this.refresh(nodes);
     this.setWindow(
       this.options.start ||
         this.starts.reduce((min, s) => Math.min(min, s), Infinity),
@@ -123,7 +140,7 @@ export class Controller<
   showTimeline() {
     const { start, end } = this.barchart.getWindow();
     this.timeline.chart.setWindow(+start, +end, { animation: false });
-    this.timeline.setTimebarsDates(this.barchart.getTimebarsDates());
+    this.timeline.setTimebars(this.barchart.getTimebars());
     this.barchart.container.style.display = "none";
     this.timeline.container.style.display = "";
     this.mode = "timeline";
@@ -134,7 +151,7 @@ export class Controller<
   showBarchart() {
     const { start, end } = this.timeline.getWindow();
     this.barchart.chart.setWindow(+start, +end, { animation: false });
-    this.barchart.setTimebarsDates(this.timeline.getTimebarsDates());
+    this.barchart.setTimebars(this.timeline.getTimebars());
     this.barchart.container.style.display = "";
     this.timeline.container.style.display = "none";
     this.mode = "barchart";
@@ -142,23 +159,23 @@ export class Controller<
     this.barchart.visible = true;
   }
 
-  addTimeBar(time: number): void {
-    this.timeline.addTimeBar(time);
-    this.barchart.addTimeBar(time);
+  addTimeBar(timebar: TimebarOptions): void {
+    this.timeline.addTimeBar(timebar);
+    this.barchart.addTimeBar(timebar);
   }
   removeTimeBar(index: number) {
     this.timeline.removeTimeBar(index);
     this.barchart.removeTimeBar(index);
   }
 
-  getTimebarsDates(): Date[] {
+  getTimebars() {
     return this.mode === "timeline"
-      ? this.timeline.getTimebarsDates()
-      : this.barchart.getTimebarsDates();
+      ? this.timeline.getTimebars()
+      : this.barchart.getTimebars();
   }
-  setTimebarsDates(dates: Date[]) {
-    this.timeline.setTimebarsDates(dates);
-    this.barchart.setTimebarsDates(dates);
+  setTimebars(timebars: TimebarOptions[]) {
+    this.timeline.setTimebars(timebars);
+    this.barchart.setTimebars(timebars);
   }
 
   setWindow(start: number, end: number, options?: TimelineAnimationOptions) {
@@ -174,10 +191,10 @@ export class Controller<
     if (!this.options.filter.enabled) return this.emit(timechange);
     const times = (
       this.mode === "timeline"
-        ? this.timeline.getTimebarsDates()
-        : this.barchart.getTimebarsDates()
+        ? this.timeline.getTimebars()
+        : this.barchart.getTimebars()
     )
-      .map((d) => +d)
+      .map(({ date }) => +date)
       .sort((a, b) => a - b);
     const selector = getSelector(
       times,
