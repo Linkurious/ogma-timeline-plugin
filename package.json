@@ -54,7 +54,7 @@
     "preview": "vite preview",
     "test": "vite build --config=test/vite.config.ts && vitest",
     "test:ui": "vitest --ui",
-    "test:unit": "vitest run --reporter=junit --outputFile=reports/junit-test-results.xml",
+    "test:unit": "vitest run --coverage --reporter=junit --reporter=default --outputFile reports/unit/junit-test-results.xml",
     "prebuild": "tsc",
     "postbuild": "scripts/postbuild.sh",
     "postversion": "sync_versions",
@@ -76,6 +76,7 @@
     "@types/lodash.throttle": "^4.1.7",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
+    "@vitest/coverage-c8": "^0.29.3",
     "@vitest/ui": "^0.28.5",
     "@vuepress/plugin-search": "^2.0.0-beta.61",
     "eslint": "^8.35.0",
@@ -97,8 +98,8 @@
     "typedoc": "^0.23.26",
     "typedoc-plugin-markdown": "^3.14.0",
     "typescript": "^4.9.3",
-    "vite": "^4.1.0",
-    "vitest": "^0.28.5",
+    "vite": "latest",
+    "vitest": "latest",
     "vuepress": "^2.0.0-beta.60"
   },
   "private": false

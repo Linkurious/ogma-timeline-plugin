@@ -89,13 +89,7 @@ export class Controller<
     // update the list of filtered nodes
     const throttled = throttle(() => this.onTimeChange(), 50);
     this.barchart.on(timechange, () => {
-      throttled();
-    });
-    this.barchart.on(timechanged, () => {
-      throttled();
-    });
-
-    this.timeline.on(timechange, () => {
+      console.log("timechange1");
       throttled();
     });
     this.timeline.on(timechanged, () => {
@@ -118,6 +112,11 @@ export class Controller<
     this.ends = nodes.getData(this.options.endDatePath);
     this.timeline.refresh(this.ids, this.starts, this.ends);
     this.barchart.refresh(this.ids, this.starts, this.ends);
+    if (!this.options.filter.enabled) {
+      this.filteredNodes.clear();
+      for (let i = 0; i < this.ids.length; i++)
+        this.filteredNodes.add(this.ids[i]);
+    }
     this.onTimeChange();
   }
 

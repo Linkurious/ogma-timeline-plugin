@@ -9,13 +9,13 @@ export class BrowserSession {
   public browser: Browser;
   public page: Page;
 
-  async start() {
+  async start(headless = true) {
     const port = await getPort();
     this.server = await preview({
       preview: { port },
       configFile: "test/vite.config.ts",
     });
-    this.browser = await chromium.launch({ headless: false });
+    this.browser = await chromium.launch({ headless, devtools: false });
     this.page = await this.browser.newPage();
     await this.page.goto(`http://localhost:${port}`);
   }
