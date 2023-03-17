@@ -1,74 +1,76 @@
-import { afterAll, beforeAll, describe, test } from "vitest";
-import { preview } from "vite";
-import type { PreviewServer } from "vite";
-import { chromium } from "playwright";
-import type { Browser, Page } from "playwright";
+import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { expect } from "@playwright/test";
-// import Ogma from "@linkurious/ogma";
-// unstable in Windows, TODO: investigate
-describe.runIf(process.platform !== "win32")("basic", async () => {
-  let server: PreviewServer;
-  let browser: Browser;
-  let page: Page;
+import { BrowserSession } from "./utils";
 
+describe("Timeline", async () => {
+  const session = new BrowserSession();
   beforeAll(async () => {
-    server = await preview({
-      preview: { port: 3000 },
-      configFile: "test/vite.config.ts",
-    });
-    browser = await chromium.launch({ headless: false});
-    page = await browser.newPage();
-    await page.goto("http://localhost:3000");
+    await session.start();
   });
 
   afterAll(async () => {
-    await browser.close();
-    await new Promise<void>((resolve, reject) => {
-      server.httpServer.close((error) => (error ? reject(error) : resolve()));
-    });
+    await session.close();
+  });
+  beforeEach(async () => {
+    await session.emptyPage();
   });
 
-  test("should load elements", async () => {
-    const size = await page.evaluate(() => {
-      document.body.innerHTML = `
-        <div id="ogma-container"></div>
-        <div id="timeline-container"></div>
-        `;
+  test("should show", async () => {
+    const size = await session.page.evaluate(() => {
       const ogma = new Ogma({
-        container: "ogma-container",
+        container: "ogma",
+        graph: {
+          nodes: [
+            ...new Array(10).fill(0).map((_, i) => ({
+              id: i,
+              data: { start: 0 },
+            })),
+          ],
+        },
       });
-      const range = Date.now() - +new Date("August 19, 1975 23:15:30");
+      const controller = new Controller(
+        ogma,
+        document.getElementById("timeline"),
+        {}
+      );
+      return afterTimelineRedraw(controller)
+        .then((controller) => afterTimelineRedraw(controller))
+        .then(() => document.querySelectorAll(".vis-box.group-0").length);
+    });
+    expect(size).toBe(10);
+  });
+
+  test("should respect grouping", async () => {
+    const [as, bs] = await session.page.evaluate(() => {
+      const ogma = new Ogma({
+        container: "ogma",
+        graph: {
+          nodes: [
+            ...new Array(10).fill(0).map((_, i) => ({
+              id: i,
+              data: { start: 0, type: i % 2 ? "A" : "B" },
+            })),
+          ],
+        },
+      });
       window.ogma = ogma;
-      return ogma.generate
-        .random({ nodes: 200, edges: 200 })
-        .then((graph) => {
-          graph.nodes.forEach((node, i) => {
-            node.data = { start: Math.floor(Date.now() * Math.random()) };
-          });
-          return ogma.setGraph(graph);
-        })
-        .then(() => {
-          const controller = new Controller(
-            ogma,
-            document.getElementById("timeline-container")
-          );
-            window.controller = controller;
-          return new Promise((resolve) => {
-              // resolve(document.querySelectorAll(".timeline-item").length);
-              setTimeout(() => {
-                resolve();
-              }, 1000000)
-          });
-          // return document.querySelectorAll(".timeline-item").length;
-          // return new Promise((resolve) => {
-          //   controller.barchart.chart.on("changed", () => {
-          //     resolve(document.querySelectorAll(".timeline-item").length);
-          //   });
-          //   // controller.refresh(ogma.getNodes());
-          // });
-        });
-    }, 60_000);
-    console.log(size);
-    expect(size).toBe(1);
+      const controller = new Controller(
+        ogma,
+        document.getElementById("timeline"),
+        {
+          timeline: {
+            groupIdFunction: (nodeid) => ogma.getNode(nodeid).getData("type"),
+          },
+        }
+      );
+      return afterTimelineRedraw(controller)
+        .then((controller) => afterTimelineRedraw(controller))
+        .then(() => [
+          document.querySelectorAll(".vis-box.A").length,
+          document.querySelectorAll(".B").length,
+        ]);
+    });
+    expect(as).toBe(5);
+    expect(bs).toBe(4);
   });
 });

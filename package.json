@@ -88,6 +88,7 @@
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.1.1",
+    "get-port": "^6.1.2",
     "gh-pages": "^5.0.0",
     "lodash.throttle": "^4.1.1",
     "moment": "^2.29.4",
@@ -98,7 +99,7 @@
     "typescript": "^4.9.3",
     "vite": "^4.1.0",
     "vitest": "^0.28.5",
-    "vuepress": "^2.0.0-beta.61"
+    "vuepress": "^2.0.0-beta.60"
   },
   "private": false
 }

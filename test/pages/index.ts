@@ -1,19 +1,30 @@
 import Ogma from "@linkurious/ogma";
 import { Controller } from "../../src/controller";
 
-const root = document.createElement("div");
-const button = document.createElement("button");
+function afterBarchartRedraw(controller: Controller) {
+  return new Promise((resolve) => {
+    controller.barchart.chart.on("changed", () => {
+      resolve(controller);
+    });
+  });
+}
+function afterTimelineRedraw(controller: Controller) {
+  return new Promise((resolve) => {
+    controller.timeline.chart.on("changed", () => {
+      resolve(controller);
+    });
+  });
+}
 
-let count = 0;
-
-button.textContent = `Clicked ${count} time(s)`;
-
-button.onclick = () => {
-  count++;
-  button.textContent = `Clicked ${count} time(s)`;
-};
-
-root.appendChild(button);
-document.body.appendChild(root);
+function wait(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, ms);
+  });
+}
 window.Ogma = Ogma;
 window.Controller = Controller;
+window.wait = wait;
+window.afterBarchartRedraw = afterBarchartRedraw;
+window.afterTimelineRedraw = afterTimelineRedraw;
