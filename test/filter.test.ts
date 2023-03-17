@@ -44,7 +44,7 @@ describe("Barchart", async () => {
       window.controller = controller;
       window.ogma = ogma;
       return afterBarchartRedraw(controller)
-        .then(() => wait(3000000))
+        // .then(() => wait(3000000))
         .then(() => controller.filteredNodes.size);
     });
     expect(size).toBe(10);

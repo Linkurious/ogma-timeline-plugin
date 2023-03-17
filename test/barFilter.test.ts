@@ -2,7 +2,7 @@ import { assert, describe, it } from "vitest";
 
 import { getSelector } from "../src/barFilter";
 
-describe.only("getSelector", () => {
+describe("getSelector", () => {
   // TODO add tests with NaN
   it("before strict", () => {
     const selector = getSelector([0, 10], "before", "strict");
@@ -50,7 +50,7 @@ describe.only("getSelector", () => {
     assert.equal(selector(11, 15), true);
   });
   it("after strict NaN", () => {
-    const selector = getSelector([0, 10], "before", "loose");
+    const selector = getSelector([0, 10], "after", "strict");
     assert.equal(selector(-5, NaN), false);
     assert.equal(selector(NaN, -5), false);
     assert.equal(selector(5, NaN), false);
@@ -68,6 +68,16 @@ describe.only("getSelector", () => {
     assert.equal(selector(5, 15), true);
     assert.equal(selector(11, 15), true);
   });
+  it("after loose NaN", () => {
+    const selector = getSelector([0, 10], "after", "loose");
+    assert.equal(selector(-5, NaN), false);
+    assert.equal(selector(NaN, -5), false);
+    assert.equal(selector(5, NaN), false);
+    assert.equal(selector(NaN, 5), false);
+    assert.equal(selector(11, NaN), true);
+    assert.equal(selector(NaN, 11), true);
+    assert.equal(selector(NaN, NaN), true);
+  });
 
   it("between strict", () => {
     const selector = getSelector([0, 10, 20, 30], "between", "strict");
@@ -82,6 +92,21 @@ describe.only("getSelector", () => {
     assert.equal(selector(21, 29), true);
     assert.equal(selector(21, 35), false);
     assert.equal(selector(35, 40), false);
+  });
+
+  it("between strict NaN", () => {
+    const selector = getSelector([0, 10, 20, 30], "between", "strict");
+    assert.equal(selector(-5, NaN), false);
+    assert.equal(selector(NaN, -5), false);
+    assert.equal(selector(NaN, 5), true);
+    assert.equal(selector(5, NaN), true);
+    assert.equal(selector(15, NaN), false);
+    assert.equal(selector(NaN, 15), false);
+    assert.equal(selector(25, NaN), true);
+    assert.equal(selector(NaN, 25), true);
+    assert.equal(selector(35, NaN), false);
+    assert.equal(selector(NaN, 35), false);
+    assert.equal(selector(NaN, NaN), true);
   });
 
   it("between loose", () => {
@@ -102,10 +127,16 @@ describe.only("getSelector", () => {
   it("between loose NaN", () => {
     const selector = getSelector([0, 10, 20, 30], "between", "loose");
     assert.equal(selector(-5, NaN), false);
-    assert.equal(selector(1, NaN), true);
+    assert.equal(selector(NaN, -5), false);
+    assert.equal(selector(NaN, 5), true);
+    assert.equal(selector(5, NaN), true);
     assert.equal(selector(15, NaN), false);
-    assert.equal(selector(21, NaN), true);
+    assert.equal(selector(NaN, 15), false);
+    assert.equal(selector(25, NaN), true);
+    assert.equal(selector(NaN, 25), true);
     assert.equal(selector(35, NaN), false);
+    assert.equal(selector(NaN, 35), false);
+    assert.equal(selector(NaN, NaN), true);
   });
 
   it("outside strict", () => {
@@ -123,6 +154,21 @@ describe.only("getSelector", () => {
     assert.equal(selector(35, 40), true);
   });
 
+  it("outside strict NaN", () => {
+    const selector = getSelector([0, 10, 20, 30], "outside", "strict");
+    assert.equal(selector(-5, NaN), true);
+    assert.equal(selector(NaN, -5), true);
+    assert.equal(selector(NaN, 5), false);
+    assert.equal(selector(5, NaN), false);
+    assert.equal(selector(15, NaN), true);
+    assert.equal(selector(NaN, 15), true);
+    assert.equal(selector(25, NaN), false);
+    assert.equal(selector(NaN, 25), false);
+    assert.equal(selector(35, NaN), true);
+    assert.equal(selector(NaN, 35), true);
+    assert.equal(selector(NaN, NaN), true);
+  });
+
   it("outside loose", () => {
     const selector = getSelector([0, 10, 20, 30], "outside", "loose");
     assert.equal(selector(-5, 5), true);
@@ -136,5 +182,20 @@ describe.only("getSelector", () => {
     assert.equal(selector(21, 29), false);
     assert.equal(selector(21, 35), true);
     assert.equal(selector(35, 40), true);
+  });
+
+  it("outside loose NaN", () => {
+    const selector = getSelector([0, 10, 20, 30], "outside", "loose");
+    assert.equal(selector(-5, NaN), true);
+    assert.equal(selector(NaN, -5), true);
+    assert.equal(selector(NaN, 5), false);
+    assert.equal(selector(5, NaN), false);
+    assert.equal(selector(15, NaN), true);
+    assert.equal(selector(NaN, 15), true);
+    assert.equal(selector(25, NaN), false);
+    assert.equal(selector(NaN, 25), false);
+    assert.equal(selector(35, NaN), true);
+    assert.equal(selector(NaN, 35), true);
+    assert.equal(selector(NaN, NaN), true);
   });
 });
