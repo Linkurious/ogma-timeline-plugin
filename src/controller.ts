@@ -107,7 +107,10 @@ export class Controller<
     const nodes = ogma.getNodes();
 
     this.options.timeBars
-      .sort((a, b) => +(a.date || a) - +(b.date || b))
+      .sort(
+        (a, b) =>
+          +((a as { date: Date }).date || a) - +((b as { date: Date }) || b)
+      )
       .forEach((timeBar) => {
         this.timeline.addTimeBar(timeBar);
         this.barchart.addTimeBar(timeBar);
