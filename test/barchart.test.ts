@@ -29,6 +29,7 @@ describe("Barchart", async () => {
               data: { start: Date.now() },
             })),
           ],
+          edges: [],
         },
       });
       const controller = createController({});
@@ -54,6 +55,7 @@ describe("Barchart", async () => {
               data: { start: Date.now(), type: i % 2 ? "A" : "B" },
             })),
           ],
+          edges: [],
         },
       });
       const controller = createController({
@@ -87,6 +89,7 @@ describe("Barchart", async () => {
               data: { start: Date.now(), type: i % 2 ? "A" : "B" },
             })),
           ],
+          edges: [],
         },
       });
       const controller = createController({

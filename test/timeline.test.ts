@@ -25,6 +25,7 @@ describe("Timeline", async () => {
               data: { start: 0 },
             })),
           ],
+          edges: [],
         },
       });
       const controller = createController({});
@@ -45,6 +46,7 @@ describe("Timeline", async () => {
               data: { start: 0, type: i % 2 ? "A" : "B" },
             })),
           ],
+          edges: [],
         },
       });
       const controller = createController({

@@ -1,10 +1,4 @@
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  test,
-} from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { expect } from "@playwright/test";
 import { BrowserSession } from "./utils";
 
@@ -40,6 +34,7 @@ describe("Options", async () => {
                 data: { start: Date.now() },
               },
             ],
+            edges: [],
           },
         });
         const controller = createController({
@@ -91,6 +86,7 @@ describe("Options", async () => {
                 data: { start: Date.now() },
               },
             ],
+            edges: [],
           },
         });
         const controller = createController({
@@ -134,6 +130,7 @@ describe("Options", async () => {
               data: { startCustom: Date.now() / 2 },
             })),
           ],
+          edges: [],
         },
       });
       const controller = createController({
@@ -156,6 +153,7 @@ describe("Options", async () => {
               data: { start: Date.now() / 2, endCustom: Date.now() },
             })),
           ],
+          edges: [],
         },
       });
       const controller = createController({
@@ -178,6 +176,7 @@ describe("Options", async () => {
               data: { start: Date.now() },
             },
           ],
+          edges: [],
         },
       });
       const controller = createController({
@@ -204,6 +203,7 @@ describe("Options", async () => {
               data: { start: Date.now() },
             },
           ],
+          edges: [],
         },
       });
       const controller = createController({

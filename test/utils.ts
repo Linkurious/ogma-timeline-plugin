@@ -3,6 +3,19 @@ import getPort from "get-port";
 import type { PreviewServer } from "vite";
 import { chromium } from "playwright";
 import type { Browser, Page } from "playwright";
+import Ogma, { OgmaParameters } from "@linkurious/ogma";
+import { Controller } from "../src";
+import { DeepPartial, Options } from "../src/types";
+declare global {
+  function createOgma(options: OgmaParameters): Ogma;
+  function createController(options: DeepPartial<Options>): Controller;
+  function afterBarchartRedraw(controller: Controller): Promise<Controller>;
+  function afterTimelineRedraw(controller: Controller): Promise<Controller>;
+  function wait(ms: number): Promise<void>;
+  let ogma: Ogma;
+  let controller: Controller;
+}
+
 export class BrowserSession {
   public server: PreviewServer;
   public browser: Browser;
@@ -36,62 +49,4 @@ export class BrowserSession {
   async refresh() {
     await this.page.reload();
   }
-/*
-  async afterBarchartRedraw() {
-    await this.page.evaluate(() => {
-      return new Promise((resolve) => {
-        window.controller.barchart.once("redraw", () => {
-          resolve(null);
-        });
-      });
-    });
-  }
-  async afterTimelineRedraw() {
-    await this.page.evaluate(() => {
-      return new Promise((resolve) => {
-        window.controller.timeline.once("redraw", () => {
-          resolve(null);
-        });
-      });
-    });
-  }
-  async wait(ms: number) {
-    await this.page.evaluate((ms) => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(null);
-        }, ms);
-      });
-    }, ms);
-  }
-
-  async createOgma(options) {
-    return await this.page.evaluate((options) => {
-      const ogma = new window.Ogma({
-        container: "ogma",
-        ...options,
-      });
-      window.ogma = ogma;
-      return ogma;
-    }, options);
-  }
-
-  async createController(options) {
-    return await this.page.evaluate((options) => {
-      const controller = new window.Controller(
-        window.ogma,
-        document.getElementById("timeline"),
-        options
-      );
-      window.controller = controller;
-      return controller;
-    }, options);
-  }
-
-  async cleanup() {
-    await this.page.evaluate(() => {
-      if (window.controller) window.controller.destroy();
-      if (window.ogma) window.ogma.destroy();
-    });
-  }*/
 }
