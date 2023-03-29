@@ -29,9 +29,9 @@ describe("Timeline", async () => {
           edges: [],
         },
       });
-      const controller = createController({});
-      return afterTimelineRedraw(controller)
-        .then((controller) => afterTimelineRedraw(controller))
+      createController({});
+      return afterTimelineRedraw()
+        .then(() => afterTimelineRedraw())
         .then(() => document.querySelectorAll(".vis-box.group-0").length);
     });
     expect(size).toBe(10);
@@ -50,14 +50,14 @@ describe("Timeline", async () => {
           edges: [],
         },
       });
-      const controller = createController({
+      createController({
         timeline: {
           groupIdFunction: (nodeid) =>
             (ogma.getNode(nodeid) as Node).getData("type"),
         },
       });
-      return afterTimelineRedraw(controller)
-        .then((controller) => afterTimelineRedraw(controller))
+      return afterTimelineRedraw()
+        .then(() => afterTimelineRedraw())
         .then(() => [
           document.querySelectorAll(".vis-box.A").length,
           document.querySelectorAll(".B").length,

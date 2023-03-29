@@ -34,9 +34,9 @@ describe("Barchart", async () => {
           edges: [],
         },
       });
-      const controller = createController({});
-      return afterBarchartRedraw(controller)
-        .then((controller) => afterBarchartRedraw(controller))
+      createController({});
+      return afterBarchartRedraw()
+        .then(() => afterBarchartRedraw())
         .then(() => document.querySelectorAll(".vis-bar").length);
     });
     expect(size).toBe(2);
@@ -60,14 +60,14 @@ describe("Barchart", async () => {
           edges: [],
         },
       });
-      const controller = createController({
+      createController({
         barchart: {
           groupIdFunction: (nodeid) =>
             (ogma.getNode(nodeid) as Node).getData("type"),
         },
       });
-      return afterBarchartRedraw(controller)
-        .then((controller) => afterBarchartRedraw(controller))
+      return afterBarchartRedraw()
+        .then(() => afterBarchartRedraw())
         .then(() => [
           document.querySelectorAll(".vis-bar.A").length,
           document.querySelectorAll(".vis-bar.B").length,
@@ -95,15 +95,15 @@ describe("Barchart", async () => {
           edges: [],
         },
       });
-      const controller = createController({
+      createController({
         barchart: {
           graph2dOptions: {
             style: "line",
           },
         },
       });
-      return afterBarchartRedraw(controller)
-        .then((controller) => afterBarchartRedraw(controller))
+      return afterBarchartRedraw()
+        .then(() => afterBarchartRedraw())
         .then(
           () =>
             [...document.querySelectorAll(".vis-group")].filter(

@@ -1,6 +1,6 @@
 import { assert, describe, it } from "vitest";
 
-import { getSelector } from "../src/barFilter";
+import { getSelector } from "../src/selector";
 
 describe("getSelector", () => {
   // TODO add tests with NaN

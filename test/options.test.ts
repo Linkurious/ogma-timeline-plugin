@@ -133,10 +133,10 @@ describe("Options", async () => {
           edges: [],
         },
       });
-      const controller = createController({
+      createController({
         startDatePath: "startCustom",
       });
-      return afterTimelineRedraw(controller).then(
+      return afterTimelineRedraw().then(
         () => document.querySelectorAll(".vis-box.group-0").length
       );
     });
@@ -156,10 +156,10 @@ describe("Options", async () => {
           edges: [],
         },
       });
-      const controller = createController({
+      createController({
         endDatePath: "endCustom",
       });
-      return afterTimelineRedraw(controller).then(
+      return afterTimelineRedraw().then(
         () => document.querySelectorAll(".vis-range").length
       );
     });
@@ -179,11 +179,11 @@ describe("Options", async () => {
           edges: [],
         },
       });
-      const controller = createController({
+      createController({
         start: new Date("1 1 1955"),
       });
 
-      return afterTimelineRedraw(controller)
+      return afterTimelineRedraw()
         .then(() => wait(100))
         .then(() =>
           (
@@ -206,11 +206,11 @@ describe("Options", async () => {
           edges: [],
         },
       });
-      const controller = createController({
+      createController({
         end: new Date("1 1 2100"),
       });
 
-      return afterTimelineRedraw(controller)
+      return afterTimelineRedraw()
         .then(() => wait(100))
         .then(() => {
           const timeAxis = document.querySelector(
@@ -222,5 +222,90 @@ describe("Options", async () => {
         });
     });
     expect(is1955).toBe(true);
+  });
+
+  test("should respect filter", async () => {
+    const filteredNodes = await session.page.evaluate(() => {
+      createOgma({
+        graph: {
+          nodes: [
+            {
+              id: 1,
+              data: { start: new Date("1 1 1955") },
+            },
+          ],
+          edges: [],
+        },
+      });
+      const controller = createController({
+        filter: {
+          enabled: true,
+          strategy: "after",
+          tolerance: "strict",
+        },
+        timeBars: [new Date("1 1 1954")],
+      });
+
+      return afterTimelineRedraw().then(() =>
+        Array.from(controller.filteredNodes)
+      );
+    });
+    expect(filteredNodes).toEqual([1]);
+  });
+  test("should respect filter disabled", async () => {
+    const filteredNodes = await session.page.evaluate(() => {
+      createOgma({
+        graph: {
+          nodes: [
+            {
+              id: 1,
+              data: { start: new Date("1 1 1955") },
+            },
+          ],
+          edges: [],
+        },
+      });
+      const controller = createController({
+        filter: {
+          enabled: true,
+          strategy: "after",
+          tolerance: "strict",
+        },
+        timeBars: [new Date("1 1 1954")],
+      });
+
+      return afterTimelineRedraw().then(() =>
+        Array.from(controller.filteredNodes)
+      );
+    });
+    expect(filteredNodes).toEqual([1]);
+  });
+  test("should respect filter after", async () => {
+    const filteredNodes = await session.page.evaluate(() => {
+      createOgma({
+        graph: {
+          nodes: [
+            {
+              id: 1,
+              data: { start: new Date("1 1 1955") },
+            },
+          ],
+          edges: [],
+        },
+      });
+      const controller = createController({
+        filter: {
+          enabled: true,
+          strategy: "after",
+          tolerance: "strict",
+        },
+        timeBars: [new Date("1 1 1956")],
+      });
+
+      return afterTimelineRedraw().then(() =>
+        Array.from(controller.filteredNodes)
+      );
+    });
+    expect(filteredNodes).toEqual([]);
   });
 });

@@ -4,7 +4,7 @@ import throttle from "lodash.throttle";
 import merge from "lodash.merge";
 
 import { rangechange, scaleChange, timechange, timechanged } from "./constants";
-import { getSelector } from "./barFilter";
+import { getSelector } from "./selector";
 import { Timeline, defaultTimelineOptions } from "./timeline";
 import { Barchart, defaultBarchartOptions } from "./barchart";
 import "vis-timeline/styles/vis-timeline-graph2d.css";

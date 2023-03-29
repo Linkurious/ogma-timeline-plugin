@@ -1,14 +1,14 @@
 import Ogma from "@linkurious/ogma";
 import { Controller } from "../../src/controller";
 
-function afterBarchartRedraw(controller: Controller) {
+function afterBarchartRedraw() {
   return new Promise((resolve) => {
     controller.barchart.once("redraw", () => {
       resolve(controller);
     });
   });
 }
-function afterTimelineRedraw(controller: Controller) {
+function afterTimelineRedraw() {
   return new Promise((resolve) => {
     controller.timeline.once("redraw", () => {
       resolve(controller);
@@ -19,7 +19,7 @@ function afterTimelineRedraw(controller: Controller) {
 function wait(ms: number) {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve();
+      resolve(null);
     }, ms);
   });
 }
