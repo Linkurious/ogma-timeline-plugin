@@ -186,9 +186,9 @@ describe("Options", async () => {
       return afterTimelineRedraw(controller)
         .then(() => wait(100))
         .then(() =>
-          document
-            .querySelector(".vis-time-axis")
-            .children[0].classList.contains("vis-year1955")
+          (
+            document.querySelector(".vis-time-axis") as HTMLDivElement
+          ).children[0].classList.contains("vis-year1955")
         );
     });
     expect(is1955).toBe(true);
@@ -213,8 +213,12 @@ describe("Options", async () => {
       return afterTimelineRedraw(controller)
         .then(() => wait(100))
         .then(() => {
-          const timeAxis = document.querySelector(".vis-time-axis");
-          return timeAxis?.lastChild.classList.contains("vis-year2100");
+          const timeAxis = document.querySelector(
+            ".vis-time-axis"
+          ) as HTMLDivElement;
+          return (timeAxis.lastChild as SVGSVGElement).classList.contains(
+            "vis-year2100"
+          );
         });
     });
     expect(is1955).toBe(true);

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { expect } from "@playwright/test";
+import { Node } from "@linkurious/ogma";
 import { BrowserSession } from "./utils";
 
 describe("Timeline", async () => {
@@ -51,7 +52,8 @@ describe("Timeline", async () => {
       });
       const controller = createController({
         timeline: {
-          groupIdFunction: (nodeid) => ogma.getNode(nodeid).getData("type"),
+          groupIdFunction: (nodeid) =>
+            (ogma.getNode(nodeid) as Node).getData("type"),
         },
       });
       return afterTimelineRedraw(controller)

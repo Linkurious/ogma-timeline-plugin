@@ -60,8 +60,8 @@ export interface Options {
   startDatePath: string;
   endDatePath: string;
   switchOnZoom: boolean;
-  start?: number;
-  end?: number;
+  start?: number | Date;
+  end?: number | Date;
 }
 
 export type Id = number | string;

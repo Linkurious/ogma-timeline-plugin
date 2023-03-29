@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { expect } from "@playwright/test";
 import { BrowserSession } from "./utils";
+import { Node } from "@linkurious/ogma";
+
 describe("Barchart", async () => {
   const session = new BrowserSession();
   beforeAll(async () => {
@@ -60,7 +62,8 @@ describe("Barchart", async () => {
       });
       const controller = createController({
         barchart: {
-          groupIdFunction: (nodeid) => ogma.getNode(nodeid).getData("type"),
+          groupIdFunction: (nodeid) =>
+            (ogma.getNode(nodeid) as Node).getData("type"),
         },
       });
       return afterBarchartRedraw(controller)
