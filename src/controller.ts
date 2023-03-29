@@ -107,7 +107,6 @@ export class Controller<
     const nodes = ogma.getNodes();
 
     this.options.timeBars
-      // @ts-ignore
       .sort((a, b) => +(a.date || a) - +(b.date || b))
       .forEach((timeBar) => {
         this.timeline.addTimeBar(timeBar);
@@ -135,7 +134,7 @@ export class Controller<
     this.ends = nodes.getData(this.options.endDatePath);
     this.timeline.refresh(this.ids, this.starts, this.ends);
     this.barchart.refresh(this.ids, this.starts, this.ends);
-    console.log('REFRESH', this.options)
+    console.log("REFRESH", this.options);
     if (!this.options.filter.enabled) {
       this.filteredNodes.clear();
       for (let i = 0; i < this.ids.length; i++)
@@ -185,7 +184,11 @@ export class Controller<
     this.barchart.setTimebars(timebars);
   }
 
-  setWindow(start: number, end: number, options?: TimelineAnimationOptions) {
+  setWindow(
+    start: number | Date,
+    end: number | Date,
+    options?: TimelineAnimationOptions
+  ) {
     if (this.mode === "timeline") {
       this.timeline.setWindow(start, end, options);
     } else {

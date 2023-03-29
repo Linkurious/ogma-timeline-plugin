@@ -24,7 +24,6 @@ export abstract class Chart extends EventEmitter<Events> {
   public visible: boolean;
   private destroyed: boolean;
 
-
   constructor(container: HTMLDivElement) {
     super();
     this.dataset = new DataSet([]);
@@ -35,13 +34,12 @@ export abstract class Chart extends EventEmitter<Events> {
     this.visible = false;
     this.chartRange = 0;
     this.destroyed = false;
-
   }
 
   protected registerEvents(): void {
     this.chart.on(rangechange, () => {
       const { start, end } = this.chart.getWindow();
-      const range = end - start;
+      const range = +end - +start;
       if (range === this.chartRange) {
         // if we are sliding but not zooming, we move the fixed timebars
         this.timebars
@@ -119,8 +117,8 @@ export abstract class Chart extends EventEmitter<Events> {
   }
 
   public setWindow(
-    minTime: number,
-    maxTime: number,
+    minTime: number | Date,
+    maxTime: number | Date,
     options?: TimelineAnimationOptions
   ): void {
     this.chart.setWindow(minTime, maxTime, options);
@@ -159,8 +157,8 @@ export abstract class Chart extends EventEmitter<Events> {
     return scale;
   }
   destroy() {
-    if(this.destroyed)return
-    this.chart.body.emitter.off();
+    if (this.destroyed) return;
+    // this.chart.body.emitter.off();
     this.chart.destroy();
     this.removeAllListeners();
     this.destroyed = true;
