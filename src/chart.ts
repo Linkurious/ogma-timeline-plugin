@@ -22,6 +22,8 @@ export abstract class Chart extends EventEmitter<Events> {
   protected isChangingRange: boolean;
   private chartRange: number;
   public visible: boolean;
+  private destroyed: boolean;
+
 
   constructor(container: HTMLDivElement) {
     super();
@@ -32,6 +34,8 @@ export abstract class Chart extends EventEmitter<Events> {
     this.isChangingRange = false;
     this.visible = false;
     this.chartRange = 0;
+    this.destroyed = false;
+
   }
 
   protected registerEvents(): void {
@@ -153,5 +157,12 @@ export abstract class Chart extends EventEmitter<Events> {
       { bars: Infinity, scale: Infinity }
     );
     return scale;
+  }
+  destroy() {
+    if(this.destroyed)return
+    this.chart.body.emitter.off();
+    this.chart.destroy();
+    this.removeAllListeners();
+    this.destroyed = true;
   }
 }

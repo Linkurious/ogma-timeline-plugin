@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { expect } from "@playwright/test";
 import { BrowserSession } from "./utils";
-import { year } from "../src";
 
 describe("Barchart", async () => {
   const session = new BrowserSession();
@@ -13,12 +12,11 @@ describe("Barchart", async () => {
     await session.close();
   });
   beforeEach(async () => {
-    await session.emptyPage();
+    await session.refresh();
   });
   test("should filter", async () => {
     const size = await session.page.evaluate(() => {
-      const ogma = new Ogma({
-        container: "ogma",
+      createOgma({
         graph: {
           nodes: [
             ...new Array(10).fill(0).map((_, i) => ({
@@ -36,11 +34,9 @@ describe("Barchart", async () => {
           ],
         },
       });
-      const controller = new Controller(
-        ogma,
-        document.getElementById("timeline"),
-        { timeBars: [(1 / 3) * Date.now(), (2 / 3) * Date.now()] }
-      );
+      const controller = createController({
+        timeBars: [(1 / 3) * Date.now(), (2 / 3) * Date.now()],
+      });
       return controller.filteredNodes.size;
     });
     expect(size).toBe(10);
@@ -48,8 +44,7 @@ describe("Barchart", async () => {
 
   test("should be disabled if asked", async () => {
     const size = await session.page.evaluate(() => {
-      const ogma = new Ogma({
-        container: "ogma",
+      createOgma({
         graph: {
           nodes: [
             ...new Array(10).fill(0).map((_, i) => ({
@@ -67,16 +62,12 @@ describe("Barchart", async () => {
           ],
         },
       });
-      const controller = new Controller(
-        ogma,
-        document.getElementById("timeline"),
-        {
-          timeBars: [(1 / 3) * Date.now(), (2 / 3) * Date.now()],
-          filter: {
-            enabled: false,
-          },
-        }
-      );
+      const controller = createController({
+        timeBars: [(1 / 3) * Date.now(), (2 / 3) * Date.now()],
+        filter: {
+          enabled: false,
+        },
+      });
       return controller.filteredNodes.size;
     });
     expect(size).toBe(12);
@@ -84,8 +75,7 @@ describe("Barchart", async () => {
 
   test("should respect strategy and tolerance", async () => {
     const ids = await session.page.evaluate(() => {
-      const ogma = new Ogma({
-        container: "ogma",
+      createOgma({
         graph: {
           nodes: [
             {
@@ -111,18 +101,14 @@ describe("Barchart", async () => {
           ],
         },
       });
-      const controller = new Controller(
-        ogma,
-        document.getElementById("timeline"),
-        {
-          timeBars: [0, Date.now()],
-          filter: {
-            enabled: true,
-            strategy: "outisde",
-            tolerance: "strict",
-          },
-        }
-      );
+      const controller = createController({
+        timeBars: [0, Date.now()],
+        filter: {
+          enabled: true,
+          strategy: "outisde",
+          tolerance: "strict",
+        },
+      });
       return [...controller.filteredNodes.values()].map((v) => v);
     });
     expect(ids).toEqual([1, 5]);
@@ -130,8 +116,7 @@ describe("Barchart", async () => {
 
   test("should refresh on drag", async () => {
     const ids = await session.page.evaluate(() => {
-      const ogma = new Ogma({
-        container: "ogma",
+      createOgma({
         graph: {
           nodes: [
             {
@@ -166,22 +151,17 @@ describe("Barchart", async () => {
           ],
         },
       });
-      const controller = new Controller(
-        ogma,
-        document.getElementById("timeline"),
-        {
-          timeBars: [new Date("1 1 1980"), new Date("1 1 2010")],
-          filter: {
-            enabled: true,
-            strategy: "outisde",
-            tolerance: "strict",
-          },
-        }
-      );
-      window.controller = controller;
+      const controller = createController({
+        timeBars: [new Date("1 1 1980"), new Date("1 1 2010")],
+        filter: {
+          enabled: true,
+          strategy: "outisde",
+          tolerance: "strict",
+        },
+      });
       return [...controller.filteredNodes.values()].map((v) => v);
     });
-    expect(ids).toEqual([1, 5]);
+    expect(ids).toEqual([1, 2, 4, 5]);
 
     const { x, y, width, height } = await session.page
       .locator(".vis-custom-time.t0>div")

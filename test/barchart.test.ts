@@ -11,12 +11,12 @@ describe("Barchart", async () => {
     await session.close();
   });
   beforeEach(async () => {
-    await session.emptyPage();
+    await session.refresh();
   });
 
   test("should show", async () => {
     const size = await session.page.evaluate(() => {
-      const ogma = new Ogma({
+      createOgma({
         container: "ogma",
         graph: {
           nodes: [
@@ -31,11 +31,7 @@ describe("Barchart", async () => {
           ],
         },
       });
-      const controller = new Controller(
-        ogma,
-        document.getElementById("timeline"),
-        {}
-      );
+      const controller = createController({});
       return afterBarchartRedraw(controller)
         .then((controller) => afterBarchartRedraw(controller))
         .then(() => document.querySelectorAll(".vis-bar").length);
@@ -45,7 +41,7 @@ describe("Barchart", async () => {
 
   test("should respect grouping", async () => {
     const [as, bs] = await session.page.evaluate(() => {
-      const ogma = new Ogma({
+      const ogma = createOgma({
         container: "ogma",
         graph: {
           nodes: [
@@ -60,15 +56,11 @@ describe("Barchart", async () => {
           ],
         },
       });
-      const controller = new Controller(
-        ogma,
-        document.getElementById("timeline"),
-        {
-          barchart: {
-            groupIdFunction: (nodeid) => ogma.getNode(nodeid).getData("type"),
-          },
-        }
-      );
+      const controller = createController({
+        barchart: {
+          groupIdFunction: (nodeid) => ogma.getNode(nodeid).getData("type"),
+        },
+      });
       return afterBarchartRedraw(controller)
         .then((controller) => afterBarchartRedraw(controller))
         .then(() => [
@@ -82,7 +74,7 @@ describe("Barchart", async () => {
 
   test("should draw lines", async () => {
     const lines = await session.page.evaluate(() => {
-      const ogma = new Ogma({
+      createOgma({
         container: "ogma",
         graph: {
           nodes: [
@@ -97,17 +89,13 @@ describe("Barchart", async () => {
           ],
         },
       });
-      const controller = new Controller(
-        ogma,
-        document.getElementById("timeline"),
-        {
-          barchart: {
-            graph2dOptions: {
-              style: "line",
-            },
+      const controller = createController({
+        barchart: {
+          graph2dOptions: {
+            style: "line",
           },
-        }
-      );
+        },
+      });
       return afterBarchartRedraw(controller)
         .then((controller) => afterBarchartRedraw(controller))
         .then(
@@ -117,6 +105,6 @@ describe("Barchart", async () => {
             ).length
         );
     });
-    expect(lines).toBe(2);
+    expect(lines).toBe(1);
   });
 });

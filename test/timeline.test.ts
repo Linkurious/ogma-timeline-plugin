@@ -12,13 +12,12 @@ describe("Timeline", async () => {
     await session.close();
   });
   beforeEach(async () => {
-    await session.emptyPage();
+    await session.refresh();
   });
 
   test("should show", async () => {
     const size = await session.page.evaluate(() => {
-      const ogma = new Ogma({
-        container: "ogma",
+      createOgma({
         graph: {
           nodes: [
             ...new Array(10).fill(0).map((_, i) => ({
@@ -28,11 +27,7 @@ describe("Timeline", async () => {
           ],
         },
       });
-      const controller = new Controller(
-        ogma,
-        document.getElementById("timeline"),
-        {}
-      );
+      const controller = createController({});
       return afterTimelineRedraw(controller)
         .then((controller) => afterTimelineRedraw(controller))
         .then(() => document.querySelectorAll(".vis-box.group-0").length);
@@ -42,8 +37,7 @@ describe("Timeline", async () => {
 
   test("should respect grouping", async () => {
     const [as, bs] = await session.page.evaluate(() => {
-      const ogma = new Ogma({
-        container: "ogma",
+      const ogma = createOgma({
         graph: {
           nodes: [
             ...new Array(10).fill(0).map((_, i) => ({
@@ -53,16 +47,11 @@ describe("Timeline", async () => {
           ],
         },
       });
-      window.ogma = ogma;
-      const controller = new Controller(
-        ogma,
-        document.getElementById("timeline"),
-        {
-          timeline: {
-            groupIdFunction: (nodeid) => ogma.getNode(nodeid).getData("type"),
-          },
-        }
-      );
+      const controller = createController({
+        timeline: {
+          groupIdFunction: (nodeid) => ogma.getNode(nodeid).getData("type"),
+        },
+      });
       return afterTimelineRedraw(controller)
         .then((controller) => afterTimelineRedraw(controller))
         .then(() => [

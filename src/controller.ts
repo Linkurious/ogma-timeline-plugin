@@ -61,7 +61,9 @@ export class Controller<
     this.ends = [];
     this.ids = [];
     const timelineContainer = document.createElement("div");
+    timelineContainer.classList.add("timeline-container");
     const barchartContainer = document.createElement("div");
+    barchartContainer.classList.add("barchart-container");
     container.appendChild(timelineContainer);
     container.appendChild(barchartContainer);
     this.container = container;
@@ -120,6 +122,10 @@ export class Controller<
         this.starts.reduce((max, s) => Math.max(max, s), -Infinity),
       { animation: false }
     );
+
+    ogma.events.on("destroy", () => {
+      this.destroy();
+    });
   }
 
   refresh(nodes: NodeList<ND, ED>) {
@@ -129,6 +135,7 @@ export class Controller<
     this.ends = nodes.getData(this.options.endDatePath);
     this.timeline.refresh(this.ids, this.starts, this.ends);
     this.barchart.refresh(this.ids, this.starts, this.ends);
+    console.log('REFRESH', this.options)
     if (!this.options.filter.enabled) {
       this.filteredNodes.clear();
       for (let i = 0; i < this.ids.length; i++)
@@ -208,5 +215,12 @@ export class Controller<
       }
     }
     return this.emit(timechange);
+  }
+
+  destroy() {
+    this.timeline.destroy();
+    this.barchart.destroy();
+    [...this.container.children].forEach((c) => c.remove());
+    this.removeAllListeners();
   }
 }
