@@ -6,14 +6,17 @@ import {
   TimelineEventPropertiesResult,
   Graph2dOptions,
   DataItem,
+  IdType,
 } from "vis-timeline";
 import { NodeId } from "@linkurious/ogma";
 import {
   click,
   rangechanged,
   scaleChange,
+  redraw,
   timechange,
   timechanged,
+  rangechange,
 } from "./constants";
 export type FilterStrategy = "before" | "after" | "between" | "outside";
 export type FilterTolerance = "strict" | "loose";
@@ -52,17 +55,20 @@ export interface TimelineOptions {
 export interface Options {
   timeline: TimelineOptions;
   barchart: BarchartOptions;
-  timeBars: Date[];
+  timeBars: TimebarOptions[];
   filter: FilterOptions;
   startDatePath: string;
   endDatePath: string;
   switchOnZoom: boolean;
+  start?: number | Date;
+  end?: number | Date;
 }
 
 export type Id = number | string;
 export type Lookup<T> = {
   [key in Id]: T;
 };
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type DeepPartial<T> = T extends object
   ? {
       [P in keyof T]?: DeepPartial<T[P]>;
@@ -102,10 +108,24 @@ export type Events = {
   [scaleChange]: (evt: ScaleChangeEvt) => void;
   [click]: (evt: ClickEvt) => void;
   [rangechanged]: () => void;
+  [rangechange]: () => void;
   [timechange]: () => void;
   [timechanged]: () => void;
+  [redraw]: () => void;
 };
 
 export type ControlerEvents = {
   [timechange]: () => void;
 };
+
+export type Timebar = {
+  delta: number;
+  id: IdType;
+  fixed: boolean;
+};
+
+/**
+ * @typedef {object} TimebarOptions Options to setup filter bars in the chart.
+ * It can be a number, a date or an object.
+ */
+export type TimebarOptions = { fixed?: boolean; date: Date } | number | Date;

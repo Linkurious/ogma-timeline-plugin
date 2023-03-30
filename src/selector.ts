@@ -5,25 +5,35 @@ export function getSelector(
   strategy: FilterStrategy,
   tolerance: FilterTolerance
 ): (a: number, b: number) => boolean {
+  const firstBar = bars[0];
+  const lastBar = bars[bars.length - 1];
   if (strategy === "before") {
     if (tolerance === "strict") {
-      return (a, b) => (isNaN(a) || a < bars[0]) && (isNaN(b) || b < bars[0]);
+      return (a, b) => (isNaN(a) || a < firstBar) && (isNaN(b) || b < firstBar);
     } else {
-      return (a, b) => isNaN(a) || a <= bars[0] || isNaN(b) || b <= bars[0];
+      return (a, b) =>
+        isNaN(a)
+          ? isNaN(b)
+            ? true
+            : b < firstBar
+          : isNaN(b)
+          ? a < firstBar
+          : a < firstBar || b < firstBar;
     }
   }
 
   if (strategy === "after") {
     if (tolerance === "strict") {
-      return (a, b) =>
-        (isNaN(a) || a > bars[bars.length - 1]) &&
-        (isNaN(b) || b > bars[bars.length - 1]);
+      return (a, b) => (isNaN(a) || a > lastBar) && (isNaN(b) || b > lastBar);
     } else {
       return (a, b) =>
-        isNaN(a) ||
-        a > bars[bars.length - 1] ||
-        isNaN(b) ||
-        b > bars[bars.length - 1];
+        isNaN(a)
+          ? isNaN(b)
+            ? true
+            : b > lastBar
+          : isNaN(b)
+          ? a > lastBar
+          : a > lastBar || b > lastBar;
     }
   }
   if (strategy === "between") {
@@ -45,7 +55,16 @@ export function getSelector(
         for (let i = 0; i < bars.length - 1; i += 2) {
           const min = bars[i];
           const max = bars[i + 1];
-          if ((isNaN(a) || a < max) && (isNaN(b) || b > min)) return true;
+          if (
+            isNaN(b)
+              ? isNaN(a)
+                ? true
+                : a < max && a > min
+              : isNaN(a)
+              ? b < max && b > min
+              : a < max && b > min
+          )
+            return true;
         }
         return false;
       };
@@ -57,28 +76,37 @@ export function getSelector(
     return (a, b) => {
       let res = true;
       const isNanA = isNaN(a);
-      const isNanB = isNaN(a);
-
+      const isNanB = isNaN(b);
+      if (isNanA && isNanB) return true;
       for (let i = 0; i < bars.length - 1; i += 2) {
         const min = bars[i];
         const max = bars[i + 1];
         res =
           res &&
-          (((isNanA || a < min) && (isNanB || b < min)) ||
-            ((isNanA || a > max) && (isNanB || b > max)));
+          (isNanA
+            ? b < min || b > max
+            : isNanB
+            ? a < min || a > max
+            : (a < min && b < min) || (a > max && b > max));
       }
       return res;
     };
   } else {
     return (a, b) => {
-      const isNanA = isNaN(a);
-      const isNanB = isNaN(a);
       let res = true;
+      const isNanA = isNaN(a);
+      const isNanB = isNaN(b);
+      if (isNanA && isNanB) return true;
       for (let i = 0; i < bars.length - 1; i += 2) {
         const min = bars[i];
         const max = bars[i + 1];
         res =
-          res && (isNanA || isNanB || a < min || b < min || a > max || b > max);
+          res &&
+          (isNanA
+            ? b < min || b > max
+            : isNanB
+            ? a < min || a > max
+            : a < min || b < min || a > max || b > max);
       }
       return res;
     };

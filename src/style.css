@@ -3,7 +3,6 @@
   font-family: 'Roboto';
   font-weight: 500;
 }
-
 .vis-timeline .vis-data-axis {
   font-size: 12px;
 }
@@ -34,4 +33,19 @@
 .vis-group {
   fill-opacity: 0;
   stroke: #1499ff;
+}
+
+#timeline>div {
+  position: absolute !important;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+  display: flex;
+  z-index: 100;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 256px;
+  box-shadow: rgb(0 0 0 / 80%) 0 0 10px;
+  overflow-x: hidden;
+  background: rgba(255, 255, 255, 0.7);
 }

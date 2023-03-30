@@ -1,7 +1,12 @@
 # Styling
 
-Now that you have a working timeline, you might want to make it look neat, and to sync it with the visualisation.
+By default the timeline will display every element with the same color: 
 
+
+![](/no-style-timeline.png)
+
+
+Let's see how to bring some colors into this. 
 ## Barchart styling
 
 The simplest way to style barchart is to set `fill` and `stroke` properties in CSS: 
@@ -18,14 +23,18 @@ Let's say groupIdFunction returns either `car` either `person`, then you can sty
 
 ```css
 .bar-item.car{
-  stroke: #99ff14;
-  fill: #99ff14;
+  stroke: #ff9914;
+  fill: #ff9914;
 }
 .bar-item.person{
-  stroke: #14ff99;
-  fill: #14ff99;
+  stroke: #08f;
+  fill: #08f;
 }
 ```
+
+
+![](/style-barchart.png)
+
 
 To go further into barchart customization, you can pass [options](https://visjs.github.io/vis-timeline/docs/graph2d/#Configuration_Options) within the controller: 
 
@@ -61,9 +70,12 @@ Then styling of the lines is as follows:
   fill-opacity: 0;
 }
 .vis-group.person{
-  stroke: #99ff14;
+  stroke: #ff9914;
 }
 ```
+
+![](/style-line.png)
+
 ## Timeline styling
 
 Timeline styling follows the same rules as the other charts, elements get classes depending on their group, and you can use it to stlye them. They also get as a class the **nodeId** of the node they represent.
@@ -82,14 +94,17 @@ const timelinePlugin = new TimelinePlugin(ogma, container, {
 ```
 ```css
 .timeline-item.car {
-  stroke: #99ff14;
-  fill: #99ff14;
+  stroke: #ff9914;
+  fill: #ff9914;
 }
 .timeline-item.car.vis-selected {
   stroke: #CCff55;
   fill: #CCff55;
 }
 ```
+
+![](/style-timeline.png)
+
 
 To go further into customization, pass [options](https://visjs.github.io/vis-timeline/docs/timeline/#Configuration_Options) in the `timelineOptions` key.
 

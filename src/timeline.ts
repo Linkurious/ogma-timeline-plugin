@@ -5,8 +5,7 @@ import {
   Timeline as VTimeline,
   TimelineEventPropertiesResult,
 } from "vis-timeline";
-import { click, scaleChange, scales } from "./constants";
-import "vis-timeline/styles/vis-timeline-graph2d.css";
+import { click, scaleChange } from "./constants";
 import "./style.css";
 import { Id, Lookup, TimelineOptions } from "./types";
 import { Chart } from "./chart";
@@ -30,9 +29,6 @@ export const defaultTimelineOptions: TimelineOptions = {
 
 export class Timeline extends Chart {
   protected options: TimelineOptions;
-
-  // private ogma: Ogma<any, any>;
-  private isChangingRange: boolean;
   private itemToNodes: Lookup<Id[]>;
 
   /**
@@ -102,31 +98,11 @@ export class Timeline extends Chart {
   }
 
   protected onRangeChange() {
-    // prevent from infinite loop: setdata and window trigger this event
-    if (this.isChangingRange) return;
-
-    // this.isChangingRange = true;
-    const { start, end } = this.chart.getWindow();
-    const length = +end - +start;
-    // choose a scale adapted to zoom
-    const { scale } = scales.reduce(
-      (scale, candidate) => {
-        const bars = Math.round(length / candidate);
-        if (bars < scale.bars && bars > 10) {
-          return {
-            bars,
-            scale: candidate,
-          };
-        }
-        return scale;
-      },
-      { bars: Infinity, scale: Infinity }
-    );
+    const scale = this.getScale();
     if (scale === this.currentScale) {
-      this.isChangingRange = false;
+      return;
     }
     this.emit(scaleChange, { scale, tooZoomed: false });
-    this.isChangingRange = false;
   }
 
   highlightNodes(nodes: NodeList | Id[]) {
@@ -144,5 +120,10 @@ export class Timeline extends Chart {
     if (!x || !y || !item) return;
     const nodeIds = this.itemToNodes[item];
     this.emit(click, { nodeIds: nodeIds, evt });
+  }
+
+  setOptions(options: TimelineOptions) {
+    this.options = options;
+    this.chart.setOptions(options.timelineOptions);
   }
 }
