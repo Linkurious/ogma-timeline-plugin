@@ -32,6 +32,7 @@ describe("Barchart", async () => {
               data: { start: Date.now() },
             },
           ],
+          edges: [],
         },
       });
       const controller = createController({
@@ -60,6 +61,7 @@ describe("Barchart", async () => {
               data: { start: Date.now() },
             },
           ],
+          edges: [],
         },
       });
       const controller = createController({
@@ -99,13 +101,14 @@ describe("Barchart", async () => {
               data: { start: Date.now() + 2000, end: Date.now() + 3000 },
             },
           ],
+          edges: [],
         },
       });
       const controller = createController({
         timeBars: [0, Date.now()],
         filter: {
           enabled: true,
-          strategy: "outisde",
+          strategy: "outside",
           tolerance: "strict",
         },
       });
@@ -149,13 +152,14 @@ describe("Barchart", async () => {
               },
             },
           ],
+          edges: [],
         },
       });
       const controller = createController({
         timeBars: [new Date("1 1 1980"), new Date("1 1 2010")],
         filter: {
           enabled: true,
-          strategy: "outisde",
+          strategy: "outside",
           tolerance: "strict",
         },
       });
