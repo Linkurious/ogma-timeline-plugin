@@ -5,7 +5,7 @@ import { BrowserSession } from "./utils";
 describe("Options", async () => {
   const session = new BrowserSession();
   beforeAll(async () => {
-    await session.start(false);
+    await session.start();
   });
 
   afterAll(async () => {
@@ -132,4 +132,5 @@ describe("Options", async () => {
     });
     expect(filteredNodes2).toEqual(0);
   });
+
 });

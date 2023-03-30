@@ -9,8 +9,8 @@ import { DeepPartial, Options } from "../src/types";
 declare global {
   function createOgma(options: OgmaParameters): Ogma;
   function createController(options: DeepPartial<Options>): Controller;
-  function afterBarchartRedraw(controller: Controller): Promise<Controller>;
-  function afterTimelineRedraw(controller: Controller): Promise<Controller>;
+  function afterBarchartRedraw(): Promise<Controller>;
+  function afterTimelineRedraw(): Promise<Controller>;
   function wait(ms: number): Promise<void>;
   let ogma: Ogma;
   let controller: Controller;
