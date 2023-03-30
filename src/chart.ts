@@ -47,6 +47,8 @@ export abstract class Chart extends EventEmitter<Events> {
           .forEach((t) => {
             this.chart.setCustomTime(t.delta + +start, t.id);
           });
+      } else {
+        this.updateDeltas();
       }
       this.chartRange = range;
 
@@ -122,8 +124,17 @@ export abstract class Chart extends EventEmitter<Events> {
     options?: TimelineAnimationOptions
   ): void {
     this.chart.setWindow(minTime, maxTime, options);
+    this.updateDeltas();
   }
 
+  private updateDeltas() {
+    const { start } = this.chart.getWindow();
+    this.timebars
+      .filter(({ fixed }) => fixed)
+      .forEach((t) => {
+        t.delta = +this.chart.getCustomTime(t.id) - +start;
+      });
+  }
   public getWindow() {
     return this.chart.getWindow();
   }
