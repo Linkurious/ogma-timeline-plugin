@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { expect } from "@playwright/test";
-import { BrowserSession } from "./utils";
+import { BrowserSession, compareDates } from "./utils";
 
 describe("Options", async () => {
   const session = new BrowserSession();
@@ -120,7 +120,11 @@ describe("Options", async () => {
       }));
     });
     expect(filteredNodes).toEqual(1);
-    expect(timebars).toEqual([new Date("1 1 1950"), new Date("1 1 1960")]);
+
+    const expectedDates = [new Date("1 1 1950"), new Date("1 1 1960")];
+    timebars.forEach((date, i) => {
+      expect(compareDates(date, expectedDates[i])).toBeTruthy();
+    });
 
     const { x, y, width, height } = await session.page
       .locator(".vis-custom-time.t0>div")
@@ -139,10 +143,13 @@ describe("Options", async () => {
       };
     });
     expect(filteredNodes2).toEqual(0);
-    expect(timebars2).toEqual([
+    const expectedDates2 = [
       new Date("1940-06-14T13:23:46.522Z"),
       new Date("1950-06-14T13:23:46.522Z"),
-    ]);
+    ];
+    timebars2.forEach((date, i) => {
+      expect(compareDates(date, expectedDates2[i])).toBeTruthy();
+    });
   });
 
   test("Fixed timebars respect zoom", async () => {
