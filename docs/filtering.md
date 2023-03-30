@@ -1,6 +1,6 @@
 # Filtering
 
-Please refer to [Getting started](#filter-nodes-depending-on-time) section to learn how to link timeline filtering with Ogma `addNodeFilter`. 
+Please refer to [Getting started](/#filter-nodes-depending-on-time) section to learn how to link timeline filtering with Ogma `addNodeFilter`. 
 
 When user drags timebars, the plugin updates the list of filtered `NodeId` depending on the passed filtering options.
 ```ts

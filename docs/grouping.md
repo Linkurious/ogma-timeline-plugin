@@ -55,7 +55,7 @@ you can do that with `itemGenerator` function:
 
 
 Now with both `itemGenerator` and `groupIdFunction`, your timeline shows one row for each node type and proper labels.
-Items within a group will have a class corresponding to the `groupId` return by `groupIdFunction`. You can use it to style your items. See [styling](/styling)
+Items within a group will have a class corresponding to the `groupId` return by `groupIdFunction`. You can use it to style your items. See [styling](./styling.md)
 
 ## Result
 ![Result](/style-grouping-timeline.png)
