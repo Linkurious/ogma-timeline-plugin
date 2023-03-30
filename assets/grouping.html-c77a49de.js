@@ -1,1 +1,0 @@
-const e=JSON.parse('{"key":"v-58aa9146","path":"/grouping.html","title":"Grouping","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1677518499000,"contributors":[{"name":"Leo Nicolle","email":"leo@linkurio.us","commits":1}]},"filePathRelative":"grouping.md"}');export{e as data};
