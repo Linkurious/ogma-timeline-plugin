@@ -89,7 +89,7 @@ describe("Options", async () => {
   });
 
   test("should allow fixed timebars", async () => {
-    const filteredNodes = await session.page.evaluate(() => {
+    const { filteredNodes, timebars } = await session.page.evaluate(() => {
       createOgma({
         graph: {
           nodes: [
@@ -103,8 +103,8 @@ describe("Options", async () => {
       });
       const controller = createController({
         timeBars: [
-          { fixed: true, date: new Date("1 1 1960") },
           { fixed: true, date: new Date("1 1 1950") },
+          { fixed: true, date: new Date("1 1 1960") },
         ],
         start: new Date("1 1 1940"),
         end: new Date("1 1 1970"),
@@ -114,9 +114,14 @@ describe("Options", async () => {
           enabled: true,
         },
       });
-      return afterTimelineRedraw().then(() => controller.filteredNodes.size);
+      return afterTimelineRedraw().then(() => ({
+        filteredNodes: controller.filteredNodes.size,
+        timebars: controller.getTimebars().map(({ date }) => date),
+      }));
     });
     expect(filteredNodes).toEqual(1);
+    expect(timebars).toEqual([new Date("1 1 1950"), new Date("1 1 1960")]);
+
     const { x, y, width, height } = await session.page
       .locator(".vis-custom-time.t0>div")
       .evaluate((e) => e.getBoundingClientRect());
@@ -127,9 +132,59 @@ describe("Options", async () => {
     await session.page.mouse.down({ button: "left" });
     await session.page.mouse.move(x2, y2, { steps: 5 });
     await session.page.mouse.up({ button: "left" });
-    const filteredNodes2 = await session.page.evaluate(() => {
-      return controller.filteredNodes.size;
+    const { filteredNodes2, timebars2 } = await session.page.evaluate(() => {
+      return {
+        filteredNodes2: controller.filteredNodes.size,
+        timebars2: controller.getTimebars().map(({ date }) => date),
+      };
     });
     expect(filteredNodes2).toEqual(0);
+    expect(timebars2).toEqual([
+      new Date("1940-06-14T13:23:46.522Z"),
+      new Date("1950-06-14T13:23:46.522Z"),
+    ]);
+  });
+
+  test("Fixed timebars respect zoom", async () => {
+    const dates = await session.page.evaluate(() => {
+      createOgma({
+        graph: {
+          nodes: [
+            {
+              id: 1,
+              data: { start: new Date("1 1 1955") },
+            },
+          ],
+          edges: [],
+        },
+      });
+      const controller = createController({
+        timeBars: [
+          { fixed: true, date: new Date("1 1 1950") },
+          { fixed: true, date: new Date("1 1 1960") },
+        ],
+        start: new Date("1 1 1940"),
+        end: new Date("1 1 1970"),
+      });
+      return afterTimelineRedraw().then(() =>
+        controller.getTimebars().map(({ date }) => date)
+      );
+    });
+    expect(dates).toEqual([new Date("1 1 1950"), new Date("1 1 1960")]);
+    const { x, y, width, height } = await session.page
+      .locator(".vis-custom-time.t0>div")
+      .evaluate((e) => e.getBoundingClientRect());
+    await session.page.mouse.move(x + 2 * width, y + height / 2);
+    await session.page.waitForTimeout(1000);
+    await session.page.mouse.wheel(0, 200);
+    await session.page.waitForTimeout(1000);
+    const { filteredNodes2, timebars2 } = await session.page.evaluate(() => {
+      return {
+        filteredNodes2: controller.filteredNodes.size,
+        timebars2: controller.getTimebars().map(({ date }) => date),
+      };
+    });
+    expect(filteredNodes2).toEqual(1);
+    expect(timebars2).toEqual([new Date("1 1 1950"), new Date("1 1 1960")]);
   });
 });
