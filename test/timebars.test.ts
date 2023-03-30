@@ -132,5 +132,4 @@ describe("Options", async () => {
     });
     expect(filteredNodes2).toEqual(0);
   });
-
 });
