@@ -122,7 +122,8 @@ export class Timeline extends Chart {
     this.emit(click, { nodeIds: nodeIds, evt });
   }
 
-  setOptions(options: TimelineOptions){
+  setOptions(options: TimelineOptions) {
     this.options = options;
+    this.chart.setOptions(options.timelineOptions);
   }
 }
