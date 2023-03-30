@@ -3,8 +3,8 @@ import EventEmitter from "eventemitter3";
 import throttle from "lodash.throttle";
 import merge from "lodash.merge";
 
-import { scaleChange, timechange, timechanged } from "./constants";
-import { getSelector } from "./barFilter";
+import { rangechange, scaleChange, timechange, timechanged } from "./constants";
+import { getSelector } from "./selector";
 import { Timeline, defaultTimelineOptions } from "./timeline";
 import { Barchart, defaultBarchartOptions } from "./barchart";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
@@ -14,8 +14,10 @@ import {
   DeepPartial,
   Id,
   Options,
+  TimebarOptions,
   TimelineMode,
 } from "./types";
+import { TimelineAnimationOptions } from "vis-timeline";
 
 export const defaultOptions: Partial<Options> = {
   startDatePath: "start",
@@ -30,13 +32,17 @@ export const defaultOptions: Partial<Options> = {
   barchart: defaultBarchartOptions,
   timeline: defaultTimelineOptions,
 };
-export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
+export class Controller<
+  ND = unknown,
+  ED = unknown
+> extends EventEmitter<ControlerEvents> {
   private mode: TimelineMode;
   public timeline: Timeline;
   public nodes: NodeList;
   public barchart: Barchart;
   public filteredNodes: Set<Id>;
   private options: Options;
+  private container: HTMLDivElement;
   private starts: number[];
   private ends: number[];
   private ids: NodeId[];
@@ -55,10 +61,12 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
     this.ends = [];
     this.ids = [];
     const timelineContainer = document.createElement("div");
+    timelineContainer.classList.add("timeline-container");
     const barchartContainer = document.createElement("div");
+    barchartContainer.classList.add("barchart-container");
     container.appendChild(timelineContainer);
     container.appendChild(barchartContainer);
-
+    this.container = container;
     const timeline = new Timeline(timelineContainer, this.options.timeline);
     const barchart = new Barchart(barchartContainer, this.options.barchart);
     this.timeline = timeline;
@@ -68,23 +76,12 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
     //switch from barchart to timeline on zoom
     this.barchart.on(scaleChange, ({ tooZoomed }) => {
       if (!tooZoomed || !this.options.switchOnZoom) return;
-      const { start, end } = this.barchart.getWindow();
-      this.timeline.setWindow(+start, +end);
-      this.timeline.setTimebarsDates(this.barchart.getTimebarsDates());
       this.showTimeline();
     });
     //switch from timeline to barchart on zoom
     this.timeline.on(scaleChange, ({ scale }) => {
       if (barchart.isTooZoomed(scale) || !this.options.switchOnZoom) return;
-      const { start, end } = this.timeline.getWindow();
-      this.barchart.setWindow(+start, +end);
-      this.barchart.setTimebarsDates(this.timeline.getTimebarsDates());
       this.showBarchart();
-    });
-
-    this.options.timeBars.sort().forEach((timeBar) => {
-      this.timeline.addTimeBar(+timeBar);
-      this.barchart.addTimeBar(+timeBar);
     });
 
     // update the list of filtered nodes
@@ -92,17 +89,45 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
     this.barchart.on(timechange, () => {
       throttled();
     });
-    this.barchart.on(timechanged, () => {
+    this.timeline.on(timechange, () => {
       throttled();
     });
-
-    this.timeline.on(timechange, () => {
+    this.barchart.on(timechanged, () => {
       throttled();
     });
     this.timeline.on(timechanged, () => {
       throttled();
     });
-    this.refresh(ogma.getNodes());
+    this.barchart.on(rangechange, () => {
+      throttled();
+    });
+    this.timeline.on(rangechange, () => {
+      throttled();
+    });
+    const nodes = ogma.getNodes();
+
+    this.options.timeBars
+      .sort(
+        (a, b) =>
+          +((a as { date: Date }).date || a) - +((b as { date: Date }) || b)
+      )
+      .forEach((timeBar) => {
+        this.timeline.addTimeBar(timeBar);
+        this.barchart.addTimeBar(timeBar);
+      });
+
+    this.refresh(nodes);
+    this.setWindow(
+      this.options.start ||
+        this.starts.reduce((min, s) => Math.min(min, s), Infinity),
+      this.options.end ||
+        this.starts.reduce((max, s) => Math.max(max, s), -Infinity),
+      { animation: false }
+    );
+
+    ogma.events.on("destroy", () => {
+      this.destroy();
+    });
   }
 
   refresh(nodes: NodeList<ND, ED>) {
@@ -112,48 +137,76 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
     this.ends = nodes.getData(this.options.endDatePath);
     this.timeline.refresh(this.ids, this.starts, this.ends);
     this.barchart.refresh(this.ids, this.starts, this.ends);
+    if (!this.options.filter.enabled) {
+      this.filteredNodes.clear();
+      for (let i = 0; i < this.ids.length; i++)
+        this.filteredNodes.add(this.ids[i]);
+    }
     this.onTimeChange();
   }
 
   showTimeline() {
+    const { start, end } = this.barchart.getWindow();
+    this.timeline.chart.setWindow(+start, +end, { animation: false });
+    this.timeline.setTimebars(this.barchart.getTimebars());
     this.barchart.container.style.display = "none";
     this.timeline.container.style.display = "";
     this.mode = "timeline";
+    this.timeline.visible = true;
+    this.barchart.visible = false;
   }
 
   showBarchart() {
+    const { start, end } = this.timeline.getWindow();
+    this.barchart.chart.setWindow(+start, +end, { animation: false });
+    this.barchart.setTimebars(this.timeline.getTimebars());
     this.barchart.container.style.display = "";
     this.timeline.container.style.display = "none";
     this.mode = "barchart";
+    this.timeline.visible = false;
+    this.barchart.visible = true;
   }
 
-  addTimeBar(time: number): void {
-    this.timeline.addTimeBar(time);
-    this.barchart.addTimeBar(time);
+  addTimeBar(timebar: TimebarOptions): void {
+    this.timeline.addTimeBar(timebar);
+    this.barchart.addTimeBar(timebar);
   }
   removeTimeBar(index: number) {
     this.timeline.removeTimeBar(index);
     this.barchart.removeTimeBar(index);
   }
 
-  getTimebarsDates(): Date[] {
+  getTimebars() {
     return this.mode === "timeline"
-      ? this.timeline.getTimebarsDates()
-      : this.barchart.getTimebarsDates();
+      ? this.timeline.getTimebars()
+      : this.barchart.getTimebars();
   }
-  setTimebarsDates(dates: Date[]) {
-    this.timeline.setTimebarsDates(dates);
-    this.barchart.setTimebarsDates(dates);
+  setTimebars(timebars: TimebarOptions[]) {
+    this.timeline.setTimebars(timebars);
+    this.barchart.setTimebars(timebars);
+  }
+
+  setWindow(
+    start: number | Date,
+    end: number | Date,
+    options?: TimelineAnimationOptions
+  ) {
+    if (this.mode === "timeline") {
+      this.timeline.setWindow(start, end, options);
+    } else {
+      this.barchart.setWindow(start, end, options);
+    }
+    this.onTimeChange();
   }
 
   onTimeChange() {
     if (!this.options.filter.enabled) return this.emit(timechange);
     const times = (
       this.mode === "timeline"
-        ? this.timeline.getTimebarsDates()
-        : this.barchart.getTimebarsDates()
+        ? this.timeline.getTimebars()
+        : this.barchart.getTimebars()
     )
-      .map((d) => +d)
+      .map(({ date }) => +date)
       .sort((a, b) => a - b);
     const selector = getSelector(
       times,
@@ -167,5 +220,29 @@ export class Controller<ND, ED> extends EventEmitter<ControlerEvents> {
       }
     }
     return this.emit(timechange);
+  }
+
+  setOptions(options: DeepPartial<Options>) {
+    const mode = this.mode;
+    this.options = merge(this.options, options) as Options;
+    this.timeline.setOptions(this.options.timeline);
+    this.barchart.setOptions(this.options.barchart);
+    this.refresh(this.nodes);
+    const wd =
+      this.mode === "timeline"
+        ? this.timeline.getWindow()
+        : this.barchart.getWindow();
+    this.setWindow(this.options.start || wd.start, this.options.end || wd.end, {
+      animation: false,
+    });
+    if (mode === "timeline") this.showTimeline();
+    else this.showBarchart();
+  }
+
+  destroy() {
+    this.timeline.destroy();
+    this.barchart.destroy();
+    [...this.container.children].forEach((c) => c.remove());
+    this.removeAllListeners();
   }
 }

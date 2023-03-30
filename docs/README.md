@@ -13,16 +13,16 @@ npm create vite@latest
 cd my-ogma-app
 ```
 
-### Install Ogma and Ogma-plugin-timeline
+### Install Ogma and Ogma-timeline-plugin
 ```bash
-npm i @linkurious/ogma @linkurious/ogma-plugin-timeline
+npm i @linkurious/ogma @linkurious/ogma-timeline-plugin
 ```
 
-## Use Ogma-plugin-timeline in your App
+## Use Ogma-timeline-plugin in your App
 
 ```ts
 import Ogma from "@linkurious/ogma";
-import {Controller as TimelinePlugin } from "@linkurious/ogma-plugin-timeline";
+import {Controller as TimelinePlugin } from "@linkurious/ogma-timeline-plugin";
 
 const ogma = new Ogma({
   container: 'graph-container'
