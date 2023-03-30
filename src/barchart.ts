@@ -4,6 +4,7 @@ import {
   Graph2d as VGraph2d,
   TimelineEventPropertiesResult,
   DataGroup,
+  TimelineOptions,
 } from "vis-timeline";
 import { click, rangechanged, scaleChange, scales } from "./constants";
 import {
@@ -247,5 +248,10 @@ export class Barchart extends Chart {
 
   isTooZoomed(scale: number) {
     return !this.itemsByScale[scale] || this.itemsByScale[scale].tooZoomed;
+  }
+
+  setOptions(options: BarchartOptions) {
+    this.options = options;
+    this.chart.setOptions(options.graph2dOptions as unknown as TimelineOptions);
   }
 }

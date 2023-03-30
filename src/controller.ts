@@ -137,7 +137,6 @@ export class Controller<
     this.ends = nodes.getData(this.options.endDatePath);
     this.timeline.refresh(this.ids, this.starts, this.ends);
     this.barchart.refresh(this.ids, this.starts, this.ends);
-    console.log("REFRESH", this.options);
     if (!this.options.filter.enabled) {
       this.filteredNodes.clear();
       for (let i = 0; i < this.ids.length; i++)
@@ -221,6 +220,23 @@ export class Controller<
       }
     }
     return this.emit(timechange);
+  }
+
+  setOptions(options: DeepPartial<Options>) {
+    const mode = this.mode;
+    this.options = merge(this.options, options) as Options;
+    this.timeline.setOptions(this.options.timeline);
+    this.barchart.setOptions(this.options.barchart);
+    this.refresh(this.nodes);
+    const wd =
+      this.mode === "timeline"
+        ? this.timeline.getWindow()
+        : this.barchart.getWindow();
+    this.setWindow(this.options.start || wd.start, this.options.end || wd.end, {
+      animation: false,
+    });
+    if (mode === "timeline") this.showTimeline();
+    else this.showBarchart();
   }
 
   destroy() {
