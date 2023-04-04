@@ -17,6 +17,7 @@ import {
   timechange,
   timechanged,
   rangechange,
+  select,
 } from "./constants";
 export type FilterStrategy = "before" | "after" | "between" | "outside";
 export type FilterTolerance = "strict" | "loose";
@@ -104,6 +105,10 @@ export type ClickEvt = {
   nodeIds: Id[];
   evt: TimelineEventPropertiesResult;
 };
+export type SelectEvt = {
+  nodeIds: Id[];
+  evt: MouseEvent;
+};
 export type Events = {
   [scaleChange]: (evt: ScaleChangeEvt) => void;
   [click]: (evt: ClickEvt) => void;
@@ -112,6 +117,7 @@ export type Events = {
   [timechange]: () => void;
   [timechanged]: () => void;
   [redraw]: () => void;
+  [select]: (evt: SelectEvt) => void;
 };
 
 export type ControlerEvents = {

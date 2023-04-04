@@ -5,7 +5,7 @@ import {
   Timeline as VTimeline,
   TimelineEventPropertiesResult,
 } from "vis-timeline";
-import { click, scaleChange } from "./constants";
+import { click, scaleChange, select } from "./constants";
 import "./style.css";
 import { Id, Lookup, TimelineOptions } from "./types";
 import { Chart } from "./chart";
@@ -51,7 +51,7 @@ export class Timeline extends Chart {
     this.chart.on("click", (e) => {
       this.onBarClick(e);
     });
-    super.registerEvents();
+    this.registerEvents();
   }
 
   public refresh(ids: NodeId[], starts: number[], ends: number[]): void {
@@ -125,5 +125,19 @@ export class Timeline extends Chart {
   setOptions(options: TimelineOptions) {
     this.options = options;
     this.chart.setOptions(options.timelineOptions);
+  }
+
+  protected registerEvents(): void {
+    super.registerEvents();
+    this.chart.on(select, ({ event, items }) => {
+      const nodeIds = (items as string[]).reduce((acc, id) => {
+        acc.push(...this.itemToNodes[id]);
+        return acc;
+      }, [] as Id[]);
+      this.emit(select, {
+        evt: event as MouseEvent,
+        nodeIds,
+      });
+    });
   }
 }

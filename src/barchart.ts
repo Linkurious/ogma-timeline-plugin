@@ -254,4 +254,47 @@ export class Barchart extends Chart {
     this.options = options;
     this.chart.setOptions(options.graph2dOptions as unknown as TimelineOptions);
   }
+  protected registerEvents(): void {
+    super.registerEvents();
+    this.chart.on('click', (evt) => {
+      console.log('click')
+    });
+    this.chart.on('select', (evt) => {
+      console.log('select')
+    });
+  }
 }
+
+// _onBarClicked = ({ x, y }: { x: number, y: number }) => {
+//   if (!x || !y || this.isSelecting) return;
+//   this.isSelecting = true;
+//   this.ogma.clearSelection();
+//   const svg: SVGAElement| null = this.container.querySelector('.vis-line-graph>svg');
+//   if(!svg) return;
+//   const groups = [...svg.children];
+//   groups.forEach(g => g.classList.remove('selected'));
+//   const offset = +svg.style.left.slice(0, -2);
+//   const nodeIdsToSelect = (groups
+//     .map((g, i) => {
+//       const groupX = +(g.getAttribute('x') as string) + offset;
+//       const groupW = +(g.getAttribute('width') as string);
+//       return groupX < x && groupX + groupW > x
+//         ? {
+//             group: g,
+//             nodeIds: this.groupToNodes[i]
+//           }
+//         : null;
+//     })
+//     .filter(e => e)as ({ nodeIds: Id[], group: Element}[]))
+//     .reduce((nodes, { group, nodeIds }) => {
+//       nodes.push(...nodeIds);
+//       group.classList.add('selected');
+//       return nodes;
+//     }, [] as Id[]);
+
+//   const nodesToSelect = this.ogma.getNodes(nodeIdsToSelect).dedupe();
+//   nodesToSelect.setSelected(true);
+//   this.ogma.view
+//     .moveToBounds(nodesToSelect.getBoundingBox())
+//     .then(() => (this.isSelecting = false));
+// };

@@ -38,6 +38,7 @@ const ogma = new Ogma({
     edges: [],
   },
 });
+ogma.layouts.force();
 const controller = new Controller(ogma, document.getElementById("timeline"), {
   timeBars: [new Date("1 1 1980"), new Date("1 1 2010")],
   filter: {
@@ -46,4 +47,8 @@ const controller = new Controller(ogma, document.getElementById("timeline"), {
     tolerance: "strict",
   },
 });
+
+controller.timeline.on("select", ({ nodeIds }) =>
+  ogma.getNodes(nodeIds).setSelected(true)
+);
 window.controller = controller;
