@@ -1,4 +1,4 @@
-import { NodeId, NodeList } from "@linkurious/ogma";
+import { Edge, EdgeList, NodeId, NodeList } from "@linkurious/ogma";
 import {
   DataItem,
   Graph2d as VGraph2d,
@@ -24,9 +24,12 @@ export const defaultBarchartOptions: BarchartOptions = {
     height: "100%",
     barChart: { sideBySide: true },
   },
-  groupIdFunction: () => `group-0`,
-  groupContent: (groupId: string) => groupId,
-  itemGenerator: () => ({}),
+  nodeGroupIdFunction: () => `node-group`,
+  edgeGroupIdFunction: () => `edge-group`,
+  nodeGroupContent: (groupId: string) => groupId,
+  edgeGroupContent: (groupId: string) => groupId,
+  nodeItemGenerator: () => ({}),
+  edgeItemGenerator: () => ({}),
 };
 
 export class Barchart extends Chart {
