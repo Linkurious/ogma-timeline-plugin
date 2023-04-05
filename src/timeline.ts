@@ -1,4 +1,4 @@
-import { NodeId, NodeList } from "@linkurious/ogma";
+import Ogma, { NodeId, NodeList } from "@linkurious/ogma";
 import {
   DataGroup,
   DataItem,
@@ -36,8 +36,8 @@ export class Timeline extends Chart {
    * @param {Ogma} ogma
    * @param {TimelineOptions} options
    */
-  constructor(container: HTMLDivElement, options: TimelineOptions) {
-    super(container);
+  constructor(container: HTMLDivElement, ogma: Ogma, options: TimelineOptions) {
+    super(container, ogma);
     this.options = options;
     const timeline = new VTimeline(
       container,

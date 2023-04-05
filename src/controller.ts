@@ -1,4 +1,4 @@
-import Ogma, { NodeList, NodeId } from "@linkurious/ogma";
+import Ogma, { NodeList, NodeId, EdgeList } from "@linkurious/ogma";
 import EventEmitter from "eventemitter3";
 import throttle from "lodash.throttle";
 import merge from "lodash.merge";
@@ -20,8 +20,10 @@ import {
 import { TimelineAnimationOptions } from "vis-timeline";
 
 export const defaultOptions: Partial<Options> = {
-  startDatePath: "start",
-  endDatePath: "end",
+  nodeStartPath: "start",
+  nodeEndPath: "end",
+  edgeStartPath: "start",
+  edgeEndPath: "end",
   filter: {
     enabled: true,
     strategy: "between",
@@ -39,13 +41,15 @@ export class Controller<
   private mode: TimelineMode;
   public timeline: Timeline;
   public nodes: NodeList;
+  public edges: EdgeList;
   public barchart: Barchart;
   public filteredNodes: Set<Id>;
   private options: Options;
   private container: HTMLDivElement;
-  private starts: number[];
-  private ends: number[];
-  private ids: NodeId[];
+  private nodeStarts: number[];
+  private nodeEnds: number[];
+  private edgeStarts: number[];
+  private edgeEnds: number[];
 
   constructor(
     ogma: Ogma<ND, ED>,
@@ -57,9 +61,11 @@ export class Controller<
     this.options = merge(defaultOptions, options) as Options;
     this.filteredNodes = new Set();
     this.nodes = ogma.createNodeList();
-    this.starts = [];
-    this.ends = [];
-    this.ids = [];
+    this.edges = ogma.createEdgeList();
+    this.nodeStarts = [];
+    this.nodeEnds = [];
+    this.edgeStarts = [];
+    this.edgeEnds = [];
     const timelineContainer = document.createElement("div");
     timelineContainer.classList.add("timeline-container");
     const barchartContainer = document.createElement("div");
@@ -67,8 +73,16 @@ export class Controller<
     container.appendChild(timelineContainer);
     container.appendChild(barchartContainer);
     this.container = container;
-    const timeline = new Timeline(timelineContainer, this.options.timeline);
-    const barchart = new Barchart(barchartContainer, this.options.barchart);
+    const timeline = new Timeline(
+      timelineContainer,
+      ogma,
+      this.options.timeline
+    );
+    const barchart = new Barchart(
+      barchartContainer,
+      ogma,
+      this.options.barchart
+    );
     this.timeline = timeline;
     this.barchart = barchart;
 
@@ -105,6 +119,7 @@ export class Controller<
       throttled();
     });
     const nodes = ogma.getNodes();
+    const edges = ogma.getEdges();
 
     this.options.timeBars
       .sort(
@@ -116,12 +131,18 @@ export class Controller<
         this.barchart.addTimeBar(timeBar);
       });
 
-    this.refresh(nodes);
+    this.refresh(nodes, edges);
     this.setWindow(
       this.options.start ||
-        this.starts.reduce((min, s) => Math.min(min, s), Infinity),
+        Math.min(
+          this.nodeStarts.reduce((min, s) => Math.min(min, s), Infinity),
+          this.edgeStarts.reduce((min, s) => Math.min(min, s), Infinity)
+        ),
       this.options.end ||
-        this.starts.reduce((max, s) => Math.max(max, s), -Infinity),
+        Math.max(
+          this.nodeStarts.reduce((max, s) => Math.max(max, s), -Infinity),
+          this.edgeStarts.reduce((max, s) => Math.max(max, s), -Infinity)
+        ),
       { animation: false }
     );
 
@@ -130,17 +151,27 @@ export class Controller<
     });
   }
 
-  refresh(nodes: NodeList<ND, ED>) {
+  refresh(nodes: NodeList<ND, ED>, edges: EdgeList<ED, ND>) {
     this.nodes = nodes;
-    this.ids = nodes.getId();
-    this.starts = nodes.getData(this.options.startDatePath);
-    this.ends = nodes.getData(this.options.endDatePath);
-    this.timeline.refresh(this.ids, this.starts, this.ends);
-    this.barchart.refresh(this.ids, this.starts, this.ends);
+    this.edges = edges;
+    this.nodeStarts = nodes.getData(this.options.nodeStartPath);
+    this.nodeEnds = nodes.getData(this.options.nodeEndPath);
+    this.edgeStarts = edges.getData(this.options.edgeStartPath);
+    this.edgeEnds = edges.getData(this.options.edgeEndPath);
+    this.timeline.refresh(this.nodes.getId(), this.nodeStarts, this.nodeEnds);
+    this.barchart.refresh(
+      nodes,
+      edges,
+      this.nodeStarts,
+      this.nodeEnds,
+      this.edgeStarts,
+      this.edgeEnds
+    );
     if (!this.options.filter.enabled) {
       this.filteredNodes.clear();
-      for (let i = 0; i < this.ids.length; i++)
-        this.filteredNodes.add(this.ids[i]);
+      // TODO
+      // for (let i = 0; i < this.ids.length; i++)
+      // this.filteredNodes.add(this.ids[i]);
     }
     this.onTimeChange();
   }
@@ -214,11 +245,13 @@ export class Controller<
       this.options.filter.tolerance
     );
     this.filteredNodes.clear();
-    for (let i = 0; i < this.ids.length; i++) {
-      if (selector(this.starts[i], this.ends[i])) {
-        this.filteredNodes.add(this.ids[i]);
-      }
-    }
+    // TODO
+    // for (let i = 0; i < this.ids.length; i++) {
+    //   // TODO node start node end edge start edge end
+    //   if (selector(this.nodeStarts[i], this.nodeEnds[i])) {
+    //     this.filteredNodes.add(this.ids[i]);
+    //   }
+    // }
     return this.emit(timechange);
   }
 
@@ -227,7 +260,7 @@ export class Controller<
     this.options = merge(this.options, options) as Options;
     this.timeline.setOptions(this.options.timeline);
     this.barchart.setOptions(this.options.barchart);
-    this.refresh(this.nodes);
+    this.refresh(this.nodes, this.edges);
     const wd =
       this.mode === "timeline"
         ? this.timeline.getWindow()

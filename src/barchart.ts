@@ -1,4 +1,12 @@
-import { Edge, EdgeList, NodeId, NodeList } from "@linkurious/ogma";
+import Ogma, {
+  Edge,
+  EdgeId,
+  EdgeList,
+  Item,
+  ItemList,
+  NodeId,
+  NodeList,
+} from "@linkurious/ogma";
 import {
   DataItem,
   Graph2d as VGraph2d,
@@ -13,6 +21,9 @@ import {
   Id,
   Lookup,
   ItemByScale,
+  IdFunction,
+  GroupFunction,
+  ItemGenerator,
 } from "./types";
 import { Chart } from "./chart";
 import { DataSet } from "vis-data";
@@ -33,10 +44,11 @@ export const defaultBarchartOptions: BarchartOptions = {
 };
 
 export class Barchart extends Chart {
-  private itemsByScale: Lookup<ItemByScale>;
-  private nodeToItem: Lookup<number>;
+  private nodeItemsByScale: Lookup<ItemByScale>;
+  private edgeItemsByScale: Lookup<ItemByScale>;
+  private currentNodeData: ItemByScale;
+  private currentEdgeData: ItemByScale;
   private options: BarchartOptions;
-  private itemToNodes: Lookup<Id[]>;
   private rects: SVGRectElement[];
   private groupDataset: DataSet<DataGroup>;
 
@@ -45,8 +57,8 @@ export class Barchart extends Chart {
    * @param {Ogma} ogma
    * @param {TimelineOptions} options
    */
-  constructor(container: HTMLDivElement, options: BarchartOptions) {
-    super(container);
+  constructor(container: HTMLDivElement, ogma: Ogma, options: BarchartOptions) {
+    super(container, ogma);
     this.groupDataset = new DataSet<DataGroup>();
     const barchart = new VGraph2d(
       container,
@@ -56,9 +68,8 @@ export class Barchart extends Chart {
     );
     this.options = options;
     this.chart = barchart;
-    this.itemsByScale = {};
-    this.nodeToItem = {};
-    this.itemToNodes = {};
+    this.nodeItemsByScale = {};
+    this.edgeItemsByScale = {};
     this.isChangingRange = false;
     this.rects = [];
     this.chart.on("click", (e) => {
@@ -72,8 +83,22 @@ export class Barchart extends Chart {
     super.registerEvents();
   }
 
-  public refresh(ids: NodeId[], starts: number[], ends: number[]): void {
-    this.computeGroups(ids, starts, ends);
+  public refresh(
+    nodes: NodeList,
+    edges: EdgeList,
+    nodeStarts: number[],
+    nodeEnds: number[],
+    edgeStarts: number[],
+    edgeEnds: number[]
+  ): void {
+    this.computeGroups(
+      nodes,
+      edges,
+      nodeStarts,
+      nodeEnds,
+      edgeStarts,
+      edgeEnds
+    );
     this.onRangeChange();
   }
 
@@ -81,107 +106,30 @@ export class Barchart extends Chart {
    * Compute the groups depending on the chart zoom.
    * Above a certain zoom, switch to timeline mode
    */
-  computeGroups(ids: NodeId[], starts: number[], ends: number[]) {
-    const min = Math.min(
-      starts.reduce(
-        (min, start) => (isNaN(start) ? min : Math.min(min, start)),
-        Infinity
-      ),
-      ends.reduce(
-        (min, end) => (isNaN(end) ? min : Math.min(min, end)),
-        Infinity
-      )
+  computeGroups(
+    nodes: NodeList,
+    edges: EdgeList,
+    nodeStarts: number[],
+    nodeEnds: number[],
+    edgeStarts: number[],
+    edgeEnds: number[]
+  ) {
+    this.nodeItemsByScale = this._group(
+      nodes,
+      this.options.nodeGroupIdFunction as IdFunction<Item>,
+      this.options.nodeGroupContent as unknown as GroupFunction<ItemList>,
+      this.options.nodeItemGenerator as ItemGenerator<BarChartItem, ItemList>,
+      nodeStarts,
+      nodeEnds
     );
-    let tooZoomed = false;
-    // iterate from big to small zoom and compute bars
-    const groupIdToIndex = ids.reduce((groups, id, i) => {
-      const groupid = this.options.groupIdFunction(id);
-      if (!groups[groupid]) {
-        groups[groupid] = [];
-      }
-      groups[groupid].push(i);
-      return groups;
-    }, {} as Record<string, number[]>);
-
-    const groups: DataGroup[] = Object.entries(groupIdToIndex).map(
-      ([groupid, indexes]) => ({
-        id: groupid,
-        content: this.options.groupContent(groupid, indexes),
-        className: `vis-group ${groupid}`,
-        options: {},
-      })
+    this.edgeItemsByScale = this._group(
+      edges,
+      this.options.edgeGroupIdFunction as IdFunction<Item>,
+      this.options.edgeGroupContent as unknown as GroupFunction<ItemList>,
+      this.options.edgeItemGenerator as ItemGenerator<BarChartItem, ItemList>,
+      edgeStarts,
+      edgeEnds
     );
-    this.itemsByScale = scales
-      .slice()
-      .reverse()
-      .reduce((itemsByScale, scale, i, scales) => {
-        // if we reached a zoom where there are not too many events,
-        // just display timeline
-        const gpPrev = itemsByScale[scales[i - 1]];
-        if (tooZoomed) {
-          itemsByScale[scale] = { ...gpPrev, tooZoomed: true };
-          return itemsByScale;
-        }
-        const itemsPerGroup: Record<
-          string,
-          Record<number, BarChartItem>
-        > = Object.keys(groupIdToIndex).reduce((acc, groupid) => {
-          acc[groupid] = {};
-          return acc;
-        }, {} as Record<string, Record<number, BarChartItem>>);
-        let itemToNodes: Lookup<Id[]> = {};
-        const nodeToItem: Lookup<number> = {};
-        const items: BarChartItem[] = [];
-        Object.entries(groupIdToIndex).forEach(([groupid, indexes]) => {
-          const itemsPerX = itemsPerGroup[groupid];
-          indexes.forEach((i) => {
-            const index = Math.floor((starts[i] - min) / scale);
-            const x = min + scale * index;
-            if (!itemsPerX[x]) {
-              itemsPerX[x] = {
-                id: i,
-                label: "",
-                group: groupid,
-                x,
-                y: 0,
-              };
-            }
-            // y is how many nodes there is within this group
-            itemsPerX[x].y += 1;
-          });
-        });
-        Object.values(itemsPerGroup).forEach((itemsPerX) => {
-          Object.values(itemsPerX).forEach((item) => {
-            items.push({
-              ...item,
-              ...this.options.itemGenerator(
-                groupIdToIndex[item.group].map((i) => ids[i])
-              ),
-            });
-          });
-        });
-
-        itemToNodes = Object.entries(itemToNodes)
-          .sort(([a], [b]) => +a - +b)
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          .reduce((itemToNodes, [_, nodes], i) => {
-            itemToNodes[i] = nodes;
-            nodes.forEach((n) => (nodeToItem[n] = i));
-            return itemToNodes;
-          }, {} as Lookup<Id[]>);
-
-        itemsByScale[scale] = {
-          items,
-          itemToNodes,
-          tooZoomed,
-          groups,
-          nodeToItem,
-        };
-        // tell the next iteration if it should be on timeline or barchart mode
-        tooZoomed =
-          tooZoomed || items.reduce((maxY, g) => Math.max(maxY, g.y), 0) < 5;
-        return itemsByScale;
-      }, {} as Lookup<ItemByScale>);
   }
 
   highlightNodes(nodes: NodeList | Id[]) {
@@ -233,38 +181,169 @@ export class Barchart extends Chart {
     }
     this.currentScale = scale;
     // get the data depending on zoom
-    const { items, nodeToItem, itemToNodes, groups, tooZoomed } =
-      this.itemsByScale[scale];
-    this.emit(scaleChange, { scale, tooZoomed });
-    this.nodeToItem = nodeToItem;
-    this.itemToNodes = itemToNodes;
-
+    const currentNodeData = this.nodeItemsByScale[scale];
+    const currentEdgeData = this.edgeItemsByScale[scale];
+    this.currentEdgeData = currentEdgeData;
+    this.currentNodeData = currentNodeData;
+    this.emit(scaleChange, { scale, tooZoomed: currentNodeData.tooZoomed });
     this.dataset.clear();
     this.groupDataset.clear();
-    this.groupDataset.add(groups);
-    this.dataset.add(items as unknown as DataItem[]);
+    this.groupDataset.add(currentNodeData.groups);
+    this.groupDataset.add(currentEdgeData.groups);
+
+    this.dataset.add(currentNodeData.items as unknown as DataItem[]);
+    this.dataset.add(currentEdgeData.items as unknown as DataItem[]);
+
     this.chart.redraw();
-    if (!tooZoomed) {
+    if (!currentNodeData.tooZoomed) {
       this.emit(rangechanged);
     }
   }
 
   isTooZoomed(scale: number) {
-    return !this.itemsByScale[scale] || this.itemsByScale[scale].tooZoomed;
+    const tooZoomedNodes = this.nodeItemsByScale[scale]
+      ? this.nodeItemsByScale[scale].tooZoomed
+      : false;
+    const tooZoomedEdges = this.nodeItemsByScale[scale]
+      ? this.nodeItemsByScale[scale].tooZoomed
+      : false;
+    return tooZoomedEdges || tooZoomedNodes;
   }
 
   setOptions(options: BarchartOptions) {
     this.options = options;
     this.chart.setOptions(options.graph2dOptions as unknown as TimelineOptions);
   }
+
   protected registerEvents(): void {
     super.registerEvents();
-    this.chart.on('click', (evt) => {
-      console.log('click')
+    this.chart.on("click", (evt) => {
+      console.log("click");
     });
-    this.chart.on('select', (evt) => {
-      console.log('select')
+    this.chart.on("select", (evt) => {
+      console.log("select");
     });
+  }
+
+  private _group(
+    elements: ItemList,
+    idFunction: IdFunction<Item>,
+    groupFunction: GroupFunction<ItemList>,
+    itemGenerator: ItemGenerator<BarChartItem, ItemList>,
+    starts: number[],
+    ends: number[]
+  ) {
+    const ids = elements.getId();
+    const isNode = elements.isNode;
+    const prefix = isNode ? "node" : "edge";
+    const min = Math.min(
+      starts.reduce(
+        (min, start) => (isNaN(start) ? min : Math.min(min, start)),
+        Infinity
+      ),
+      ends.reduce(
+        (min, end) => (isNaN(end) ? min : Math.min(min, end)),
+        Infinity
+      )
+    );
+    let tooZoomed = false;
+
+    const groupIdToElementsArray = ids.reduce((groups, id, i) => {
+      const groupid = `${prefix}-${idFunction(elements.get(i))}`;
+      if (!groups[groupid]) {
+        groups[groupid] = [];
+      }
+      groups[groupid].push(elements.get(i));
+      return groups;
+    }, {} as Record<string, Item[]>);
+    const groupIdToElement = Object.entries(groupIdToElementsArray).reduce(
+      (acc, [groupid, elements]) => {
+        acc[groupid] = isNode
+          ? this.ogma.getNodes(elements as unknown as NodeId[])
+          : this.ogma.getEdges(elements as unknown as NodeId[]);
+        return acc;
+      },
+      {} as Record<string, ItemList>
+    );
+
+    const groups: DataGroup[] = Object.entries(groupIdToElement).map(
+      ([groupid, elements]) => ({
+        id: groupid,
+        content: groupFunction(groupid, elements),
+        className: `vis-group ${groupid} ${prefix}`,
+        options: {},
+      })
+    );
+    return scales
+      .slice()
+      .reverse()
+      .reduce((itemsByScale, scale, i, scales) => {
+        // if we reached a zoom where there are not too many events,
+        // just display timeline
+        const gpPrev = itemsByScale[scales[i - 1]];
+        if (tooZoomed) {
+          itemsByScale[scale] = { ...gpPrev, tooZoomed: true };
+          return itemsByScale;
+        }
+        const itemsPerGroup: Record<
+          string,
+          Record<number, BarChartItem>
+        > = Object.keys(groupIdToElement).reduce((acc, groupid) => {
+          acc[groupid] = {};
+          return acc;
+        }, {} as Record<string, Record<number, BarChartItem>>);
+
+        let itemToElements: Lookup<ItemList> = {};
+        const elementToItem: Lookup<NodeId | EdgeId> = {};
+        const items: BarChartItem[] = [];
+        Object.entries(groupIdToElement).forEach(([groupid, elements]) => {
+          const itemsPerX = itemsPerGroup[groupid];
+          elements.forEach((element, i) => {
+            const index = Math.floor((starts[i] - min) / scale);
+            const x = min + scale * index;
+            if (!itemsPerX[x]) {
+              itemsPerX[x] = {
+                id: element.getId(),
+                label: "",
+                group: groupid,
+                x,
+                y: 0,
+              };
+            }
+            // y is how many nodes there is within this group
+            itemsPerX[x].y += 1;
+          });
+        });
+        Object.values(itemsPerGroup).forEach((itemsPerX) => {
+          Object.values(itemsPerX).forEach((item) => {
+            items.push({
+              ...item,
+              ...itemGenerator(groupIdToElement[item.group]),
+            });
+          });
+        });
+
+        itemToElements = Object.entries(itemToElements)
+          .sort(([a], [b]) => +a - +b)
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .reduce((itemToNodes, [_, nodes], i) => {
+            itemToElements[i] = nodes;
+            nodes.forEach((n) => (elementToItem[n.getId()] = i));
+            return itemToNodes;
+          }, {} as Lookup<NodeList>);
+
+        itemsByScale[scale] = {
+          items,
+          itemToElements,
+          tooZoomed,
+          groups,
+          elementToItem,
+        };
+        // tell the next iteration if it should be on timeline or barchart mode
+        tooZoomed =
+          tooZoomed || items.reduce((maxY, g) => Math.max(maxY, g.y), 0) < 5;
+        return itemsByScale;
+      }, {} as Lookup<ItemByScale>);
   }
 }
 

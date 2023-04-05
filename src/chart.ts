@@ -1,4 +1,4 @@
-import { NodeId } from "@linkurious/ogma";
+import Ogma, { EdgeList, NodeId } from "@linkurious/ogma";
 import EventEmitter from "eventemitter3";
 import { DataSet } from "vis-data";
 import { DataItem, TimelineAnimationOptions } from "vis-timeline";
@@ -20,11 +20,12 @@ export abstract class Chart extends EventEmitter<Events> {
   protected currentScale: number;
   protected timebars: Timebar[];
   protected isChangingRange: boolean;
+  protected ogma: Ogma;
   private chartRange: number;
   public visible: boolean;
   private destroyed: boolean;
 
-  constructor(container: HTMLDivElement) {
+  constructor(container: HTMLDivElement, ogma: Ogma) {
     super();
     this.dataset = new DataSet([]);
     this.container = container;
@@ -34,6 +35,7 @@ export abstract class Chart extends EventEmitter<Events> {
     this.visible = false;
     this.chartRange = 0;
     this.destroyed = false;
+    this.ogma = ogma;
   }
 
   protected registerEvents(): void {
@@ -143,9 +145,12 @@ export abstract class Chart extends EventEmitter<Events> {
     this.emit(rangechanged);
   }
   public abstract refresh(
-    ids: NodeId[],
-    starts: number[],
-    ends: number[]
+    nodes: NodeList,
+    edges: EdgeList,
+    nodeStarts: number[],
+    nodeEnds: number[],
+    edgeStarts: number[],
+    edgeEnds: number[]
   ): void;
 
   protected getScale(): number {

@@ -8,7 +8,7 @@ import {
   DataItem,
   IdType,
 } from "vis-timeline";
-import { Edge, Node, NodeList, EdgeList, NodeId } from "@linkurious/ogma";
+import { Edge, Node, NodeList, EdgeList, NodeId, ItemList, EdgeId } from "@linkurious/ogma";
 import {
   click,
   rangechanged,
@@ -27,9 +27,9 @@ export type FilterOptions = {
   strategy: FilterStrategy;
   tolerance: FilterTolerance;
 };
-type IdFunction<U> = (item: U) => string;
-type GroupFunction<U> = (groupId: string, items: U) => string;
-type ItemGenerator<T, U> = (elements: U) => Partial<T>;
+export type IdFunction<U> = (item: U) => string;
+export type GroupFunction<U> = (groupId: string, items: U) => string;
+export type ItemGenerator<T, U> = (elements: U) => Partial<T>;
 interface BaseOptions<T> {
   nodeGroupIdFunction: IdFunction<Node>;
   nodeGroupContent: GroupFunction<Node>;
@@ -62,8 +62,10 @@ export interface Options {
   barchart: BarchartOptions;
   timeBars: TimebarOptions[];
   filter: FilterOptions;
-  startDatePath: string;
-  endDatePath: string;
+  nodeStartPath: string;
+  nodeEndPath: string;
+  edgeStartPath: string;
+  edgeEndPath: string;
   switchOnZoom: boolean;
   start?: number | Date;
   end?: number | Date;
@@ -90,9 +92,9 @@ export type BarChartItem = {
 
 export type ItemByScale = {
   items: BarChartItem[];
-  itemToNodes: Lookup<Id[]>;
+  itemToElements: Lookup<ItemList>;
   groups: DataGroup[];
-  nodeToItem: Lookup<number>;
+  elementToItem: Lookup<NodeId | EdgeId>;
   tooZoomed: boolean;
 };
 export type TimelineMode = "barchart" | "timeline";
