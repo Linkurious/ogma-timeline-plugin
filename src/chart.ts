@@ -1,4 +1,4 @@
-import Ogma, { EdgeList, NodeId } from "@linkurious/ogma";
+import Ogma, { NodeList, EdgeList, Edge } from "@linkurious/ogma";
 import EventEmitter from "eventemitter3";
 import { DataSet } from "vis-data";
 import { DataItem, TimelineAnimationOptions } from "vis-timeline";
@@ -9,7 +9,27 @@ import {
   timechange,
   timechanged,
 } from "./constants";
-import { Events, Timebar, TimebarOptions, VChart } from "./types";
+import {
+  BaseOptions,
+  BarChartItem,
+  Events,
+  Timebar,
+  TimebarOptions,
+  VChart,
+} from "./types";
+
+export const defaultChartOptions: BaseOptions<
+  BarChartItem | DataItem,
+  NodeList | Node,
+  EdgeList | Edge
+> = {
+  nodeGroupIdFunction: () => `node-group`,
+  edgeGroupIdFunction: () => `edge-group`,
+  nodeGroupContent: (groupId: string) => groupId,
+  edgeGroupContent: (groupId: string) => groupId,
+  nodeItemGenerator: () => ({}),
+  edgeItemGenerator: () => ({}),
+};
 
 export abstract class Chart extends EventEmitter<Events> {
   public chart!: VChart;

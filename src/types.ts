@@ -8,7 +8,17 @@ import {
   DataItem,
   IdType,
 } from "vis-timeline";
-import { Edge, Node, NodeList, EdgeList, NodeId, ItemList, EdgeId } from "@linkurious/ogma";
+import {
+  Edge,
+  Node,
+  NodeList,
+  EdgeList,
+  NodeId,
+  ItemList,
+  EdgeId,
+  Item,
+  ItemId,
+} from "@linkurious/ogma";
 import {
   click,
   rangechanged,
@@ -29,14 +39,14 @@ export type FilterOptions = {
 };
 export type IdFunction<U> = (item: U) => string;
 export type GroupFunction<U> = (groupId: string, items: U) => string;
-export type ItemGenerator<T, U> = (elements: U) => Partial<T>;
-interface BaseOptions<T> {
+export type ItemGenerator<T, U> = (elements: U, groupId: string) => Partial<T>;
+export interface BaseOptions<T, U, V> {
   nodeGroupIdFunction: IdFunction<Node>;
   nodeGroupContent: GroupFunction<Node>;
-  nodeItemGenerator: ItemGenerator<T, NodeList>;
+  nodeItemGenerator: ItemGenerator<T, U>;
   edgeGroupIdFunction: IdFunction<Edge>;
   edgeGroupContent: GroupFunction<Edge>;
-  edgeItemGenerator: ItemGenerator<T, EdgeList>;
+  edgeItemGenerator: ItemGenerator<T, V>;
 }
 /**
  * @typedef {object} BarchartOptions
@@ -44,10 +54,11 @@ interface BaseOptions<T> {
  * @property {Function} groupIdFunction Similar to [Ogma addNodeGrouping](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeGrouping) groupIdFunction
  * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
  */
-export interface BarchartOptions extends BaseOptions<BarChartItem> {
+export interface BarchartOptions
+  extends BaseOptions<BarChartItem, NodeList, EdgeList> {
   graph2dOptions: Graph2dOptions;
 }
-export interface TimelineOptions extends BaseOptions<DataItem> {
+export interface TimelineOptions extends BaseOptions<DataItem, Node, Edge> {
   timelineOptions: VTimelineOptions;
 }
 
@@ -61,7 +72,8 @@ export interface Options {
   timeline: TimelineOptions;
   barchart: BarchartOptions;
   timeBars: TimebarOptions[];
-  filter: FilterOptions;
+  edgeFilter: FilterOptions;
+  nodeFilter: FilterOptions;
   nodeStartPath: string;
   nodeEndPath: string;
   edgeStartPath: string;
@@ -83,7 +95,7 @@ export type DeepPartial<T> = T extends object
   : T;
 
 export type BarChartItem = {
-  id: NodeId;
+  ids: ItemId[];
   group: string;
   label: string;
   x: number;
@@ -96,6 +108,14 @@ export type ItemByScale = {
   groups: DataGroup[];
   elementToItem: Lookup<NodeId | EdgeId>;
   tooZoomed: boolean;
+  maxY : number;
+};
+
+export type TimelineData = {
+  items: DataItem[];
+  groups: DataGroup[];
+  itemToElements: Lookup<Item>;
+  elementToItem: Lookup<number>;
 };
 export type TimelineMode = "barchart" | "timeline";
 

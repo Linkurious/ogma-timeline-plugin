@@ -24,7 +24,12 @@ export const defaultOptions: Partial<Options> = {
   nodeEndPath: "end",
   edgeStartPath: "start",
   edgeEndPath: "end",
-  filter: {
+  edgeFilter: {
+    enabled: true,
+    strategy: "between",
+    tolerance: "loose",
+  },
+  nodeFilter: {
     enabled: true,
     strategy: "between",
     tolerance: "loose",
@@ -44,6 +49,8 @@ export class Controller<
   public edges: EdgeList;
   public barchart: Barchart;
   public filteredNodes: Set<Id>;
+  public filteredEdges: Set<Id>;
+
   private options: Options;
   private container: HTMLDivElement;
   private nodeStarts: number[];
@@ -60,6 +67,7 @@ export class Controller<
     this.mode = "barchart";
     this.options = merge(defaultOptions, options) as Options;
     this.filteredNodes = new Set();
+    this.filteredEdges = new Set();
     this.nodes = ogma.createNodeList();
     this.edges = ogma.createEdgeList();
     this.nodeStarts = [];
@@ -158,7 +166,14 @@ export class Controller<
     this.nodeEnds = nodes.getData(this.options.nodeEndPath);
     this.edgeStarts = edges.getData(this.options.edgeStartPath);
     this.edgeEnds = edges.getData(this.options.edgeEndPath);
-    this.timeline.refresh(this.nodes.getId(), this.nodeStarts, this.nodeEnds);
+    this.timeline.refresh(
+      nodes,
+      edges,
+      this.nodeStarts,
+      this.nodeEnds,
+      this.edgeStarts,
+      this.edgeEnds
+    );
     this.barchart.refresh(
       nodes,
       edges,
@@ -167,12 +182,17 @@ export class Controller<
       this.edgeStarts,
       this.edgeEnds
     );
-    if (!this.options.filter.enabled) {
+    if (!this.options.nodeFilter.enabled) {
       this.filteredNodes.clear();
-      // TODO
-      // for (let i = 0; i < this.ids.length; i++)
-      // this.filteredNodes.add(this.ids[i]);
+      for (let i = 0; i < this.nodes.size; i++)
+        this.filteredNodes.add(this.nodes.get(i).getId());
     }
+    if (!this.options.edgeFilter.enabled) {
+      this.filteredEdges.clear();
+      for (let i = 0; i < this.edges.size; i++)
+        this.filteredEdges.add(this.edges.get(i).getId());
+    }
+
     this.onTimeChange();
   }
 
@@ -231,7 +251,9 @@ export class Controller<
   }
 
   onTimeChange() {
-    if (!this.options.filter.enabled) return this.emit(timechange);
+    if (!this.options.nodeFilter.enabled && !this.options.edgeFilter.enabled) {
+      return this.emit(timechange);
+    }
     const times = (
       this.mode === "timeline"
         ? this.timeline.getTimebars()
@@ -239,19 +261,30 @@ export class Controller<
     )
       .map(({ date }) => +date)
       .sort((a, b) => a - b);
-    const selector = getSelector(
-      times,
-      this.options.filter.strategy,
-      this.options.filter.tolerance
-    );
-    this.filteredNodes.clear();
-    // TODO
-    // for (let i = 0; i < this.ids.length; i++) {
-    //   // TODO node start node end edge start edge end
-    //   if (selector(this.nodeStarts[i], this.nodeEnds[i])) {
-    //     this.filteredNodes.add(this.ids[i]);
-    //   }
-    // }
+    if (this.options.nodeFilter.enabled) {
+      const selector = getSelector(
+        times,
+        this.options.nodeFilter.strategy,
+        this.options.nodeFilter.tolerance
+      );
+      this.filteredNodes.clear();
+      for (let i = 0; i < this.nodes.size; i++) {
+        if (!selector(this.nodeStarts[i], this.nodeEnds[i])) continue;
+        this.filteredNodes.add(this.nodes.get(i).getId());
+      }
+    }
+    if (this.options.edgeFilter.enabled) {
+      const selector = getSelector(
+        times,
+        this.options.edgeFilter.strategy,
+        this.options.edgeFilter.tolerance
+      );
+      this.filteredEdges.clear();
+      for (let i = 0; i < this.edges.size; i++) {
+        if (!selector(this.edgeStarts[i], this.edgeEnds[i])) continue;
+        this.filteredEdges.add(this.edges.get(i).getId());
+      }
+    }
     return this.emit(timechange);
   }
 

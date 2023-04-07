@@ -14,7 +14,7 @@ import {
   DataGroup,
   TimelineOptions,
 } from "vis-timeline";
-import { click, rangechanged, scaleChange, scales } from "./constants";
+import { click, rangechanged, scaleChange, scales, select } from "./constants";
 import {
   BarchartOptions,
   BarChartItem,
@@ -25,7 +25,7 @@ import {
   GroupFunction,
   ItemGenerator,
 } from "./types";
-import { Chart } from "./chart";
+import { Chart, defaultChartOptions } from "./chart";
 import { DataSet } from "vis-data";
 import merge from "lodash.merge";
 
@@ -35,12 +35,7 @@ export const defaultBarchartOptions: BarchartOptions = {
     height: "100%",
     barChart: { sideBySide: true },
   },
-  nodeGroupIdFunction: () => `node-group`,
-  edgeGroupIdFunction: () => `edge-group`,
-  nodeGroupContent: (groupId: string) => groupId,
-  edgeGroupContent: (groupId: string) => groupId,
-  nodeItemGenerator: () => ({}),
-  edgeItemGenerator: () => ({}),
+  ...defaultChartOptions,
 };
 
 export class Barchart extends Chart {
@@ -48,6 +43,7 @@ export class Barchart extends Chart {
   private edgeItemsByScale: Lookup<ItemByScale>;
   private currentNodeData: ItemByScale;
   private currentEdgeData: ItemByScale;
+  private isTooZoomedByScale: Lookup<boolean>;
   private options: BarchartOptions;
   private rects: SVGRectElement[];
   private groupDataset: DataSet<DataGroup>;
@@ -70,6 +66,7 @@ export class Barchart extends Chart {
     this.chart = barchart;
     this.nodeItemsByScale = {};
     this.edgeItemsByScale = {};
+    this.isTooZoomedByScale = {};
     this.isChangingRange = false;
     this.rects = [];
     this.chart.on("click", (e) => {
@@ -130,6 +127,34 @@ export class Barchart extends Chart {
       edgeStarts,
       edgeEnds
     );
+    this.isTooZoomedByScale = Object.keys(this.nodeItemsByScale).reduce(
+      (acc, scale) => {
+        let max = -Infinity;
+        let heightAtIndex = this.nodeItemsByScale[scale].items.reduce(
+          (acc, item) => {
+            const index = Math.floor(item.x / +scale);
+            if (!acc[index]) acc[index] = 0;
+            acc[index] += item.y;
+            max = Math.max(max, acc[index]);
+            return acc;
+          },
+          {} as Lookup<number>
+        );
+        heightAtIndex = this.edgeItemsByScale[scale].items.reduce(
+          (acc, item) => {
+            const index = Math.floor(item.x / +scale);
+            if (!acc[index]) acc[index] = 0;
+            acc[index] += item.y;
+            max = Math.max(max, acc[index]);
+            return acc;
+          },
+          heightAtIndex
+        );
+        acc[scale] = max < 5;
+        return acc;
+      },
+      {} as Lookup<boolean>
+    );
   }
 
   highlightNodes(nodes: NodeList | Id[]) {
@@ -137,6 +162,7 @@ export class Barchart extends Chart {
     const ids = "getId" in nodes ? nodes.getId() : nodes;
 
     ids.forEach((id) => {
+      // TODO
       if (!this.rects[this.nodeToItem[id]]) return;
       this.rects[this.nodeToItem[id]].classList.add("hightlight");
     });
@@ -148,35 +174,61 @@ export class Barchart extends Chart {
 
   onBarClick(evt: TimelineEventPropertiesResult) {
     const { x, y, what } = evt;
-    if (!x || !y || !this.rects.length || what === "background") return;
+    if (!x || !y || !this.rects.length) return;
     const svg: SVGAElement | null = this.container.querySelector(
       ".vis-line-graph>svg"
     );
     if (!svg) return;
     const offset = +svg.style.left.slice(0, -2);
-    const nodeIds = (
+    let edgeIndex = 0;
+    let nodeIndex = 0;
+    const isLine = this.options.graph2dOptions.style === "line";
+    const { nodes, edges } = (
       this.rects
         .map((rect, i) => {
           const groupX = +(rect.getAttribute("x") as string) + offset;
           const groupW = +(rect.getAttribute("width") as string);
-          return groupX < x && groupX + groupW > x
-            ? {
-                rect,
-                nodeIds: this.itemToNodes[i],
-              }
-            : null;
+          const isNode = rect.classList.contains("node");
+          const isEdge = rect.classList.contains("edge");
+          if (isLine || !rect.classList.contains("vis-point")) {
+            if (isNode) nodeIndex++;
+            if (isEdge) edgeIndex++;
+          }
+          if (groupX >= x || groupX + groupW <= x) return null;
+          return {
+            rect,
+            nodeIndex,
+            edgeIndex,
+            nodes: isNode
+              ? this.ogma.getNodes(
+                  this.currentNodeData.items[nodeIndex - 1].ids
+                )
+              : undefined,
+            edges: isEdge
+              ? this.ogma.getEdges(
+                  this.currentEdgeData.items[edgeIndex - 1].ids
+                )
+              : undefined,
+          };
         })
-        .filter((e) => e) as { nodeIds: Id[]; rect: SVGRectElement }[]
-    ).reduce((acc, { nodeIds }) => {
-      acc.push(...nodeIds);
-      return acc;
-    }, [] as Id[]);
-    this.emit(click, { nodeIds, evt });
+        .filter((e) => e) as {
+        nodes?: NodeList;
+        edges?: EdgeList;
+        rect: SVGRectElement;
+      }[]
+    ).reduce(
+      (acc, { nodes, edges }) => (nodes || edges ? { nodes, edges } : acc),
+      { nodes: undefined, edges: undefined }
+    );
+    this.emit(click, { nodes, edges, evt });
+    if (nodes || edges) {
+      this.emit(select, { nodes, edges, evt });
+    }
   }
 
   protected onRangeChange() {
     const scale = this.getScale();
-    if (scale === this.currentScale) {
+    if (scale === this.currentScale || !this.nodeItemsByScale[scale]) {
       return;
     }
     this.currentScale = scale;
@@ -185,7 +237,7 @@ export class Barchart extends Chart {
     const currentEdgeData = this.edgeItemsByScale[scale];
     this.currentEdgeData = currentEdgeData;
     this.currentNodeData = currentNodeData;
-    this.emit(scaleChange, { scale, tooZoomed: currentNodeData.tooZoomed });
+    this.emit(scaleChange, { scale, tooZoomed: this.isTooZoomed(scale) });
     this.dataset.clear();
     this.groupDataset.clear();
     this.groupDataset.add(currentNodeData.groups);
@@ -201,13 +253,9 @@ export class Barchart extends Chart {
   }
 
   isTooZoomed(scale: number) {
-    const tooZoomedNodes = this.nodeItemsByScale[scale]
-      ? this.nodeItemsByScale[scale].tooZoomed
-      : false;
-    const tooZoomedEdges = this.nodeItemsByScale[scale]
-      ? this.nodeItemsByScale[scale].tooZoomed
-      : false;
-    return tooZoomedEdges || tooZoomedNodes;
+    return this.isTooZoomedByScale[scale] !== undefined
+      ? this.isTooZoomedByScale[scale]
+      : true;
   }
 
   setOptions(options: BarchartOptions) {
@@ -236,16 +284,6 @@ export class Barchart extends Chart {
     const ids = elements.getId();
     const isNode = elements.isNode;
     const prefix = isNode ? "node" : "edge";
-    const min = Math.min(
-      starts.reduce(
-        (min, start) => (isNaN(start) ? min : Math.min(min, start)),
-        Infinity
-      ),
-      ends.reduce(
-        (min, end) => (isNaN(end) ? min : Math.min(min, end)),
-        Infinity
-      )
-    );
     let tooZoomed = false;
 
     const groupIdToElementsArray = ids.reduce((groups, id, i) => {
@@ -260,7 +298,7 @@ export class Barchart extends Chart {
       (acc, [groupid, elements]) => {
         acc[groupid] = isNode
           ? this.ogma.getNodes(elements as unknown as NodeId[])
-          : this.ogma.getEdges(elements as unknown as NodeId[]);
+          : this.ogma.getEdges(elements as unknown as EdgeId[]);
         return acc;
       },
       {} as Record<string, ItemList>
@@ -299,11 +337,11 @@ export class Barchart extends Chart {
         Object.entries(groupIdToElement).forEach(([groupid, elements]) => {
           const itemsPerX = itemsPerGroup[groupid];
           elements.forEach((element, i) => {
-            const index = Math.floor((starts[i] - min) / scale);
-            const x = min + scale * index;
+            const index = Math.floor(starts[i] / scale);
+            const x = scale * index;
             if (!itemsPerX[x]) {
               itemsPerX[x] = {
-                id: element.getId(),
+                ids: [],
                 label: "",
                 group: groupid,
                 x,
@@ -312,36 +350,41 @@ export class Barchart extends Chart {
             }
             // y is how many nodes there is within this group
             itemsPerX[x].y += 1;
+            itemsPerX[x].ids.push(element.getId());
           });
         });
-        Object.values(itemsPerGroup).forEach((itemsPerX) => {
+        Object.entries(itemsPerGroup).forEach(([groupId, itemsPerX]) => {
           Object.values(itemsPerX).forEach((item) => {
             items.push({
               ...item,
-              ...itemGenerator(groupIdToElement[item.group]),
+              ...itemGenerator(groupIdToElement[item.group], groupId),
             });
           });
         });
 
-        itemToElements = Object.entries(itemToElements)
-          .sort(([a], [b]) => +a - +b)
+        itemToElements = items
+          .sort((a, b) => a.x - b.x)
+          // .sort(([a], [b]) => +a - +b)
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          .reduce((itemToNodes, [_, nodes], i) => {
-            itemToElements[i] = nodes;
-            nodes.forEach((n) => (elementToItem[n.getId()] = i));
-            return itemToNodes;
-          }, {} as Lookup<NodeList>);
+          .reduce((itemToElements, { ids }, i) => {
+            itemToElements[i] = isNode
+              ? this.ogma.getNodes(ids)
+              : this.ogma.getEdges(ids);
+            ids.forEach((id) => (elementToItem[id] = i));
+            return itemToElements;
+          }, {} as Lookup<ItemList>);
 
+        const maxY = items.reduce((maxY, g) => Math.max(maxY, g.y), 0);
         itemsByScale[scale] = {
           items,
           itemToElements,
           tooZoomed,
           groups,
+          maxY,
           elementToItem,
         };
         // tell the next iteration if it should be on timeline or barchart mode
-        tooZoomed =
-          tooZoomed || items.reduce((maxY, g) => Math.max(maxY, g.y), 0) < 5;
+        tooZoomed = tooZoomed || maxY < 5;
         return itemsByScale;
       }, {} as Lookup<ItemByScale>);
   }
