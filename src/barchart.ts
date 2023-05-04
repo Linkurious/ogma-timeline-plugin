@@ -150,30 +150,17 @@ export class Barchart extends Chart {
           },
           heightAtIndex
         );
-        acc[scale] = max < 5;
+        acc[scale] =
+          Object.values(heightAtIndex).reduce((max, h) => Math.max(max, h), 0) <
+          5;
         return acc;
       },
       {} as Lookup<boolean>
     );
   }
 
-  highlightNodes(nodes: NodeList | Id[]) {
-    this.resethighlight();
-    const ids = "getId" in nodes ? nodes.getId() : nodes;
-
-    ids.forEach((id) => {
-      // TODO
-      if (!this.rects[this.nodeToItem[id]]) return;
-      this.rects[this.nodeToItem[id]].classList.add("hightlight");
-    });
-  }
-
-  resethighlight() {
-    this.rects.forEach((group) => group.classList.remove("hightlight"));
-  }
-
   onBarClick(evt: TimelineEventPropertiesResult) {
-    const { x, y, what } = evt;
+    const { x, y, event } = evt;
     if (!x || !y || !this.rects.length) return;
     const svg: SVGAElement | null = this.container.querySelector(
       ".vis-line-graph>svg"
@@ -194,7 +181,11 @@ export class Barchart extends Chart {
             if (isNode) nodeIndex++;
             if (isEdge) edgeIndex++;
           }
-          if (groupX >= x || groupX + groupW <= x) return null;
+          if (groupX >= x || groupX + groupW <= x) {
+            rect.classList.remove("vis-selected");
+            return null;
+          }
+          rect.classList.add("vis-selected");
           return {
             rect,
             nodeIndex,
@@ -221,9 +212,7 @@ export class Barchart extends Chart {
       { nodes: undefined, edges: undefined }
     );
     this.emit(click, { nodes, edges, evt });
-    if (nodes || edges) {
-      this.emit(select, { nodes, edges, evt });
-    }
+    this.emit(select, { nodes, edges, evt: event as MouseEvent });
   }
 
   protected onRangeChange() {
@@ -387,6 +376,52 @@ export class Barchart extends Chart {
         tooZoomed = tooZoomed || maxY < 5;
         return itemsByScale;
       }, {} as Lookup<ItemByScale>);
+  }
+  setSelection({ nodes, edges }: { nodes?: NodeList; edges?: EdgeList }) {
+    const nodeIds = (nodes ? nodes.getId() : []).reduce((acc, id) => {
+      acc[id] = true;
+      return acc;
+    }, {} as Record<NodeId, boolean>);
+    const edgeIds = (edges ? edges.getId() : []).reduce((acc, id) => {
+      acc[id] = true;
+      return acc;
+    }, {} as Record<EdgeId, boolean>);
+    let edgeIndex = 0;
+    let nodeIndex = 0;
+    const isLine = this.options.graph2dOptions.style === "line";
+    const { itemToElements: itemToNodes } = this.currentNodeData;
+    const { itemToElements: itemToEdges } = this.currentEdgeData;
+
+    this.rects.forEach((rect) => {
+      const isNode = rect.classList.contains("node");
+      const isEdge = rect.classList.contains("edge");
+      if (isNode) {
+        if (
+          itemToNodes[nodeIndex] &&
+          itemToNodes[nodeIndex].getId().some((id) => nodeIds[id])
+        ) {
+          console.log("select node", nodeIndex, nodeIds);
+          rect.classList.add("vis-selected");
+        } else {
+          rect.classList.remove("vis-selected");
+        }
+      }
+      if (isEdge) {
+        if (
+          itemToEdges[edgeIndex] &&
+          itemToEdges[edgeIndex].getId().some((id) => edgeIds[id])
+        ) {
+          console.log("select edge", edgeIndex, edgeIds);
+          rect.classList.add("vis-selected");
+        } else {
+          rect.classList.remove("vis-selected");
+        }
+      }
+      if (isLine || !rect.classList.contains("vis-point")) {
+        if (isNode) nodeIndex++;
+        if (isEdge) edgeIndex++;
+      }
+    });
   }
 }
 

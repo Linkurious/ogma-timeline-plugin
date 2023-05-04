@@ -136,23 +136,20 @@ export class Timeline extends Chart {
 
   onBarClick(evt: TimelineEventPropertiesResult) {
     const { x, y, item, event } = evt;
-    if (!x || !y || !item) return;
-    const node = this.nodeItems.itemToElements[item] as unknown as
-      | Node
-      | undefined;
-    const edge = this.edgeItems.itemToElements[item] as unknown as
-      | Edge
-      | undefined;
+    if (!x || !y) return;
+    const nodes = (item
+      ? this.nodeItems.itemToElements[item]
+      : undefined) as unknown as Node | undefined;
+    const edges = (item
+      ? this.edgeItems.itemToElements[item]
+      : undefined) as unknown as Edge | undefined;
 
-    this.edgeItems.itemToElements[item];
-    this.emit(click, { node, edge, evt });
-    if (node || edge) {
-      this.emit(select, {
-        evt: event as MouseEvent,
-        node,
-        edge,
-      });
-    }
+    this.emit(click, { nodes, edges, evt });
+    this.emit(select, {
+      evt: event as MouseEvent,
+      nodes,
+      edges,
+    });
   }
 
   setOptions(options: TimelineOptions) {
@@ -213,5 +210,17 @@ export class Timeline extends Chart {
       })
     );
     return { items, groups, itemToElements, elementToItem };
+  }
+  setSelection({ nodes, edges }: { nodes?: NodeList; edges?: EdgeList }) {
+    const nodeIds = nodes ? nodes.getId() : [];
+    const edgeIds = edges ? edges.getId() : [];
+    const ids = [];
+    for (let i = 0; i < nodeIds.length; i++) {
+      ids.push(this.nodeItems.elementToItem[nodeIds[i]]);
+    }
+    for (let i = 0; i < edgeIds.length; i++) {
+      ids.push(this.edgeItems.elementToItem[edgeIds[i]]);
+    }
+    this.chart.setSelection([...nodeIds, ...edgeIds]);
   }
 }

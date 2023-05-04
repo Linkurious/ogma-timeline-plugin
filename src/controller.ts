@@ -1,9 +1,15 @@
-import Ogma, { NodeList, NodeId, EdgeList } from "@linkurious/ogma";
+import Ogma, { NodeList, EdgeList } from "@linkurious/ogma";
 import EventEmitter from "eventemitter3";
 import throttle from "lodash.throttle";
 import merge from "lodash.merge";
 
-import { rangechange, scaleChange, timechange, timechanged } from "./constants";
+import {
+  rangechange,
+  scaleChange,
+  select,
+  timechange,
+  timechanged,
+} from "./constants";
 import { getSelector } from "./selector";
 import { Timeline, defaultTimelineOptions } from "./timeline";
 import { Barchart, defaultBarchartOptions } from "./barchart";
@@ -126,6 +132,13 @@ export class Controller<
     this.timeline.on(rangechange, () => {
       throttled();
     });
+    this.barchart.on(select, (evt) => {
+      this.emit(select, evt);
+    });
+    this.timeline.on(select, (evt) => {
+      this.emit(select, evt);
+    });
+
     const nodes = ogma.getNodes();
     const edges = ogma.getEdges();
 
@@ -248,6 +261,14 @@ export class Controller<
       this.barchart.setWindow(start, end, options);
     }
     this.onTimeChange();
+  }
+
+  setSelection({ nodes, edges }: { nodes?: NodeList; edges?: EdgeList }) {
+    if (this.mode === "timeline") {
+      this.timeline.setSelection({ nodes, edges });
+    } else {
+      this.barchart.setSelection({ nodes, edges });
+    }
   }
 
   onTimeChange() {

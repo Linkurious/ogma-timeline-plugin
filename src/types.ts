@@ -16,7 +16,6 @@ import {
   NodeId,
   ItemList,
   EdgeId,
-  Item,
   ItemId,
 } from "@linkurious/ogma";
 import {
@@ -108,13 +107,13 @@ export type ItemByScale = {
   groups: DataGroup[];
   elementToItem: Lookup<NodeId | EdgeId>;
   tooZoomed: boolean;
-  maxY : number;
+  maxY: number;
 };
 
 export type TimelineData = {
   items: DataItem[];
   groups: DataGroup[];
-  itemToElements: Lookup<Item>;
+  itemToElements: Lookup<ItemId>;
   elementToItem: Lookup<number>;
 };
 export type TimelineMode = "barchart" | "timeline";
@@ -128,11 +127,13 @@ export type ScaleChangeEvt = {
   tooZoomed: boolean;
 };
 export type ClickEvt = {
-  nodeIds: Id[];
+  edges?: EdgeList | Edge;
+  nodes?: NodeList | Node;
   evt: TimelineEventPropertiesResult;
 };
 export type SelectEvt = {
-  nodeIds: Id[];
+  edges?: EdgeList | Edge;
+  nodes?: NodeList | Node;
   evt: MouseEvent;
 };
 export type Events = {
@@ -148,6 +149,7 @@ export type Events = {
 
 export type ControlerEvents = {
   [timechange]: () => void;
+  [select]: (evt: SelectEvt) => void;
 };
 
 export type Timebar = {
