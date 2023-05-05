@@ -15,6 +15,7 @@ export default defineUserConfig({
       "/grouping",
       "/styling",
       "/filtering",
+      "/selecting",
       "/timebars",
       "/timezone",
     ],

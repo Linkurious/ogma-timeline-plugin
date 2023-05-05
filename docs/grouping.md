@@ -1,6 +1,6 @@
 # Grouping
 
-Barchart automatically groups data by date, depending on zoom, but you can specify a `groupIdFunction` to make it group together nodes with different data.
+Barchart automatically groups data by date, depending on zoom, but you can specify a `nodeGroupIdFunction` to make it group together nodes with different data.
 Let's say you have two types of nodes: persons and cars, like this: 
 
 ## GroupIdFunction
@@ -22,19 +22,18 @@ const ogma = new Ogma({
     edges: [],
   },
 });
-
-## GroupIdFunction
 ```
-By default, the timeline will render all nodes without distinction. You can split different types of nodes by passing `groupIdFunction` to the timeline: 
+By default, the timeline will render all nodes without distinction. You can split different types of nodes by passing `nodeGroupIdFunction` to the timeline: 
 
-You can then pass a `groupIdFunction` that will create bars for cars and bars for persons.
+You can then pass a `nodeGroupIdFunction` that will create bars for cars and bars for persons.
 ```ts
 const timelinePlugin = new TimelinePlugin(ogma, container, {
   barchart: {
-    groupIdFunction: (nodeId) => ogma.getNode(nodeId).getData('type')
+    nodeGroupIdFunction: (nodeId) => ogma.getNode(nodeId).getData('type'),
+    
   },
   timeline: {
-    groupIdFunction: (nodeId) => ogma.getNode(nodeId).getData('type')
+    nodeGroupIdFunction: (nodeId) => ogma.getNode(nodeId).getData('type')
   }
 });
 ```
@@ -54,8 +53,8 @@ you can do that with `itemGenerator` function:
 ```
 
 
-Now with both `itemGenerator` and `groupIdFunction`, your timeline shows one row for each node type and proper labels.
-Items within a group will have a class corresponding to the `groupId` return by `groupIdFunction`. You can use it to style your items. See [styling](./styling.md)
+Now with both `itemGenerator` and `nodeGroupIdFunction`, your timeline shows one row for each node type and proper labels.
+Items within a group will have a class corresponding to the `groupId` return by `nodeGroupIdFunction`. You can use it to style your items. See [styling](./styling.md)
 
 ## Result
 ![Result](/style-grouping-timeline.png)
