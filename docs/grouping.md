@@ -1,6 +1,6 @@
 # Grouping
 
-Barchart automatically groups data by date, depending on zoom, but you can specify a `nodeGroupIdFunction` to make it group together nodes with different data.
+Barchart automatically groups data by date, depending on zoom, but you can specify a `nodeGroupIdFunction` and/or `edgeGroupIdFunction` to make it group together nodes with different data.
 Let's say you have two types of nodes: persons and cars, like this: 
 
 ## GroupIdFunction
@@ -23,17 +23,18 @@ const ogma = new Ogma({
   },
 });
 ```
-By default, the timeline will render all nodes without distinction. You can split different types of nodes by passing `nodeGroupIdFunction` to the timeline: 
+By default, the timeline will render all nodes without distinction. You can split different types of nodes by passing `nodeGroupIdFunction` and/or `edgeGroupIdFunction` to the timeline: 
 
 You can then pass a `nodeGroupIdFunction` that will create bars for cars and bars for persons.
 ```ts
 const timelinePlugin = new TimelinePlugin(ogma, container, {
   barchart: {
-    nodeGroupIdFunction: (nodeId) => ogma.getNode(nodeId).getData('type'),
-    
+    nodeGroupIdFunction: (node) => node.getData('type'),
+    edgeGroupIdFunction: (edge) => edge.getData('type'),
   },
   timeline: {
-    nodeGroupIdFunction: (nodeId) => ogma.getNode(nodeId).getData('type')
+    nodeGroupIdFunction: (node) => node.getData('type'),
+    edgeGroupIdFunction: (edge) => edge.getData('type'),
   }
 });
 ```
@@ -41,13 +42,12 @@ const timelinePlugin = new TimelinePlugin(ogma, container, {
 
 ## ItemGenerator
 By default the timeline will set `Node-${id}` as labels for each element. But you might want to display different names,
-you can do that with `itemGenerator` function: 
+you can do that with `nodeItemGenerator` and `edgeItemGenerator` function: 
 
 ```ts
  timeline: {
-    itemGenerator: (nodeId) => {
-      const node = ogma.getNode(nodeId) as Node;
-      return { content: `${node?.getData("type")} ${node.getId()}` };
+    nodeItemGenerator: (node) => {
+      return { content: `${node.getData("type")} ${node.getId()}` };
     },
   },
 ```
