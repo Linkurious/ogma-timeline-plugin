@@ -1,7 +1,13 @@
 import "./style.css";
 import Ogma from "@linkurious/ogma";
 import moment from "moment/min/moment-with-locales";
-import { Controller, vis, click } from "../src";
+import {
+  Controller as TimelinePlugin,
+  vis,
+  click,
+  day,
+  rangechanged,
+} from "../src";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
@@ -10,45 +16,101 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div id="timeline"></div>
   </div>
 `;
+
+const nodesN = 30;
+const edgesN = 30;
 const ogma = new Ogma({
   container: "ogma",
   graph: {
-    nodes: [
-      {
-        id: 1,
-        data: { start: -10, end: -5 },
+    nodes: new Array(nodesN).fill(0).map((_, i) => ({
+      id: i + 1,
+      data: {
+        start: Date.now() - Math.floor(1 + 100 * Math.random()) * day,
+        end: Date.now() + Math.floor(1 + 100 * Math.random()) * day,
+        type: i % 2 === 0 ? "car" : "truck",
       },
-      {
-        id: 2,
-        data: { start: -10, end: 10 },
+    })),
+    edges: new Array(edgesN).fill(0).map((_, i) => ({
+      // id: i + 1,
+      source: ((i + 1) % (nodesN - 1)) + 1,
+      target: 1,
+      data: {
+        start: Date.now() - Math.floor(1 + 100 * Math.random()) * day,
       },
-      {
-        id: 3,
-        data: { start: Date.now() / 4, end: Date.now() / 2 },
-      },
-      {
-        id: 4,
-        data: { start: Date.now() - 1000, end: Date.now() + 1000 },
-      },
-      {
-        id: 5,
-        data: { start: Date.now() + 2000, end: Date.now() + 3000 },
-      },
-    ],
-    edges: [],
+    })),
   },
 });
-ogma.layouts.force();
-const controller = new Controller(ogma, document.getElementById("timeline"), {
-  timeBars: [new Date("1 1 1980"), new Date("1 1 2010")],
-  filter: {
-    enabled: true,
-    strategy: "outisde",
-    tolerance: "strict",
+ogma.layouts.force({
+  locate: { padding: 100 },
+});
+const timelinePlugin = new TimelinePlugin(
+  ogma,
+  document.getElementById("timeline"),
+  {
+    barchart: {
+      nodeGroupIdFunction: (node) => node.getData("type"),
+      graph2dOptions: {
+        legend: true,
+      },
+    },
+    timeBars: [
+      // place the bars at now and 01/01/70 to start
+      new Date(Date.now()),
+      new Date(0),
+    ],
+    //configure filtering
+    nodeFilter: {
+      enabled: true,
+      strategy: "between",
+      tolerance: "loose",
+    },
+    edgeFilter: {
+      enabled: true,
+      strategy: "between",
+      tolerance: "loose",
+    },
+  }
+);
+
+//create filters
+const nodeFilter = ogma.transformations.addNodeFilter({
+  criteria: (node) => {
+    return timelinePlugin.filteredNodes.has(node.getId());
   },
+  enabled: true,
+});
+const edgeFilter = ogma.transformations.addEdgeFilter({
+  criteria: (edge) => {
+    return timelinePlugin.filteredEdges.has(edge.getId());
+  },
+});
+//Hook it to the timeline events
+timelinePlugin.on("timechange", () => {
+  nodeFilter.refresh();
+  edgeFilter.refresh();
 });
 
-controller.timeline.on("select", ({ nodeIds }) =>
-  ogma.getNodes(nodeIds).setSelected(true)
+let isSelecting = false;
+timelinePlugin.on("select", ({ nodes, edges }) => {
+  isSelecting = true;
+  ogma.getNodes().setSelected(false);
+  ogma.getEdges().setSelected(false);
+
+  if (nodes) {
+    nodes.setSelected(true);
+  }
+  if (edges) {
+    edges.setSelected(true);
+  }
+  isSelecting = false;
+});
+ogma.events.on(
+  ["nodesSelected", "edgesSelected", "nodesUnselected", "edgesUnselected"],
+  () => {
+    if (isSelecting) return;
+    timelinePlugin.setSelection({
+      nodes: ogma.getSelectedNodes(),
+      edges: ogma.getSelectedEdges(),
+    });
+  }
 );
-window.controller = controller;

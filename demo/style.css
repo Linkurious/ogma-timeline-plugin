@@ -8,5 +8,19 @@
 
 .vis-group.car {
   stroke: #ff9914;
+  fill: #ff9914;
+}
+.vis-group.truck {
+  stroke: #09b531;
+  fill: #60f779;
+}
 
+.bar-item {
+  stroke: #1499ff;
+  fill: #d4ecff;
+}
+
+.bar-item.edge {
+  stroke: #99ff14;
+  fill: #ecffd4;
 }
