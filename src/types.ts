@@ -78,6 +78,7 @@ export interface Options {
   edgeStartPath: string;
   edgeEndPath: string;
   switchOnZoom: boolean;
+  showBarchart: boolean;
   start?: number | Date;
   end?: number | Date;
 }

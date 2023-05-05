@@ -113,6 +113,8 @@ export class Timeline extends Chart {
         ...this.nodeItems.groups,
         ...this.edgeItems.groups,
       ]);
+    } else {
+      this.chart.setGroups();
     }
   }
 

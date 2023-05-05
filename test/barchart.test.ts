@@ -46,7 +46,7 @@ describe("Barchart", async () => {
     60_000 * 60
   );
 
-  test("should respect grouping", async () => {
+  test("should respect node grouping", async () => {
     const [as, bs] = await session.page.evaluate(() => {
       const ogma = createOgma({
         container: "ogma",
@@ -78,6 +78,43 @@ describe("Barchart", async () => {
     });
     expect(as).toBe(2);
     expect(bs).toBe(2);
+  });
+
+  test("should respect edge grouping", async () => {
+    const edgesN = 2;
+    const [as, bs] = await session.page.evaluate(() => {
+      const ogma = createOgma({
+        container: "ogma",
+        graph: {
+          nodes: [
+            ...new Array(2).fill(0).map((_, i) => ({
+              id: i,
+            })),
+          ],
+          edges: new Array(edgesN).fill(0).map((_, i) => ({
+            source: 0,
+            target: 1,
+            data: {
+              start: 0,
+              type: i % 2 ? "A" : "B",
+            },
+          })),
+        },
+      });
+      createController({
+        barchart: {
+          edgeGroupIdFunction: (edge) => edge.getData("type"),
+        },
+      });
+      return afterBarchartRedraw()
+        .then(() => wait(200))
+        .then(() => [
+          document.querySelectorAll(".vis-bar.A").length,
+          document.querySelectorAll(".vis-bar.B").length,
+        ]);
+    });
+    expect(as).toBe(1);
+    expect(bs).toBe(1);
   });
 
   test("should draw lines", async () => {

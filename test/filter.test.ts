@@ -14,7 +14,7 @@ describe("Barchart", async () => {
   beforeEach(async () => {
     await session.refresh();
   });
-  test("should filter", async () => {
+  test("should filter nodes", async () => {
     const size = await session.page.evaluate(() => {
       createOgma({
         graph: {
@@ -39,6 +39,44 @@ describe("Barchart", async () => {
         timeBars: [(1 / 3) * Date.now(), (2 / 3) * Date.now()],
       });
       return controller.filteredNodes.size;
+    });
+    expect(size).toBe(10);
+  });
+
+  test("should filter edges", async () => {
+    const size = await session.page.evaluate(() => {
+      createOgma({
+        graph: {
+          nodes: [{ id: 0 }, { id: 1 }],
+          edges: [
+            {
+              source: 0,
+              target: 1,
+              data: {
+                start: Date.now(),
+              },
+            },
+            {
+              source: 0,
+              target: 1,
+              data: {
+                start: Date.now(),
+              },
+            },
+            ...new Array(10).fill(0).map((_, i) => ({
+              source: 0,
+              target: 1,
+              data: {
+                start: Date.now() / 2,
+              },
+            })),
+          ],
+        },
+      });
+      const controller = createController({
+        timeBars: [(1 / 3) * Date.now(), (2 / 3) * Date.now()],
+      });
+      return controller.filteredEdges.size;
     });
     expect(size).toBe(10);
   });

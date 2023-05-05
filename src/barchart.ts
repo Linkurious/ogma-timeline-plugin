@@ -96,7 +96,7 @@ export class Barchart extends Chart {
       edgeStarts,
       edgeEnds
     );
-    this.onRangeChange();
+    this.onRangeChange(true);
   }
 
   /**
@@ -224,9 +224,12 @@ export class Barchart extends Chart {
     this.emit(select, { nodes, edges, evt: event as MouseEvent });
   }
 
-  protected onRangeChange() {
+  protected onRangeChange(force = false) {
     const scale = this.getScale();
-    if (scale === this.currentScale || !this.nodeItemsByScale[scale]) {
+    if (
+      (!force && scale === this.currentScale) ||
+      !this.nodeItemsByScale[scale]
+    ) {
       return;
     }
     this.currentScale = scale;
@@ -376,7 +379,7 @@ export class Barchart extends Chart {
           elementToItem,
         };
         // tell the next iteration if it should be on timeline or barchart mode
-        tooZoomed = tooZoomed || maxY < 5;
+        tooZoomed = false; //tooZoomed || maxY < 5;
         return itemsByScale;
       }, {} as Lookup<ItemByScale>);
   }

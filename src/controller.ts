@@ -41,6 +41,7 @@ export const defaultOptions: Partial<Options> = {
     tolerance: "loose",
   },
   switchOnZoom: true,
+  showBarchart: false,
   timeBars: [],
   barchart: defaultBarchartOptions,
   timeline: defaultTimelineOptions,
@@ -100,8 +101,11 @@ export class Controller<
     );
     this.timeline = timeline;
     this.barchart = barchart;
-
-    this.showTimeline();
+    if (this.options.showBarchart) {
+      this.showBarchart();
+    } else {
+      this.showTimeline();
+    }
     //switch from barchart to timeline on zoom
     this.barchart.on(scaleChange, ({ tooZoomed }) => {
       if (!tooZoomed || !this.options.switchOnZoom) return;
@@ -167,7 +171,6 @@ export class Controller<
         ),
       { animation: false }
     );
-
     ogma.events.on("destroy", () => {
       this.destroy();
     });
@@ -180,6 +183,10 @@ export class Controller<
     nodes?: NodeList<ND, ED>;
     edges?: EdgeList<ED, ND>;
   }) {
+    const wd =
+      this.mode === "barchart"
+        ? this.barchart.getWindow()
+        : this.timeline.getWindow();
     this.nodes = (nodes ? nodes : this.ogma.createNodeList()).filter(
       (n) => n.getData(this.options.nodeStartPath) !== undefined
     );
@@ -216,8 +223,7 @@ export class Controller<
       for (let i = 0; i < this.edges.size; i++)
         this.filteredEdges.add(this.edges.get(i).getId());
     }
-
-    this.onTimeChange();
+    this.setWindow(wd.start, wd.end, { animation: false });
   }
 
   showTimeline() {
