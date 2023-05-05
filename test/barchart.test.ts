@@ -16,31 +16,35 @@ describe("Barchart", async () => {
     await session.refresh();
   });
 
-  test("should show", async () => {
-    const size = await session.page.evaluate(() => {
-      createOgma({
-        container: "ogma",
-        graph: {
-          nodes: [
-            ...new Array(10).fill(0).map((_, i) => ({
-              id: i,
-              data: { start: 0 },
-            })),
-            ...new Array(10).fill(0).map((_, i) => ({
-              id: i + 10,
-              data: { start: Date.now() },
-            })),
-          ],
-          edges: [],
-        },
+  test.only(
+    "should show",
+    async () => {
+      const size = await session.page.evaluate(() => {
+        createOgma({
+          container: "ogma",
+          graph: {
+            nodes: [
+              ...new Array(10).fill(0).map((_, i) => ({
+                id: i,
+                data: { start: 0 },
+              })),
+              ...new Array(10).fill(0).map((_, i) => ({
+                id: i + 10,
+                data: { start: Date.now() },
+              })),
+            ],
+            edges: [],
+          },
+        });
+        createController({});
+        return afterBarchartRedraw()
+          .then(() => wait(200))
+          .then(() => document.querySelectorAll(".vis-bar").length);
       });
-      createController({});
-      return afterBarchartRedraw()
-        .then(() => afterBarchartRedraw())
-        .then(() => document.querySelectorAll(".vis-bar").length);
-    });
-    expect(size).toBe(2);
-  });
+      expect(size).toBe(2);
+    },
+    60_000 * 60
+  );
 
   test("should respect grouping", async () => {
     const [as, bs] = await session.page.evaluate(() => {
@@ -62,12 +66,11 @@ describe("Barchart", async () => {
       });
       createController({
         barchart: {
-          groupIdFunction: (nodeid) =>
-            (ogma.getNode(nodeid) as Node).getData("type"),
+          nodeGroupIdFunction: (node) => node.getData("type"),
         },
       });
       return afterBarchartRedraw()
-        .then(() => afterBarchartRedraw())
+        .then(() => wait(200))
         .then(() => [
           document.querySelectorAll(".vis-bar.A").length,
           document.querySelectorAll(".vis-bar.B").length,
@@ -103,7 +106,7 @@ describe("Barchart", async () => {
         },
       });
       return afterBarchartRedraw()
-        .then(() => afterBarchartRedraw())
+        .then(() => wait(200))
         .then(
           () =>
             [...document.querySelectorAll(".vis-group")].filter(

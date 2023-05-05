@@ -18,7 +18,6 @@ import { click, rangechanged, scaleChange, scales, select } from "./constants";
 import {
   BarchartOptions,
   BarChartItem,
-  Id,
   Lookup,
   ItemByScale,
   IdFunction,
@@ -34,6 +33,7 @@ export const defaultBarchartOptions: BarchartOptions = {
     style: "bar",
     height: "100%",
     barChart: { sideBySide: true },
+    autoResize: false,
   },
   ...defaultChartOptions,
 };
@@ -166,14 +166,18 @@ export class Barchart extends Chart {
       ".vis-line-graph>svg"
     );
     if (!svg) return;
-    const offset = +svg.style.left.slice(0, -2);
+    const offsetX = +svg.style.left.slice(0, -2);
+    const offsetY = +svg.style.top.slice(0, -2);
+
     let edgeIndex = 0;
     let nodeIndex = 0;
     const isLine = this.options.graph2dOptions.style === "line";
     const { nodes, edges } = (
       this.rects
         .map((rect, i) => {
-          const groupX = +(rect.getAttribute("x") as string) + offset;
+          const groupX = +(rect.getAttribute("x") as string) + offsetX;
+          const groupH = +(rect.getAttribute("height") as string);
+          const groupY = +(rect.getAttribute("y") as string) + offsetY;
           const groupW = +(rect.getAttribute("width") as string);
           const isNode = rect.classList.contains("node");
           const isEdge = rect.classList.contains("edge");
@@ -181,7 +185,12 @@ export class Barchart extends Chart {
             if (isNode) nodeIndex++;
             if (isEdge) edgeIndex++;
           }
-          if (groupX >= x || groupX + groupW <= x) {
+          if (
+            groupX >= x ||
+            groupX + groupW <= x ||
+            groupY >= y ||
+            groupY + groupH <= y
+          ) {
             rect.classList.remove("vis-selected");
             return null;
           }
@@ -254,12 +263,6 @@ export class Barchart extends Chart {
 
   protected registerEvents(): void {
     super.registerEvents();
-    this.chart.on("click", (evt) => {
-      console.log("click");
-    });
-    this.chart.on("select", (evt) => {
-      console.log("select");
-    });
   }
 
   private _group(
@@ -276,7 +279,7 @@ export class Barchart extends Chart {
     let tooZoomed = false;
 
     const groupIdToElementsArray = ids.reduce((groups, id, i) => {
-      const groupid = `${prefix}-${idFunction(elements.get(i))}`;
+      const groupid = `${idFunction(elements.get(i))}`;
       if (!groups[groupid]) {
         groups[groupid] = [];
       }
@@ -400,7 +403,6 @@ export class Barchart extends Chart {
           itemToNodes[nodeIndex] &&
           itemToNodes[nodeIndex].getId().some((id) => nodeIds[id])
         ) {
-          console.log("select node", nodeIndex, nodeIds);
           rect.classList.add("vis-selected");
         } else {
           rect.classList.remove("vis-selected");
@@ -411,7 +413,6 @@ export class Barchart extends Chart {
           itemToEdges[edgeIndex] &&
           itemToEdges[edgeIndex].getId().some((id) => edgeIds[id])
         ) {
-          console.log("select edge", edgeIndex, edgeIds);
           rect.classList.add("vis-selected");
         } else {
           rect.classList.remove("vis-selected");
@@ -424,37 +425,3 @@ export class Barchart extends Chart {
     });
   }
 }
-
-// _onBarClicked = ({ x, y }: { x: number, y: number }) => {
-//   if (!x || !y || this.isSelecting) return;
-//   this.isSelecting = true;
-//   this.ogma.clearSelection();
-//   const svg: SVGAElement| null = this.container.querySelector('.vis-line-graph>svg');
-//   if(!svg) return;
-//   const groups = [...svg.children];
-//   groups.forEach(g => g.classList.remove('selected'));
-//   const offset = +svg.style.left.slice(0, -2);
-//   const nodeIdsToSelect = (groups
-//     .map((g, i) => {
-//       const groupX = +(g.getAttribute('x') as string) + offset;
-//       const groupW = +(g.getAttribute('width') as string);
-//       return groupX < x && groupX + groupW > x
-//         ? {
-//             group: g,
-//             nodeIds: this.groupToNodes[i]
-//           }
-//         : null;
-//     })
-//     .filter(e => e)as ({ nodeIds: Id[], group: Element}[]))
-//     .reduce((nodes, { group, nodeIds }) => {
-//       nodes.push(...nodeIds);
-//       group.classList.add('selected');
-//       return nodes;
-//     }, [] as Id[]);
-
-//   const nodesToSelect = this.ogma.getNodes(nodeIdsToSelect).dedupe();
-//   nodesToSelect.setSelected(true);
-//   this.ogma.view
-//     .moveToBounds(nodesToSelect.getBoundingBox())
-//     .then(() => (this.isSelecting = false));
-// };

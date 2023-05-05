@@ -23,8 +23,8 @@ export const defaultChartOptions: BaseOptions<
   NodeList | Node,
   EdgeList | Edge
 > = {
-  nodeGroupIdFunction: () => `node-group`,
-  edgeGroupIdFunction: () => `edge-group`,
+  nodeGroupIdFunction: () => `nodes`,
+  edgeGroupIdFunction: () => `edges`,
   nodeGroupContent: (groupId: string) => groupId,
   edgeGroupContent: (groupId: string) => groupId,
   nodeItemGenerator: () => ({}),
@@ -161,9 +161,7 @@ export abstract class Chart extends EventEmitter<Events> {
     return this.chart.getWindow();
   }
 
-  protected onRangeChange() {
-    this.emit(rangechanged);
-  }
+  protected abstract onRangeChange(): void;
   public abstract refresh(
     nodes: NodeList,
     edges: EdgeList,

@@ -1,6 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { expect } from "@playwright/test";
-import { Node } from "@linkurious/ogma";
 import { BrowserSession } from "./utils";
 
 describe("Timeline", async () => {
@@ -32,7 +31,7 @@ describe("Timeline", async () => {
       createController({});
       return afterTimelineRedraw()
         .then(() => afterTimelineRedraw())
-        .then(() => document.querySelectorAll(".vis-box.group-0").length);
+        .then(() => document.querySelectorAll(".vis-box.nodes").length);
     });
     expect(size).toBe(10);
   });
@@ -52,8 +51,7 @@ describe("Timeline", async () => {
       });
       createController({
         timeline: {
-          groupIdFunction: (nodeid) =>
-            (ogma.getNode(nodeid) as Node).getData("type"),
+          nodeGroupIdFunction: (node) => node.getData("type"),
         },
       });
       return afterTimelineRedraw()

@@ -66,7 +66,7 @@ describe("Barchart", async () => {
       });
       const controller = createController({
         timeBars: [(1 / 3) * Date.now(), (2 / 3) * Date.now()],
-        filter: {
+        nodeFilter: {
           enabled: false,
         },
       });
@@ -106,7 +106,7 @@ describe("Barchart", async () => {
       });
       const controller = createController({
         timeBars: [0, Date.now()],
-        filter: {
+        nodeFilter: {
           enabled: true,
           strategy: "outside",
           tolerance: "strict",
@@ -157,7 +157,7 @@ describe("Barchart", async () => {
       });
       const controller = createController({
         timeBars: [new Date("1 1 1980"), new Date("1 1 2010")],
-        filter: {
+        nodeFilter: {
           enabled: true,
           strategy: "outside",
           tolerance: "strict",

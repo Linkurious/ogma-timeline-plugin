@@ -39,7 +39,7 @@ describe("Options", async () => {
         });
         const controller = createController({
           timeBars: [(1 / 2) * Date.now()],
-          filter: {
+          nodeFilter: {
             enabled: false,
           },
         });
@@ -55,7 +55,7 @@ describe("Options", async () => {
       .locator(".vis-custom-time.t0>div")
       .evaluate((e) => e.getBoundingClientRect());
     await session.page.mouse.move(x, y + height / 2);
-    await session.page.mouse.wheel(0, 200);
+    await session.page.mouse.wheel(0, 1200);
     const { timelineVisible: tv, barchartVisible: bv } =
       await session.page.evaluate(() => {
         return {
@@ -91,7 +91,7 @@ describe("Options", async () => {
         });
         const controller = createController({
           timeBars: [(1 / 2) * Date.now()],
-          filter: {
+          nodeFilter: {
             enabled: false,
           },
           switchOnZoom: false,
@@ -134,16 +134,15 @@ describe("Options", async () => {
         },
       });
       createController({
-        startDatePath: "startCustom",
+        nodeStartPath: "startCustom",
       });
       return afterTimelineRedraw().then(
-        () => document.querySelectorAll(".vis-box.group-0").length
+        () => document.querySelectorAll(".vis-box.nodes").length
       );
     });
     expect(elementSize).toBe(3);
   });
   test("should respect endDatePath", async () => {
-    debugger;
     const elementSize = await session.page.evaluate(() => {
       createOgma({
         graph: {
@@ -157,7 +156,7 @@ describe("Options", async () => {
         },
       });
       createController({
-        endDatePath: "endCustom",
+        nodeEndPath: "endCustom",
       });
       return afterTimelineRedraw().then(
         () => document.querySelectorAll(".vis-range").length
@@ -238,7 +237,7 @@ describe("Options", async () => {
         },
       });
       const controller = createController({
-        filter: {
+        nodeFilter: {
           enabled: true,
           strategy: "after",
           tolerance: "strict",
@@ -266,7 +265,7 @@ describe("Options", async () => {
         },
       });
       const controller = createController({
-        filter: {
+        nodeFilter: {
           enabled: true,
           strategy: "after",
           tolerance: "strict",
@@ -294,7 +293,7 @@ describe("Options", async () => {
         },
       });
       const controller = createController({
-        filter: {
+        nodeFilter: {
           enabled: true,
           strategy: "after",
           tolerance: "strict",

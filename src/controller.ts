@@ -56,7 +56,7 @@ export class Controller<
   public barchart: Barchart;
   public filteredNodes: Set<Id>;
   public filteredEdges: Set<Id>;
-
+  private ogma: Ogma<ND, ED>;
   private options: Options;
   private container: HTMLDivElement;
   private nodeStarts: number[];
@@ -71,6 +71,7 @@ export class Controller<
   ) {
     super();
     this.mode = "barchart";
+    this.ogma = ogma;
     this.options = merge(defaultOptions, options) as Options;
     this.filteredNodes = new Set();
     this.filteredEdges = new Set();
@@ -152,7 +153,7 @@ export class Controller<
         this.barchart.addTimeBar(timeBar);
       });
 
-    this.refresh(nodes, edges);
+    this.refresh({ nodes, edges });
     this.setWindow(
       this.options.start ||
         Math.min(
@@ -172,24 +173,34 @@ export class Controller<
     });
   }
 
-  refresh(nodes: NodeList<ND, ED>, edges: EdgeList<ED, ND>) {
-    this.nodes = nodes;
-    this.edges = edges;
-    this.nodeStarts = nodes.getData(this.options.nodeStartPath);
-    this.nodeEnds = nodes.getData(this.options.nodeEndPath);
-    this.edgeStarts = edges.getData(this.options.edgeStartPath);
-    this.edgeEnds = edges.getData(this.options.edgeEndPath);
+  refresh({
+    nodes,
+    edges,
+  }: {
+    nodes?: NodeList<ND, ED>;
+    edges?: EdgeList<ED, ND>;
+  }) {
+    this.nodes = (nodes ? nodes : this.ogma.createNodeList()).filter(
+      (n) => n.getData(this.options.nodeStartPath) !== undefined
+    );
+    this.edges = (edges ? edges : this.ogma.createEdgeList()).filter(
+      (e) => e.getData(this.options.edgeStartPath) !== undefined
+    );
+    this.nodeStarts = this.nodes.getData(this.options.nodeStartPath);
+    this.nodeEnds = this.nodes.getData(this.options.nodeEndPath);
+    this.edgeStarts = this.edges.getData(this.options.edgeStartPath);
+    this.edgeEnds = this.edges.getData(this.options.edgeEndPath);
     this.timeline.refresh(
-      nodes,
-      edges,
+      this.nodes,
+      this.edges,
       this.nodeStarts,
       this.nodeEnds,
       this.edgeStarts,
       this.edgeEnds
     );
     this.barchart.refresh(
-      nodes,
-      edges,
+      this.nodes,
+      this.edges,
       this.nodeStarts,
       this.nodeEnds,
       this.edgeStarts,
@@ -314,7 +325,7 @@ export class Controller<
     this.options = merge(this.options, options) as Options;
     this.timeline.setOptions(this.options.timeline);
     this.barchart.setOptions(this.options.barchart);
-    this.refresh(this.nodes, this.edges);
+    this.refresh({ nodes: this.nodes, edges: this.edges });
     const wd =
       this.mode === "timeline"
         ? this.timeline.getWindow()
