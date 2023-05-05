@@ -67,6 +67,22 @@ export class Barchart extends Chart {
     this.nodeItemsByScale = {};
     this.edgeItemsByScale = {};
     this.isTooZoomedByScale = {};
+    this.currentNodeData = {
+      items: [],
+      itemToElements: {},
+      elementToItem: {},
+      groups: [],
+      tooZoomed: false,
+      maxY: 0,
+    };
+    this.currentEdgeData = {
+      items: [],
+      itemToElements: {},
+      elementToItem: {},
+      groups: [],
+      tooZoomed: false,
+      maxY: 0,
+    };
     this.isChangingRange = false;
     this.rects = [];
     this.chart.on("click", (e) => {
@@ -217,8 +233,14 @@ export class Barchart extends Chart {
         rect: SVGRectElement;
       }[]
     ).reduce(
-      (acc, { nodes, edges }) => (nodes || edges ? { nodes, edges } : acc),
-      { nodes: undefined, edges: undefined }
+      (acc, { nodes, edges }) => {
+        if (nodes || edges) return { nodes, edges };
+        return acc;
+      },
+      { nodes: undefined, edges: undefined } as {
+        nodes?: NodeList;
+        edges?: EdgeList;
+      }
     );
     this.emit(click, { nodes, edges, evt });
     this.emit(select, { nodes, edges, evt: event as MouseEvent });

@@ -64,6 +64,18 @@ export class Timeline extends Chart {
   constructor(container: HTMLDivElement, ogma: Ogma, options: TimelineOptions) {
     super(container, ogma);
     this.options = options;
+    this.nodeItems = {
+      items: [],
+      groups: [],
+      itemToElements: {},
+      elementToItem: {},
+    };
+    this.edgeItems = {
+      items: [],
+      groups: [],
+      itemToElements: {},
+      elementToItem: {},
+    };
     const timeline = new VTimeline(
       container,
       this.dataset,

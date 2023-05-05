@@ -17,6 +17,7 @@ import {
   ItemList,
   EdgeId,
   ItemId,
+  Item,
 } from "@linkurious/ogma";
 import {
   click,
@@ -114,8 +115,8 @@ export type ItemByScale = {
 export type TimelineData = {
   items: DataItem[];
   groups: DataGroup[];
-  itemToElements: Lookup<ItemId>;
-  elementToItem: Lookup<number>;
+  itemToElements: Lookup<Item>;
+  elementToItem: Lookup<ItemId>;
 };
 export type TimelineMode = "barchart" | "timeline";
 
