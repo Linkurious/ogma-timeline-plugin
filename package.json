@@ -1,6 +1,6 @@
 {
   "name": "@linkurious/ogma-timeline-plugin",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "keywords": [
     "ogma",
     "timeline",
@@ -77,7 +77,7 @@
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
     "@vitest/coverage-c8": "^0.29.3",
-    "@vitest/ui": "^0.28.5",
+    "@vitest/ui": "^0.29.0",
     "@vuepress/plugin-search": "next",
     "eslint": "^8.35.0",
     "eslint-config-prettier": "^8.6.0",
