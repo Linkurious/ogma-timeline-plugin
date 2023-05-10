@@ -108,7 +108,7 @@ describe("Barchart", async () => {
       });
       controller.setWindow(0, Date.now(), {
         animation: false,
-      })
+      });
       return afterBarchartRedraw()
         .then(() => wait(200))
         .then(() => [
