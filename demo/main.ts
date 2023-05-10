@@ -1,13 +1,6 @@
 import "./style.css";
 import Ogma from "@linkurious/ogma";
-import moment from "moment/min/moment-with-locales";
-import {
-  Controller as TimelinePlugin,
-  vis,
-  click,
-  day,
-  rangechanged,
-} from "../src";
+import { Controller as TimelinePlugin, day } from "../src";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
@@ -16,7 +9,6 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div id="timeline"></div>
   </div>
 `;
-
 const nodesN = 30;
 const edgesN = 30;
 const ogma = new Ogma({
@@ -26,7 +18,7 @@ const ogma = new Ogma({
       id: i + 1,
       data: {
         start: Date.now() - Math.floor(1 + 100 * Math.random()) * day,
-        end: Date.now() + Math.floor(1 + 100 * Math.random()) * day,
+        // end: Date.now() + Math.floor(1 + 100 * Math.random()) * day,
         type: i % 2 === 0 ? "car" : "truck",
       },
     })),
@@ -40,6 +32,29 @@ const ogma = new Ogma({
     })),
   },
 });
+
+ogma.styles.addRule({
+  nodeAttributes: {
+    color: (node) => (node.getData("type") === "car" ? "#ff9914" : "#60f779"),
+  },
+  edgeAttributes: {
+    color: "#9914ff",
+  },
+});
+ogma.styles.setSelectedNodeAttributes({
+  color: (node) => (node.getData("type") === "car" ? "#e9bd84" : "#78d88e"),
+  outerStroke: {
+    color: (node) => (node.getData("type") === "car" ? "#e9bd84" : "#78d88e"),
+  },
+});
+
+ogma.styles.setHoveredNodeAttributes({
+  color: (node) => (node.getData("type") === "car" ? "#ff9914" : "#60f779"),
+  outerStroke: {
+    color: (node) => (node.getData("type") === "car" ? "#ff9914" : "#60f779"),
+  },
+});
+
 ogma.layouts.force({
   locate: { padding: 100 },
 });
@@ -51,6 +66,7 @@ const timelinePlugin = new TimelinePlugin(
       nodeGroupIdFunction: (node) => node.getData("type"),
       graph2dOptions: {
         legend: true,
+        // style: "line",
       },
     },
     timeBars: [
@@ -77,7 +93,7 @@ const nodeFilter = ogma.transformations.addNodeFilter({
   criteria: (node) => {
     return timelinePlugin.filteredNodes.has(node.getId());
   },
-  enabled: true,
+  enabled: false,
 });
 const edgeFilter = ogma.transformations.addEdgeFilter({
   criteria: (edge) => {
