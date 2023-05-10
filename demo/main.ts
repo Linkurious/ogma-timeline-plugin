@@ -100,6 +100,7 @@ const edgeFilter = ogma.transformations.addEdgeFilter({
     return timelinePlugin.filteredEdges.has(edge.getId());
   },
 });
+
 //Hook it to the timeline events
 timelinePlugin.on("timechange", () => {
   nodeFilter.refresh();
