@@ -76,7 +76,6 @@ describe("Barchart", async () => {
   });
 
   test("should respect edge grouping", async () => {
-    const edgesN = 2;
     const [as, bs] = await session.page.evaluate(() => {
       const ogma = createOgma({
         container: "ogma",
@@ -86,7 +85,7 @@ describe("Barchart", async () => {
               id: i,
             })),
           ],
-          edges: new Array(edgesN).fill(0).map((_, i) => ({
+          edges: new Array(2).fill(0).map((_, i) => ({
             source: 0,
             target: 1,
             data: {
