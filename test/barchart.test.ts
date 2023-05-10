@@ -85,7 +85,7 @@ describe("Barchart", async () => {
               id: i,
             })),
           ],
-          edges: new Array(2).fill(0).map((_, i) => ({
+          edges: new Array(10).fill(0).map((_, i) => ({
             source: 0,
             target: 1,
             data: {
@@ -95,11 +95,12 @@ describe("Barchart", async () => {
           })),
         },
       });
-      createController({
+      const controller = createController({
         barchart: {
           edgeGroupIdFunction: (edge) => edge.getData("type"),
         },
       });
+      controller.setWindow(0, Date.now());
       return afterBarchartRedraw()
         .then(() => wait(200))
         .then(() => [

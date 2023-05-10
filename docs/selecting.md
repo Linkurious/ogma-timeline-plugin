@@ -31,6 +31,20 @@ ogma.events.on(
 );
 ```
 
+## Styles and selection
+
+When a timeline item is selected, the `vis-selected` class is added to it. So you can tweak selected styles using selectors: 
+```css
+.timeline-item.car.vis-selected,
+.vis-group.car.vis-selected
+ {
+  stroke: #CCff55;
+  fill: #CCff55;
+}
+
+```
+
+
 ## Result
 ![Result](/selection.mp4)
 

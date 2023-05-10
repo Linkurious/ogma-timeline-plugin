@@ -33,22 +33,22 @@ const timelinePlugin = new TimelinePlugin(ogma, container);
 
 That's it ! You have a fully functionnal Ogma instance within your app, and a timeline showing your data.
 
-## Get the timestamps on your nodes adn edges
+## Get the timestamps on your nodes and edges
 
 By default the plugin looks for `start` and `end` keys within node data, and uses it to generate the timeline.
 If you store your data within the `creation.date` and `deletion.date` keys for instance, then you can pass `nodeStartPath` and `nodeEndPath` properties to the Controller constructor: 
 
 ```ts
 const timelinePlugin = new TimelinePlugin(ogma, container, {
-  startDatePath: 'creation.date',
-  endDatePath: 'deletion.date',
+  nodeStartPath: 'creation.date',
+  nodeEndPath: 'deletion.date',
 })
 ```
-If some of your data does not have an `end` date, no worries, the plugin deals with `undefined` end dates. Though start date are **mandatory** to be displayed.
+If some of your data does not have an `end` date, no worries, the plugin deals with `undefined` end dates. Though start date are **mandatory**.
 
 ## Filter nodes and edges depending on time
 
-The plugin provides a simple API to filter out nodes depending on user's imput: 
+The plugin provides a simple API to filter out nodes depending on user's input: 
  - add some timeBars to the controller
  - create an ogma [nodeFilter](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeFilter)
  - Link it to the timeline events
