@@ -3,6 +3,7 @@ import Ogma, {
   EdgeId,
   EdgeList,
   Item,
+  ItemId,
   ItemList,
   NodeId,
   NodeList,
@@ -262,12 +263,16 @@ export class Barchart extends Chart {
     this.currentNodeData = currentNodeData;
     this.emit(scaleChange, { scale, tooZoomed: this.isTooZoomed(scale) });
     this.dataset.clear();
+    console.log(currentNodeData, currentEdgeData);
     this.groupDataset.clear();
-    this.groupDataset.add(currentNodeData.groups);
-    this.groupDataset.add(currentEdgeData.groups);
-
-    this.dataset.add(currentNodeData.items as unknown as DataItem[]);
-    this.dataset.add(currentEdgeData.items as unknown as DataItem[]);
+    this.groupDataset.add([
+      ...currentNodeData.groups,
+      ...currentEdgeData.groups,
+    ]);
+    this.dataset.add([
+      ...currentNodeData.items,
+      ...currentEdgeData.items,
+    ] as unknown as DataItem[]);
 
     this.chart.redraw();
     if (!currentNodeData.tooZoomed) {
@@ -302,13 +307,14 @@ export class Barchart extends Chart {
     const isNode = elements.isNode;
     const prefix = isNode ? "node" : "edge";
     let tooZoomed = false;
-
+    const idToIndex: Record<ItemId, number> = {};
     const groupIdToElementsArray = ids.reduce((groups, id, i) => {
       const groupid = `${idFunction(elements.get(i))}`;
       if (!groups[groupid]) {
         groups[groupid] = [];
       }
       groups[groupid].push(elements.get(i));
+      idToIndex[id] = i;
       return groups;
     }, {} as Record<string, Item[]>);
     const groupIdToElement = Object.entries(groupIdToElementsArray).reduce(
@@ -352,9 +358,10 @@ export class Barchart extends Chart {
         const elementToItem: Lookup<NodeId | EdgeId> = {};
         const items: BarChartItem[] = [];
         Object.entries(groupIdToElement).forEach(([groupid, elements]) => {
+          const ids = elements.getId();
           const itemsPerX = itemsPerGroup[groupid];
           elements.forEach((element, i) => {
-            const index = Math.floor(starts[i] / scale);
+            const index = Math.floor(starts[idToIndex[ids[i]]] / scale);
             const x = scale * index;
             if (!itemsPerX[x]) {
               itemsPerX[x] = {
@@ -367,7 +374,7 @@ export class Barchart extends Chart {
             }
             // y is how many nodes there is within this group
             itemsPerX[x].y += 1;
-            itemsPerX[x].ids.push(element.getId());
+            itemsPerX[x].ids.push(ids[i]);
           });
         });
         Object.entries(itemsPerGroup).forEach(([groupId, itemsPerX]) => {
