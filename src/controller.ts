@@ -280,6 +280,13 @@ export class Controller<
     this.onTimeChange();
   }
 
+  getWindow() {
+    if (this.mode === "timeline") {
+      return this.timeline.getWindow();
+    }
+    return this.barchart.getWindow();
+  }
+
   setSelection({ nodes, edges }: { nodes?: NodeList; edges?: EdgeList }) {
     if (this.mode === "timeline") {
       this.timeline.setSelection({ nodes, edges });

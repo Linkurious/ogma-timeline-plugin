@@ -59,12 +59,18 @@ describe("Barchart", async () => {
           edges: [],
         },
       });
-      createController({
+      const controller = createController({
         barchart: {
           nodeGroupIdFunction: (node) => node.getData("type"),
         },
       });
+
       return afterBarchartRedraw()
+        .then(() =>
+          controller.setWindow(new Date("1 1 1960"), new Date("1 1 1980"), {
+            animation: false,
+          })
+        )
         .then(() => wait(200))
         .then(() => [
           document.querySelectorAll(".vis-bar.A").length,
@@ -81,7 +87,7 @@ describe("Barchart", async () => {
         container: "ogma",
         graph: {
           nodes: [
-            ...new Array(2).fill(0).map((_, i) => ({
+            ...new Array(10).fill(0).map((_, i) => ({
               id: i,
             })),
           ],
@@ -100,7 +106,9 @@ describe("Barchart", async () => {
           edgeGroupIdFunction: (edge) => edge.getData("type"),
         },
       });
-      controller.setWindow(0, Date.now());
+      controller.setWindow(0, Date.now(), {
+        animation: false,
+      })
       return afterBarchartRedraw()
         .then(() => wait(200))
         .then(() => [
