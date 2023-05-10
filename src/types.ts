@@ -8,7 +8,17 @@ import {
   DataItem,
   IdType,
 } from "vis-timeline";
-import { NodeId } from "@linkurious/ogma";
+import {
+  Edge,
+  Node,
+  NodeList,
+  EdgeList,
+  NodeId,
+  ItemList,
+  EdgeId,
+  ItemId,
+  Item,
+} from "@linkurious/ogma";
 import {
   click,
   rangechanged,
@@ -17,6 +27,7 @@ import {
   timechange,
   timechanged,
   rangechange,
+  select,
 } from "./constants";
 export type FilterStrategy = "before" | "after" | "between" | "outside";
 export type FilterTolerance = "strict" | "loose";
@@ -26,23 +37,28 @@ export type FilterOptions = {
   strategy: FilterStrategy;
   tolerance: FilterTolerance;
 };
-
+export type IdFunction<U> = (item: U) => string;
+export type GroupFunction<U> = (groupId: string, items: U) => string;
+export type ItemGenerator<T, U> = (elements: U, groupId: string) => Partial<T>;
+export interface BaseOptions<T, U, V> {
+  nodeGroupIdFunction: IdFunction<Node>;
+  nodeGroupContent: GroupFunction<Node>;
+  nodeItemGenerator: ItemGenerator<T, U>;
+  edgeGroupIdFunction: IdFunction<Edge>;
+  edgeGroupContent: GroupFunction<Edge>;
+  edgeItemGenerator: ItemGenerator<T, V>;
+}
 /**
  * @typedef {object} BarchartOptions
  * @property {Graph2dOptions} graph2dOptions (https://visjs.github.io/vis-timeline/docs/graph2d/#graph2dOptions) to pass to the barchart
  * @property {Function} groupIdFunction Similar to [Ogma addNodeGrouping](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeGrouping) groupIdFunction
  * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
  */
-export interface BarchartOptions {
+export interface BarchartOptions
+  extends BaseOptions<BarChartItem, NodeList, EdgeList> {
   graph2dOptions: Graph2dOptions;
-  groupIdFunction: (item: NodeId) => string;
-  groupContent: (groupId: string, nodeIds: NodeId[]) => string;
-  itemGenerator: (nodeId: NodeId[]) => Partial<BarChartItem>;
 }
-export interface TimelineOptions {
-  groupIdFunction: (item: NodeId) => string;
-  groupContent: (groupId: string, nodeIds: NodeId[]) => string;
-  itemGenerator: (nodeId: NodeId) => Partial<DataItem>;
+export interface TimelineOptions extends BaseOptions<DataItem, Node, Edge> {
   timelineOptions: VTimelineOptions;
 }
 
@@ -56,10 +72,14 @@ export interface Options {
   timeline: TimelineOptions;
   barchart: BarchartOptions;
   timeBars: TimebarOptions[];
-  filter: FilterOptions;
-  startDatePath: string;
-  endDatePath: string;
+  edgeFilter: FilterOptions;
+  nodeFilter: FilterOptions;
+  nodeStartPath: string;
+  nodeEndPath: string;
+  edgeStartPath: string;
+  edgeEndPath: string;
   switchOnZoom: boolean;
+  showBarchart: boolean;
   start?: number | Date;
   end?: number | Date;
 }
@@ -76,7 +96,7 @@ export type DeepPartial<T> = T extends object
   : T;
 
 export type BarChartItem = {
-  id: NodeId;
+  ids: ItemId[];
   group: string;
   label: string;
   x: number;
@@ -85,10 +105,18 @@ export type BarChartItem = {
 
 export type ItemByScale = {
   items: BarChartItem[];
-  itemToNodes: Lookup<Id[]>;
+  itemToElements: Lookup<ItemList>;
   groups: DataGroup[];
-  nodeToItem: Lookup<number>;
+  elementToItem: Lookup<NodeId | EdgeId>;
   tooZoomed: boolean;
+  maxY: number;
+};
+
+export type TimelineData = {
+  items: DataItem[];
+  groups: DataGroup[];
+  itemToElements: Lookup<Item>;
+  elementToItem: Lookup<ItemId>;
 };
 export type TimelineMode = "barchart" | "timeline";
 
@@ -101,8 +129,14 @@ export type ScaleChangeEvt = {
   tooZoomed: boolean;
 };
 export type ClickEvt = {
-  nodeIds: Id[];
+  edges?: EdgeList | Edge;
+  nodes?: NodeList | Node;
   evt: TimelineEventPropertiesResult;
+};
+export type SelectEvt = {
+  edges?: EdgeList | Edge;
+  nodes?: NodeList | Node;
+  evt: MouseEvent;
 };
 export type Events = {
   [scaleChange]: (evt: ScaleChangeEvt) => void;
@@ -112,10 +146,12 @@ export type Events = {
   [timechange]: () => void;
   [timechanged]: () => void;
   [redraw]: () => void;
+  [select]: (evt: SelectEvt) => void;
 };
 
 export type ControlerEvents = {
   [timechange]: () => void;
+  [select]: (evt: SelectEvt) => void;
 };
 
 export type Timebar = {

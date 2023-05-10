@@ -78,7 +78,7 @@
     "@typescript-eslint/parser": "^5.54.0",
     "@vitest/coverage-c8": "^0.29.3",
     "@vitest/ui": "^0.29.0",
-    "@vuepress/plugin-search": "^2.0.0-beta.61",
+    "@vuepress/plugin-search": "next",
     "eslint": "^8.35.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-es5": "^1.5.0",
@@ -101,7 +101,7 @@
     "typescript": "^4.9.3",
     "vite": "latest",
     "vitest": "latest",
-    "vuepress": "^2.0.0-beta.61"
+    "vuepress": "next"
   },
   "private": false
 }

@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { expect } from "@playwright/test";
 import { BrowserSession } from "./utils";
-import { Node } from "@linkurious/ogma";
 
 describe("Barchart", async () => {
   const session = new BrowserSession();
@@ -36,13 +35,13 @@ describe("Barchart", async () => {
       });
       createController({});
       return afterBarchartRedraw()
-        .then(() => afterBarchartRedraw())
+        .then(() => wait(200))
         .then(() => document.querySelectorAll(".vis-bar").length);
     });
     expect(size).toBe(2);
   });
 
-  test("should respect grouping", async () => {
+  test("should respect node grouping", async () => {
     const [as, bs] = await session.page.evaluate(() => {
       const ogma = createOgma({
         container: "ogma",
@@ -60,14 +59,19 @@ describe("Barchart", async () => {
           edges: [],
         },
       });
-      createController({
+      const controller = createController({
         barchart: {
-          groupIdFunction: (nodeid) =>
-            (ogma.getNode(nodeid) as Node).getData("type"),
+          nodeGroupIdFunction: (node) => node.getData("type"),
         },
       });
+
       return afterBarchartRedraw()
-        .then(() => afterBarchartRedraw())
+        .then(() =>
+          controller.setWindow(new Date("1 1 1960"), new Date("1 1 1980"), {
+            animation: false,
+          })
+        )
+        .then(() => wait(200))
         .then(() => [
           document.querySelectorAll(".vis-bar.A").length,
           document.querySelectorAll(".vis-bar.B").length,
@@ -75,6 +79,45 @@ describe("Barchart", async () => {
     });
     expect(as).toBe(2);
     expect(bs).toBe(2);
+  });
+
+  test("should respect edge grouping", async () => {
+    const [as, bs] = await session.page.evaluate(() => {
+      const ogma = createOgma({
+        container: "ogma",
+        graph: {
+          nodes: [
+            ...new Array(10).fill(0).map((_, i) => ({
+              id: i,
+            })),
+          ],
+          edges: new Array(10).fill(0).map((_, i) => ({
+            source: 0,
+            target: 1,
+            data: {
+              start: 0,
+              type: i % 2 ? "A" : "B",
+            },
+          })),
+        },
+      });
+      const controller = createController({
+        barchart: {
+          edgeGroupIdFunction: (edge) => edge.getData("type"),
+        },
+      });
+      controller.setWindow(0, Date.now(), {
+        animation: false,
+      });
+      return afterBarchartRedraw()
+        .then(() => wait(200))
+        .then(() => [
+          document.querySelectorAll(".vis-bar.A").length,
+          document.querySelectorAll(".vis-bar.B").length,
+        ]);
+    });
+    expect(as).toBe(1);
+    expect(bs).toBe(1);
   });
 
   test("should draw lines", async () => {
@@ -103,7 +146,7 @@ describe("Barchart", async () => {
         },
       });
       return afterBarchartRedraw()
-        .then(() => afterBarchartRedraw())
+        .then(() => wait(200))
         .then(
           () =>
             [...document.querySelectorAll(".vis-group")].filter(

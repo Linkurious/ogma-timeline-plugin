@@ -1,4 +1,4 @@
-import { NodeId } from "@linkurious/ogma";
+import Ogma, { NodeList, EdgeList, Edge } from "@linkurious/ogma";
 import EventEmitter from "eventemitter3";
 import { DataSet } from "vis-data";
 import { DataItem, TimelineAnimationOptions } from "vis-timeline";
@@ -9,7 +9,27 @@ import {
   timechange,
   timechanged,
 } from "./constants";
-import { Events, Timebar, TimebarOptions, VChart } from "./types";
+import {
+  BaseOptions,
+  BarChartItem,
+  Events,
+  Timebar,
+  TimebarOptions,
+  VChart,
+} from "./types";
+
+export const defaultChartOptions: BaseOptions<
+  BarChartItem | DataItem,
+  NodeList | Node,
+  EdgeList | Edge
+> = {
+  nodeGroupIdFunction: () => `nodes`,
+  edgeGroupIdFunction: () => `edges`,
+  nodeGroupContent: (groupId: string) => groupId,
+  edgeGroupContent: (groupId: string) => groupId,
+  nodeItemGenerator: () => ({}),
+  edgeItemGenerator: () => ({}),
+};
 
 export abstract class Chart extends EventEmitter<Events> {
   public chart!: VChart;
@@ -20,11 +40,12 @@ export abstract class Chart extends EventEmitter<Events> {
   protected currentScale: number;
   protected timebars: Timebar[];
   protected isChangingRange: boolean;
+  protected ogma: Ogma;
   private chartRange: number;
   public visible: boolean;
   private destroyed: boolean;
 
-  constructor(container: HTMLDivElement) {
+  constructor(container: HTMLDivElement, ogma: Ogma) {
     super();
     this.dataset = new DataSet([]);
     this.container = container;
@@ -34,6 +55,7 @@ export abstract class Chart extends EventEmitter<Events> {
     this.visible = false;
     this.chartRange = 0;
     this.destroyed = false;
+    this.ogma = ogma;
   }
 
   protected registerEvents(): void {
@@ -139,13 +161,14 @@ export abstract class Chart extends EventEmitter<Events> {
     return this.chart.getWindow();
   }
 
-  protected onRangeChange() {
-    this.emit(rangechanged);
-  }
+  protected abstract onRangeChange(): void;
   public abstract refresh(
-    ids: NodeId[],
-    starts: number[],
-    ends: number[]
+    nodes: NodeList,
+    edges: EdgeList,
+    nodeStarts: number[],
+    nodeEnds: number[],
+    edgeStarts: number[],
+    edgeEnds: number[]
   ): void;
 
   protected getScale(): number {

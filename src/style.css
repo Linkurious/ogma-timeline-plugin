@@ -19,21 +19,44 @@
   fill: #d4ecff;
 }
 
-.timeline-item.vis-selected {
+.bar-item.edge {
+  stroke: #99ff14;
+  fill: #ecffd4;
+}
+
+.vis-item.timeline-item.vis-selected {
   border-color: #34b9ff;
   background-color: rgb(205, 249, 255);
 }
 
-.bar-item.hightlight {
+.vis-group.vis-selected {
   stroke: #34b9ff;
   fill: rgb(205, 249, 255);
 }
-
 
 .vis-group {
   fill-opacity: 0;
   stroke: #1499ff;
 }
+
+div.vis-item,
+rect.vis-group,
+rect.vis-group.vis-selected{
+  cursor: pointer;
+}
+path.vis-group{
+  pointer-events: none;
+}
+.vis-group.edge {
+  fill-opacity: 0;
+  stroke: #9914ff;
+  fill: #9914ff;
+}
+.vis-group.edge.vis-selected {
+  stroke: #DD66ff;
+  fill: #e4bcef;
+}
+
 
 #timeline>div {
   position: absolute !important;
