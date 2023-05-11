@@ -263,7 +263,6 @@ export class Barchart extends Chart {
     this.currentNodeData = currentNodeData;
     this.emit(scaleChange, { scale, tooZoomed: this.isTooZoomed(scale) });
     this.dataset.clear();
-    console.log(currentNodeData, currentEdgeData);
     this.groupDataset.clear();
     this.groupDataset.add([
       ...currentNodeData.groups,
