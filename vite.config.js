@@ -10,6 +10,7 @@ export default defineConfig({
     rollupOptions: {
       external: ["@linkurious/ogma", "vis-timeline", "vis-data"],
       output: {
+        name: "OgmaTimelinePlugin",
         globals: {
           "@linkurious/ogma": "Ogma",
           "vis-timeline": "vis",
