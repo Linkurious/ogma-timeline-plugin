@@ -54,3 +54,4 @@ export const rangechange = "rangechange";
 export const timechange = "timechange";
 export const timechanged = "timechanged";
 export const redraw = "redraw";
+export const select = "select";

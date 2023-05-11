@@ -21,7 +21,7 @@ Please check the [filtering](/filtering.md) section for further details on the f
 
 ```ts
 const controller = new Controller(ogma, document.getElementById("timeline"), {
- filter: {
+ nodeFilter: {
     enabled: true,
     strategy: "between",
     tolerance: "strict",

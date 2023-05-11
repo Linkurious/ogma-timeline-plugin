@@ -33,22 +33,22 @@ const timelinePlugin = new TimelinePlugin(ogma, container);
 
 That's it ! You have a fully functionnal Ogma instance within your app, and a timeline showing your data.
 
-## Get the timestamps on your nodes
+## Get the timestamps on your nodes and edges
 
 By default the plugin looks for `start` and `end` keys within node data, and uses it to generate the timeline.
-If you store your data within the `creation.date` and `deletion.date` keys for instance, then you can pass `startDatePath` and `endDatePath` properties to the Controller constructor: 
+If you store your data within the `creation.date` and `deletion.date` keys for instance, then you can pass `nodeStartPath` and `nodeEndPath` properties to the Controller constructor: 
 
 ```ts
 const timelinePlugin = new TimelinePlugin(ogma, container, {
-  startDatePath: 'creation.date',
-  endDatePath: 'deletion.date',
+  nodeStartPath: 'creation.date',
+  nodeEndPath: 'deletion.date',
 })
 ```
-If some of your data does not have an `end` date, no worries, the plugin deals with `undefined` end dates. Though start date are **mandatory** to be displayed.
+If some of your data does not have an `end` date, no worries, the plugin deals with `undefined` end dates. Though start date are **mandatory**.
 
-## Filter nodes depending on time
+## Filter nodes and edges depending on time
 
-The plugin provides a simple API to filter out nodes depending on user's imput: 
+The plugin provides a simple API to filter out nodes depending on user's input: 
  - add some timeBars to the controller
  - create an ogma [nodeFilter](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeFilter)
  - Link it to the timeline events
@@ -61,22 +61,33 @@ const timelinePlugin = new TimelinePlugin(ogma, container, {
         new Date(0),
       ],
   //configure filtering
-  filter: {
+  nodeFilter: {
+    enabled: true,
+    strategy: 'between',
+    tolerance: 'loose'
+  },
+  edgeFilter: {
     enabled: true,
     strategy: 'between',
     tolerance: 'loose'
   },
 })
 
-//create filter
-const filter = ogma.transformations.addNodeFilter({
+//create filters
+const nodeFilter = ogma.transformations.addNodeFilter({
     criteria: node => {
       return controller.filteredNodes.has(node.getId());
     },
   })
+const edgeFilter = ogma.transformations.addEdgeFilter({
+    criteria: edge => {
+      return controller.filteredEdges.has(edge.getId());
+    },
+  })
 //Hook it to the timeline events
 controller.on('timechange', () => {
-  filter.refresh();
+  nodeFilter.refresh();
+  edgeFilter.refresh();
 })
 ```
 
@@ -90,6 +101,19 @@ Then the timeline will show only thoose nodes, but your graph might evolve with 
   
 ```ts
 ogma.events.on(['addNodes', 'addEdges', 'removeNodes', 'removeEdges', 'clearGraph'] ,() => {
-  timeline.refresh(ogma.getNodes())
+  timeline.refresh({nodes: ogma.getNodes(), edges: ogma.getEdges()})
 })
+```
+
+## Display only edges, or only nodes
+
+If you just want to show nodes within your timeline, just call: 
+```ts
+  timeline.refresh({nodes: ogma.getNodes()})
+
+```
+
+If you want to show just edges, call: 
+```ts
+  timeline.refresh({edges: ogma.getEdges()})
 ```

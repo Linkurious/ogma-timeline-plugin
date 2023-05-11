@@ -1,6 +1,6 @@
 {
   "name": "@linkurious/ogma-timeline-plugin",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "keywords": [
     "ogma",
     "timeline",
@@ -21,12 +21,12 @@
   "type": "module",
   "main": "dist/ogma-timeline-plugin.umd.js",
   "module": "dist/ogma-timeline-plugin.js",
-  "types": "dist/types.d.ts",
+  "types": "dist/types/index.d.ts",
   "files": [
     "LICENCE",
     "dist/ogma-timeline-plugin.js",
     "dist/ogma-timeline-plugin.umd.js",
-    "dist/types.d.ts",
+    "dist/types/*.d.ts",
     "dist/style.css"
   ],
   "exports": {
@@ -35,7 +35,7 @@
       "require": "./dist/ogma-timeline-plugin.umd.js"
     },
     "./style.css": "./dist/style.css",
-    "./types": "./dist/types.d.ts"
+    "./types": "./dist/types/index.d.ts"
   },
   "publishConfig": {
     "access": "public"
@@ -77,8 +77,8 @@
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
     "@vitest/coverage-c8": "^0.29.3",
-    "@vitest/ui": "^0.28.5",
-    "@vuepress/plugin-search": "^2.0.0-beta.61",
+    "@vitest/ui": "^0.29.0",
+    "@vuepress/plugin-search": "next",
     "eslint": "^8.35.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-es5": "^1.5.0",
@@ -101,7 +101,7 @@
     "typescript": "^4.9.3",
     "vite": "latest",
     "vitest": "latest",
-    "vuepress": "^2.0.0-beta.61"
+    "vuepress": "next"
   },
   "private": false
 }

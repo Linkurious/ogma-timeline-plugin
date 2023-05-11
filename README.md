@@ -1,6 +1,11 @@
+[![npm version](https://img.shields.io/npm/v/@linkurious/ogma-timeline-plugin)](https://www.npmjs.com/package/@linkurious/ogma-timeline-plugin)
+[![license](https://img.shields.io/npm/l/@linkurious/ogma-timeline-plugin.svg)](LICENSE.md)
+[![](https://data.jsdelivr.com/v1/package/npm/@linkurious/ogma-timeline-plugin/badge?style=rounded)](https://www.jsdelivr.com/package/npm/@linkurious/ogma-timeline-plugin)
+
+
 # @linkurious/ogma-timeline-plugin
 
-This is a Timeline plugin for [Ogma](https://doc.linkurious.com/ogma/latest/), it is still work in progress, the first official version should be released before end of April.
+Timeline plugin for [Ogma](https://doc.linkurious.com/ogma/latest/)
 
 
 

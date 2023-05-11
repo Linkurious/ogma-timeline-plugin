@@ -14,7 +14,7 @@ describe("Barchart", async () => {
   beforeEach(async () => {
     await session.refresh();
   });
-  test("should filter", async () => {
+  test("should filter nodes", async () => {
     const size = await session.page.evaluate(() => {
       createOgma({
         graph: {
@@ -43,6 +43,44 @@ describe("Barchart", async () => {
     expect(size).toBe(10);
   });
 
+  test("should filter edges", async () => {
+    const size = await session.page.evaluate(() => {
+      createOgma({
+        graph: {
+          nodes: [{ id: 0 }, { id: 1 }],
+          edges: [
+            {
+              source: 0,
+              target: 1,
+              data: {
+                start: Date.now(),
+              },
+            },
+            {
+              source: 0,
+              target: 1,
+              data: {
+                start: Date.now(),
+              },
+            },
+            ...new Array(10).fill(0).map((_, i) => ({
+              source: 0,
+              target: 1,
+              data: {
+                start: Date.now() / 2,
+              },
+            })),
+          ],
+        },
+      });
+      const controller = createController({
+        timeBars: [(1 / 3) * Date.now(), (2 / 3) * Date.now()],
+      });
+      return controller.filteredEdges.size;
+    });
+    expect(size).toBe(10);
+  });
+
   test("should be disabled if asked", async () => {
     const size = await session.page.evaluate(() => {
       createOgma({
@@ -66,7 +104,7 @@ describe("Barchart", async () => {
       });
       const controller = createController({
         timeBars: [(1 / 3) * Date.now(), (2 / 3) * Date.now()],
-        filter: {
+        nodeFilter: {
           enabled: false,
         },
       });
@@ -106,7 +144,7 @@ describe("Barchart", async () => {
       });
       const controller = createController({
         timeBars: [0, Date.now()],
-        filter: {
+        nodeFilter: {
           enabled: true,
           strategy: "outside",
           tolerance: "strict",
@@ -157,7 +195,7 @@ describe("Barchart", async () => {
       });
       const controller = createController({
         timeBars: [new Date("1 1 1980"), new Date("1 1 2010")],
-        filter: {
+        nodeFilter: {
           enabled: true,
           strategy: "outside",
           tolerance: "strict",

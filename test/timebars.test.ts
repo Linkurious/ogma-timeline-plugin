@@ -63,7 +63,7 @@ describe("Options", async () => {
         ],
         start: new Date("1 1 1940"),
         end: new Date("1 1 1970"),
-        filter: {
+        nodeFilter: {
           strategy: "between",
           tolerance: "strict",
           enabled: true,
@@ -108,7 +108,7 @@ describe("Options", async () => {
         ],
         start: new Date("1 1 1940"),
         end: new Date("1 1 1970"),
-        filter: {
+        nodeFilter: {
           strategy: "between",
           tolerance: "strict",
           enabled: true,
