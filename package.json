@@ -21,12 +21,12 @@
   "type": "module",
   "main": "dist/ogma-timeline-plugin.umd.js",
   "module": "dist/ogma-timeline-plugin.js",
-  "types": "dist/types.d.ts",
+  "types": "dist/types/index.d.ts",
   "files": [
     "LICENCE",
     "dist/ogma-timeline-plugin.js",
     "dist/ogma-timeline-plugin.umd.js",
-    "dist/types.d.ts",
+    "dist/types/*.d.ts",
     "dist/style.css"
   ],
   "exports": {
@@ -35,7 +35,7 @@
       "require": "./dist/ogma-timeline-plugin.umd.js"
     },
     "./style.css": "./dist/style.css",
-    "./types": "./dist/types.d.ts"
+    "./types": "./dist/types/index.d.ts"
   },
   "publishConfig": {
     "access": "public"
