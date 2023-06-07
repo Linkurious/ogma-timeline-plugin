@@ -2,7 +2,7 @@
 
 Ogma-Timeline-Plugin for [Ogma](https://doc.linkurio.us/ogma/latest/).
 
-[demo](/examples/demo)
+[demo](https://doc.linkurious.com/ogma/latest/examples/timeline.html)
 ## Installation
 
 First, you need to own a valid **Ogma** licence. Reach out [Ogma sales](https://doc.linkurio.us/ogma/latest/support.html) for more details.
