@@ -14,7 +14,7 @@
     "url": "git+https://github.com/Linkurious/ogma-timeline-plugin.git"
   },
   "engines": {
-    "node": "^16 || ^18"
+    "node": "16.20.0"
   },
   "license": "Apache-2.0",
   "author": "Linkurious SAS",
