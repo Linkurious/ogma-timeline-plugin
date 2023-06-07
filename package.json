@@ -14,7 +14,7 @@
     "url": "git+https://github.com/Linkurious/ogma-timeline-plugin.git"
   },
   "engines": {
-    "node": "18.13.0"
+    "node": ">=16"
   },
   "license": "Apache-2.0",
   "author": "Linkurious SAS",
@@ -52,7 +52,7 @@
     "predocs:build": "rm -rf docs/.vuepress/dist docs/.vuepress/.cache docs/.vuepress/.temp",
     "predocs:publish": "npm run docs:build",
     "preview": "vite preview",
-    "test": "vite build --config=test/vite.config.ts && vitest",
+    "test": "vite build --config=test/vite.config.ts && vitest run",
     "pretest:unit": "vite build --config=test/vite.config.ts",
     "test:unit": "vitest run --coverage --reporter=junit --reporter=default --outputFile reports/unit/junit-test-results.xml",
     "prebuild": "tsc",
