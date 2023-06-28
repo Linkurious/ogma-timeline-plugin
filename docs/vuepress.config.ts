@@ -18,6 +18,7 @@ export default defineUserConfig({
       "/selecting",
       "/timebars",
       "/timezone",
+      "/API",
     ],
     repo: "Linkurious/ogma-timeline-plugin",
   }),
