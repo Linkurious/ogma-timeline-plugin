@@ -15,7 +15,14 @@ import {
   DataGroup,
   TimelineOptions,
 } from "vis-timeline";
-import { click, rangechanged, scaleChange, scales, select } from "./constants";
+import {
+  click,
+  day,
+  rangechanged,
+  scaleChange,
+  scales,
+  select,
+} from "./constants";
 import {
   BarchartOptions,
   BarChartItem,
@@ -38,7 +45,7 @@ export const defaultBarchartOptions: BarchartOptions = {
   },
   ...defaultChartOptions,
 };
-
+const test = 0;
 export class Barchart extends Chart {
   private nodeItemsByScale: Lookup<ItemByScale>;
   private edgeItemsByScale: Lookup<ItemByScale>;
@@ -248,7 +255,7 @@ export class Barchart extends Chart {
   }
 
   protected onRangeChange(force = false) {
-    const scale = this.getScale();
+    const { scale, i, name } = this.getScale();
     if (
       (!force && scale === this.currentScale) ||
       !this.nodeItemsByScale[scale]
@@ -337,12 +344,12 @@ export class Barchart extends Chart {
     return scales
       .slice()
       .reverse()
-      .reduce((itemsByScale, scale, i, scales) => {
+      .reduce((itemsByScale, { millis, round, name }, i, scales) => {
         // if we reached a zoom where there are not too many events,
         // just display timeline
-        const gpPrev = itemsByScale[scales[i - 1]];
-        if (tooZoomed) {
-          itemsByScale[scale] = { ...gpPrev, tooZoomed: true };
+        const gpPrev = i > 0 ? itemsByScale[scales[i - 1].millis] : undefined;
+        if (gpPrev && tooZoomed) {
+          itemsByScale[millis] = { ...gpPrev, tooZoomed: true };
           return itemsByScale;
         }
         const itemsPerGroup: Record<
@@ -360,8 +367,10 @@ export class Barchart extends Chart {
           const ids = elements.getId();
           const itemsPerX = itemsPerGroup[groupid];
           elements.forEach((element, i) => {
-            const index = Math.floor(starts[idToIndex[ids[i]]] / scale);
-            const x = scale * index;
+            const d = starts[idToIndex[ids[i]]];
+            const x = round
+              ? round(new Date(d))
+              : millis * Math.floor(d / millis);
             if (!itemsPerX[x]) {
               itemsPerX[x] = {
                 ids: [],
@@ -398,7 +407,7 @@ export class Barchart extends Chart {
           }, {} as Lookup<ItemList>);
 
         const maxY = items.reduce((maxY, g) => Math.max(maxY, g.y), 0);
-        itemsByScale[scale] = {
+        itemsByScale[millis] = {
           items,
           itemToElements,
           tooZoomed,

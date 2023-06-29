@@ -171,24 +171,25 @@ export abstract class Chart extends EventEmitter<Events> {
     edgeEnds: number[]
   ): void;
 
-  protected getScale(): number {
+  protected getScale() {
     const { start, end } = this.chart.getWindow();
     const length = +end - +start;
     // choose a scale adapted to zoom
-    const { scale } = scales.reduce(
-      (scale, candidate) => {
+    return scales.reduce(
+      (scale, { millis: candidate, name }, i) => {
         const bars = Math.round(length / candidate);
         if (bars < scale.bars && bars > 10) {
           return {
             bars,
+            name,
             scale: candidate,
+            i,
           };
         }
         return scale;
       },
-      { bars: Infinity, scale: Infinity }
+      { bars: Infinity, scale: Infinity, i: -1, name: "undefined" }
     );
-    return scale;
   }
   destroy() {
     if (this.destroyed) return;

@@ -131,7 +131,7 @@ export class Timeline extends Chart {
   }
 
   protected onRangeChange() {
-    const scale = this.getScale();
+    const { scale } = this.getScale();
     if (scale === this.currentScale) {
       return;
     }
