@@ -20,9 +20,9 @@ describe("Timeline", async () => {
       createOgma({
         graph: {
           nodes: [
-            ...new Array(10).fill(0).map((_, i) => ({
+            ...new Array(4).fill(0).map((_, i) => ({
               id: i,
-              data: { start: 0 },
+              data: { start: Math.random() * 3600_000 },
             })),
           ],
           edges: [],
@@ -33,7 +33,7 @@ describe("Timeline", async () => {
         .then(() => afterTimelineRedraw())
         .then(() => document.querySelectorAll(".vis-box.nodes").length);
     });
-    expect(size).toBe(10);
+    expect(size).toBe(4);
   });
 
   test("should respect grouping", async () => {
@@ -43,7 +43,10 @@ describe("Timeline", async () => {
           nodes: [
             ...new Array(10).fill(0).map((_, i) => ({
               id: i,
-              data: { start: 0, type: i % 2 ? "A" : "B" },
+              data: {
+                start: Math.random() * 3600_000,
+                type: i % 2 ? "A" : "B",
+              },
             })),
           ],
           edges: [],
@@ -58,10 +61,10 @@ describe("Timeline", async () => {
         .then(() => afterTimelineRedraw())
         .then(() => [
           document.querySelectorAll(".vis-box.A").length,
-          document.querySelectorAll(".B").length,
+          document.querySelectorAll(".vis-box.B").length,
         ]);
     });
     expect(as).toBe(5);
-    expect(bs).toBe(4);
+    expect(bs).toBe(5);
   });
 });
