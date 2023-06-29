@@ -189,7 +189,7 @@ export class Barchart extends Chart {
     const isLine = this.options.graph2dOptions.style === "line";
     const { nodes, edges } = (
       this.rects
-        .map((rect, i) => {
+        .map((rect) => {
           const groupX = +(rect.getAttribute("x") as string) + offsetX;
           const groupH = +(rect.getAttribute("height") as string);
           const groupY = +(rect.getAttribute("y") as string) + offsetY;
@@ -256,7 +256,8 @@ export class Barchart extends Chart {
     // prevent from too much movement on zoom out
     if (
       scale > this.currentScale &&
-      this.currentEdgeData.items.length + this.currentNodeData.items.length < 5 &&
+      this.currentEdgeData.items.length + this.currentNodeData.items.length <
+        5 &&
       this.nodeItemsByScale[scale].items.length +
         this.nodeItemsByScale[scale].items.length <
         5
@@ -345,7 +346,7 @@ export class Barchart extends Chart {
     return scales
       .slice()
       .reverse()
-      .reduce((itemsByScale, { millis, round, name }, i, scales) => {
+      .reduce((itemsByScale, { millis, round }, i, scales) => {
         // if we reached a zoom where there are not too many events,
         // just display timeline
         const gpPrev = i > 0 ? itemsByScale[scales[i - 1].millis] : undefined;
