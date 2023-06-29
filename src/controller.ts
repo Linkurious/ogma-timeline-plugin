@@ -228,24 +228,24 @@ export class Controller<
 
   showTimeline() {
     const { start, end } = this.barchart.getWindow();
-    this.timeline.chart.setWindow(+start, +end, { animation: false });
     this.timeline.setTimebars(this.barchart.getTimebars());
     this.barchart.container.style.display = "none";
     this.timeline.container.style.display = "";
     this.mode = "timeline";
     this.timeline.visible = true;
     this.barchart.visible = false;
+    this.timeline.chart.setWindow(+start, +end, { animation: false });
   }
 
   showBarchart() {
     const { start, end } = this.timeline.getWindow();
-    this.barchart.chart.setWindow(+start, +end, { animation: false });
     this.barchart.setTimebars(this.timeline.getTimebars());
     this.barchart.container.style.display = "";
     this.timeline.container.style.display = "none";
     this.mode = "barchart";
     this.timeline.visible = false;
     this.barchart.visible = true;
+    this.barchart.chart.setWindow(+start, +end, { animation: false });
   }
 
   addTimeBar(timebar: TimebarOptions): void {
