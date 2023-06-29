@@ -1,4 +1,4 @@
-import{_ as n,p as s,q as a,a1 as t}from"./framework-5866ffd3.js";const p={},o=t(`<div class="language-typescript line-numbers-mode" data-ext="ts"><pre class="language-typescript"><code><span class="token keyword">const</span> ogma <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Ogma</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+import{_ as n,o as s,c as a,e as t}from"./app-422df3f8.js";const p={},o=t(`<div class="language-typescript line-numbers-mode" data-ext="ts"><pre class="language-typescript"><code><span class="token keyword">const</span> ogma <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Ogma</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
   container<span class="token operator">:</span> <span class="token string">&quot;ogma&quot;</span><span class="token punctuation">,</span>
   graph<span class="token operator">:</span> <span class="token punctuation">{</span>
     nodes<span class="token operator">:</span> <span class="token punctuation">[</span>
