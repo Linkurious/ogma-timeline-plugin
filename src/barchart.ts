@@ -1,5 +1,4 @@
 import Ogma, {
-  Edge,
   EdgeId,
   EdgeList,
   Item,
@@ -38,7 +37,6 @@ export const defaultBarchartOptions: BarchartOptions = {
   },
   ...defaultChartOptions,
 };
-
 export class Barchart extends Chart {
   private nodeItemsByScale: Lookup<ItemByScale>;
   private edgeItemsByScale: Lookup<ItemByScale>;
@@ -191,7 +189,7 @@ export class Barchart extends Chart {
     const isLine = this.options.graph2dOptions.style === "line";
     const { nodes, edges } = (
       this.rects
-        .map((rect, i) => {
+        .map((rect) => {
           const groupX = +(rect.getAttribute("x") as string) + offsetX;
           const groupH = +(rect.getAttribute("height") as string);
           const groupY = +(rect.getAttribute("y") as string) + offsetY;
@@ -248,10 +246,23 @@ export class Barchart extends Chart {
   }
 
   protected onRangeChange(force = false) {
-    const scale = this.getScale();
+    const { scale } = this.getScale();
     if (
       (!force && scale === this.currentScale) ||
       !this.nodeItemsByScale[scale]
+    ) {
+      return;
+    }
+    // prevent from too much movement on zoom out
+    const currentBarsCount =
+      this.currentEdgeData.items.length + this.currentNodeData.items.length;
+    if (
+      scale > this.currentScale &&
+      currentBarsCount < 5 &&
+      currentBarsCount > 0 &&
+      this.nodeItemsByScale[scale].items.length +
+        this.nodeItemsByScale[scale].items.length <
+        5
     ) {
       return;
     }
@@ -337,12 +348,12 @@ export class Barchart extends Chart {
     return scales
       .slice()
       .reverse()
-      .reduce((itemsByScale, scale, i, scales) => {
+      .reduce((itemsByScale, { millis, round }, i, scales) => {
         // if we reached a zoom where there are not too many events,
         // just display timeline
-        const gpPrev = itemsByScale[scales[i - 1]];
-        if (tooZoomed) {
-          itemsByScale[scale] = { ...gpPrev, tooZoomed: true };
+        const gpPrev = i > 0 ? itemsByScale[scales[i - 1].millis] : undefined;
+        if (gpPrev && tooZoomed) {
+          itemsByScale[millis] = { ...gpPrev, tooZoomed: true };
           return itemsByScale;
         }
         const itemsPerGroup: Record<
@@ -360,8 +371,10 @@ export class Barchart extends Chart {
           const ids = elements.getId();
           const itemsPerX = itemsPerGroup[groupid];
           elements.forEach((element, i) => {
-            const index = Math.floor(starts[idToIndex[ids[i]]] / scale);
-            const x = scale * index;
+            const d = starts[idToIndex[ids[i]]];
+            const x = round
+              ? round(new Date(d))
+              : millis * Math.floor(d / millis);
             if (!itemsPerX[x]) {
               itemsPerX[x] = {
                 ids: [],
@@ -398,7 +411,7 @@ export class Barchart extends Chart {
           }, {} as Lookup<ItemList>);
 
         const maxY = items.reduce((maxY, g) => Math.max(maxY, g.y), 0);
-        itemsByScale[scale] = {
+        itemsByScale[millis] = {
           items,
           itemToElements,
           tooZoomed,

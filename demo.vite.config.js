@@ -1,9 +1,6 @@
 export default {
-  root: 'demo/',
+  root: "demo/",
   build: {
-    outDir: '../dist'
-  //   rollupOptions: {
-  //     input: 'demo/main.ts',
-  //   },
+    outDir: "../dist",
   },
-}
+};
