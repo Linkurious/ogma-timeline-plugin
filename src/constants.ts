@@ -1,10 +1,10 @@
-import { Scales } from "./types";
+import { Scale } from "./types";
 
 export const day = 1000 * 3600 * 24;
 export const month = day * 30;
 export const year = day * 365;
 
-export const scales: Scales[] = [
+export const scales: Scale[] = [
   {
     name: "millisecond",
     millis: 1,

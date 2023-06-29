@@ -178,7 +178,7 @@ export abstract class Chart extends EventEmitter<Events> {
     return scales.reduce(
       (scale, { millis: candidate, name }, i) => {
         const bars = Math.round(length / candidate);
-        if (bars < scale.bars && bars > 10) {
+        if (bars < scale.bars && bars > 2) {
           return {
             bars,
             name,

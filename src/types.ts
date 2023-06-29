@@ -166,8 +166,8 @@ export type Timebar = {
  */
 export type TimebarOptions = { fixed?: boolean; date: Date } | number | Date;
 
-export type Scales = {
+export type Scale = {
   name: string;
   millis: number;
   round?: (date: Date) => number;
-}[];
+};

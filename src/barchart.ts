@@ -1,5 +1,4 @@
 import Ogma, {
-  Edge,
   EdgeId,
   EdgeList,
   Item,
@@ -15,14 +14,7 @@ import {
   DataGroup,
   TimelineOptions,
 } from "vis-timeline";
-import {
-  click,
-  day,
-  rangechanged,
-  scaleChange,
-  scales,
-  select,
-} from "./constants";
+import { click, rangechanged, scaleChange, scales, select } from "./constants";
 import {
   BarchartOptions,
   BarChartItem,
@@ -45,7 +37,6 @@ export const defaultBarchartOptions: BarchartOptions = {
   },
   ...defaultChartOptions,
 };
-const test = 0;
 export class Barchart extends Chart {
   private nodeItemsByScale: Lookup<ItemByScale>;
   private edgeItemsByScale: Lookup<ItemByScale>;
@@ -255,10 +246,20 @@ export class Barchart extends Chart {
   }
 
   protected onRangeChange(force = false) {
-    const { scale, i, name } = this.getScale();
+    const { scale } = this.getScale();
     if (
       (!force && scale === this.currentScale) ||
       !this.nodeItemsByScale[scale]
+    ) {
+      return;
+    }
+    // prevent from too much movement on zoom out
+    if (
+      scale > this.currentScale &&
+      this.currentEdgeData.items.length + this.currentNodeData.items.length < 5 &&
+      this.nodeItemsByScale[scale].items.length +
+        this.nodeItemsByScale[scale].items.length <
+        5
     ) {
       return;
     }
