@@ -254,10 +254,12 @@ export class Barchart extends Chart {
       return;
     }
     // prevent from too much movement on zoom out
+    const currentBarsCount =
+      this.currentEdgeData.items.length + this.currentNodeData.items.length;
     if (
       scale > this.currentScale &&
-      this.currentEdgeData.items.length + this.currentNodeData.items.length <
-        5 &&
+      currentBarsCount < 5 &&
+      currentBarsCount > 0 &&
       this.nodeItemsByScale[scale].items.length +
         this.nodeItemsByScale[scale].items.length <
         5
