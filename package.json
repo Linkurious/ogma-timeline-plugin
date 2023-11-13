@@ -81,7 +81,7 @@
     "@vitest/ui": "^0.34.0",
     "@vuepress/plugin-search": "next",
     "eslint": "^8.35.0",
-    "eslint-config-prettier": "^8.6.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-es5": "^1.5.0",
     "eslint-plugin-html": "^7.1.0",
     "eslint-plugin-import": "^2.27.5",
