@@ -38,7 +38,7 @@ describe("Timeline", async () => {
 
   test("should respect grouping", async () => {
     const [as, bs] = await session.page.evaluate(() => {
-      const ogma = createOgma({
+      createOgma({
         graph: {
           nodes: [
             ...new Array(10).fill(0).map((_, i) => ({
