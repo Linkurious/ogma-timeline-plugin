@@ -1,6 +1,6 @@
 {
   "name": "@linkurious/ogma-timeline-plugin",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "keywords": [
     "ogma",
     "timeline",
@@ -14,7 +14,7 @@
     "url": "git+https://github.com/Linkurious/ogma-timeline-plugin.git"
   },
   "engines": {
-    "node": "18.16.1"
+    "node": "18.18.2"
   },
   "license": "Apache-2.0",
   "author": "Linkurious SAS",
@@ -76,12 +76,12 @@
     "@types/lodash.throttle": "^4.1.7",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
-    "@vitest/coverage-c8": "^0.29.3",
-    "@vitest/coverage-v8": "^0.32.0",
-    "@vitest/ui": "^0.29.0",
+    "@vitest/coverage-c8": "^0.33.0",
+    "@vitest/coverage-v8": "^0.34.0",
+    "@vitest/ui": "^0.34.0",
     "@vuepress/plugin-search": "next",
     "eslint": "^8.35.0",
-    "eslint-config-prettier": "^8.6.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-es5": "^1.5.0",
     "eslint-plugin-html": "^7.1.0",
     "eslint-plugin-import": "^2.27.5",
@@ -90,8 +90,8 @@
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.1.1",
-    "get-port": "^6.1.2",
-    "gh-pages": "^5.0.0",
+    "get-port": "^7.0.0",
+    "gh-pages": "^6.0.0",
     "lodash.throttle": "^4.1.1",
     "markdown-it-html5-media": "^0.7.1",
     "moment": "^2.29.4",
