@@ -1,8 +1,10 @@
 import Ogma, { NodeList, EdgeList } from "@linkurious/ogma";
 import EventEmitter from "eventemitter3";
-import throttle from "lodash.throttle";
 import merge from "lodash.merge";
+import throttle from "lodash.throttle";
 
+import { TimelineAnimationOptions } from "vis-timeline";
+import { Barchart, defaultBarchartOptions } from "./barchart";
 import {
   rangechange,
   scaleChange,
@@ -12,7 +14,6 @@ import {
 } from "./constants";
 import { getSelector } from "./selector";
 import { Timeline, defaultTimelineOptions } from "./timeline";
-import { Barchart, defaultBarchartOptions } from "./barchart";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 import "./style.css";
 import {
@@ -23,7 +24,6 @@ import {
   TimebarOptions,
   TimelineMode,
 } from "./types";
-import { TimelineAnimationOptions } from "vis-timeline";
 
 export const defaultOptions: Partial<Options> = {
   nodeStartPath: "start",

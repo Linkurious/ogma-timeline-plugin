@@ -8,12 +8,14 @@ import Ogma, {
   NodeId,
   NodeList,
 } from "@linkurious/ogma";
+import merge from "lodash.merge";
 import {
   DataGroup,
   DataItem,
   Timeline as VTimeline,
   TimelineEventPropertiesResult,
 } from "vis-timeline";
+import { Chart, defaultChartOptions } from "./chart";
 import { click, scaleChange, select } from "./constants";
 import "./style.css";
 import {
@@ -25,8 +27,7 @@ import {
   TimelineData,
   TimelineOptions,
 } from "./types";
-import { Chart, defaultChartOptions } from "./chart";
-import merge from "lodash.merge";
+
 
 /**
  * @typedef {object} TimelineOptions

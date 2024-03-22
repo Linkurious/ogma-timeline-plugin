@@ -1,14 +1,4 @@
 import {
-  TimelineOptions as VTimelineOptions,
-  DataGroup,
-  Graph2d,
-  Timeline,
-  TimelineEventPropertiesResult,
-  Graph2dOptions,
-  DataItem,
-  IdType,
-} from "vis-timeline";
-import {
   Edge,
   Node,
   NodeList,
@@ -19,6 +9,16 @@ import {
   ItemId,
   Item,
 } from "@linkurious/ogma";
+import {
+  TimelineOptions as VTimelineOptions,
+  DataGroup,
+  Graph2d,
+  Timeline,
+  TimelineEventPropertiesResult,
+  Graph2dOptions,
+  DataItem,
+  IdType,
+} from "vis-timeline";
 import {
   click,
   rangechanged,

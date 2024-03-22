@@ -1,5 +1,5 @@
-import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { expect } from "@playwright/test";
+import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { BrowserSession } from "./utils";
 
 describe("Barchart", async () => {
@@ -43,7 +43,7 @@ describe("Barchart", async () => {
 
   test("should respect node grouping", async () => {
     const [as, bs] = await session.page.evaluate(() => {
-      const ogma = createOgma({
+      createOgma({
         container: "ogma",
         graph: {
           nodes: [
@@ -83,7 +83,7 @@ describe("Barchart", async () => {
 
   test("should respect edge grouping", async () => {
     const [as, bs] = await session.page.evaluate(() => {
-      const ogma = createOgma({
+      createOgma({
         container: "ogma",
         graph: {
           nodes: [
