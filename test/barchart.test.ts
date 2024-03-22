@@ -43,7 +43,7 @@ describe("Barchart", async () => {
 
   test("should respect node grouping", async () => {
     const [as, bs] = await session.page.evaluate(() => {
-      const ogma = createOgma({
+      createOgma({
         container: "ogma",
         graph: {
           nodes: [
@@ -83,7 +83,7 @@ describe("Barchart", async () => {
 
   test("should respect edge grouping", async () => {
     const [as, bs] = await session.page.evaluate(() => {
-      const ogma = createOgma({
+      createOgma({
         container: "ogma",
         graph: {
           nodes: [
