@@ -7,6 +7,8 @@ import Ogma, {
   NodeId,
   NodeList,
 } from "@linkurious/ogma";
+import merge from "lodash.merge";
+import { DataSet } from "vis-data";
 import {
   DataItem,
   Graph2d as VGraph2d,
@@ -14,6 +16,7 @@ import {
   DataGroup,
   TimelineOptions,
 } from "vis-timeline";
+import { Chart, defaultChartOptions } from "./chart";
 import { click, rangechanged, scaleChange, scales, select } from "./constants";
 import {
   BarchartOptions,
@@ -24,9 +27,6 @@ import {
   GroupFunction,
   ItemGenerator,
 } from "./types";
-import { Chart, defaultChartOptions } from "./chart";
-import { DataSet } from "vis-data";
-import merge from "lodash.merge";
 
 export const defaultBarchartOptions: BarchartOptions = {
   graph2dOptions: {
@@ -311,6 +311,7 @@ export class Barchart extends Chart {
     groupFunction: GroupFunction<ItemList>,
     itemGenerator: ItemGenerator<BarChartItem, ItemList>,
     starts: number[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ends: number[]
   ) {
     const ids = elements.getId();
