@@ -58,7 +58,8 @@
     "prebuild": "tsc",
     "postbuild": "scripts/postbuild.sh",
     "postversion": "sync_versions",
-    "bump:patch": "npm version --no-git-tag-version patch"
+    "bump:patch": "npm version --no-git-tag-version patch",
+    "prepare": "npx playwright install chromium"
   },
   "peerDependencies": {
     "@linkurious/ogma": "^4.4.0 || ^5.0.0",
