@@ -37,6 +37,13 @@
     "./style.css": "./dist/style.css",
     "./types": "./dist/types/index.d.ts"
   },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/types/index.d.ts"
+      ]
+    }
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -56,6 +63,7 @@
     "pretest:unit": "vite build --config=test/vite.config.ts",
     "test:unit": "vitest run --reporter=junit --reporter=default --outputFile reports/unit/junit-test-results.xml",
     "prebuild": "tsc",
+    "prepack": "node scripts/clean-package.js",
     "postbuild": "scripts/postbuild.sh",
     "postversion": "sync_versions",
     "bump:patch": "npm version --no-git-tag-version patch"
