@@ -32,10 +32,17 @@
   "exports": {
     ".": {
       "import": "./dist/ogma-timeline-plugin.js",
-      "require": "./dist/ogma-timeline-plugin.umd.js"
+      "require": "./dist/ogma-timeline-plugin.umd.js",
+      "types": "./dist/types/index.d.ts"
     },
-    "./style.css": "./dist/style.css",
-    "./types": "./dist/types/index.d.ts"
+    "./style.css": "./dist/style.css"
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/types/index.d.ts"
+      ]
+    }
   },
   "typesVersions": {
     "*": {
