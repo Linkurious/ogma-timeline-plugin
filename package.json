@@ -1,6 +1,6 @@
 {
   "name": "@linkurious/ogma-timeline-plugin",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "keywords": [
     "ogma",
     "timeline",
@@ -36,13 +36,6 @@
       "types": "./dist/types/index.d.ts"
     },
     "./style.css": "./dist/style.css"
-  },
-  "typesVersions": {
-    "*": {
-      ".": [
-        "./dist/types/index.d.ts"
-      ]
-    }
   },
   "typesVersions": {
     "*": {
