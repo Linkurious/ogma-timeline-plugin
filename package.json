@@ -37,28 +37,12 @@
     "./style.css": "./dist/style.css",
     "./types": "./dist/types/index.d.ts"
   },
-  "publishConfig": {
-    "access": "public"
-  },
-  "scripts": {
-    "build": "vite build",
-    "dev": "vite --config=demo.vite.config.js",
-    "docs:build": "vuepress build docs --config docs/vuepress.config.ts",
-    "docs:dev": "vuepress dev docs --config docs/vuepress.config.ts",
-    "docs:publish": "gh-pages -d docs/.vuepress/dist",
-    "lint": "eslint --ext .js,.ts,.vue demo src",
-    "lint:fix": "eslint --ext .js,.ts,.vue demo src --fix",
-    "lint:ci": "eslint -f checkstyle -o reports/checkstyle.xml src ./test/**/*.test.ts",
-    "predocs:build": "rm -rf docs/.vuepress/dist docs/.vuepress/.cache docs/.vuepress/.temp",
-    "predocs:publish": "npm run docs:build",
-    "preview": "vite preview",
-    "test": "vite build --config=test/vite.config.ts && vitest run",
-    "pretest:unit": "vite build --config=test/vite.config.ts",
-    "test:unit": "vitest run --reporter=junit --reporter=default --outputFile reports/unit/junit-test-results.xml",
-    "prebuild": "tsc",
-    "postbuild": "scripts/postbuild.sh",
-    "postversion": "sync_versions",
-    "bump:patch": "npm version --no-git-tag-version patch"
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/types/index.d.ts"
+      ]
+    }
   },
   "peerDependencies": {
     "@linkurious/ogma": "^4.4.0 || ^5.0.0",
@@ -68,39 +52,5 @@
   "dependencies": {
     "eventemitter3": "^5.0.0",
     "lodash.merge": "^4.6.2"
-  },
-  "devDependencies": {
-    "@linkurious/code-tools": "0.0.14",
-    "@playwright/test": "^1.31.2",
-    "@types/lodash.merge": "^4.6.7",
-    "@types/lodash.throttle": "^4.1.7",
-    "@typescript-eslint/eslint-plugin": "^5.54.0",
-    "@typescript-eslint/parser": "^5.54.0",
-    "@vitest/coverage-c8": "^0.33.0",
-    "@vitest/coverage-v8": "^0.34.0",
-    "@vitest/ui": "^0.34.0",
-    "@vuepress/plugin-search": "next",
-    "eslint": "^8.35.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-es5": "^1.5.0",
-    "eslint-plugin-html": "^8.0.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-import-order": "^2.1.4",
-    "eslint-plugin-jsdoc": "^40.0.0",
-    "eslint-plugin-prefer-arrow": "^1.2.3",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-promise": "^6.1.1",
-    "get-port": "^7.0.0",
-    "gh-pages": "^6.0.0",
-    "lodash.throttle": "^4.1.1",
-    "markdown-it-html5-media": "^0.7.1",
-    "moment": "^2.29.4",
-    "playwright": "^1.31.2",
-    "prettier": "^2.8.4",
-    "typescript": "^5.0.0",
-    "vite": "latest",
-    "vitest": "latest",
-    "vuepress": "next"
-  },
-  "private": false
+  }
 }
