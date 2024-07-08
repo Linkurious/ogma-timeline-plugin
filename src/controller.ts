@@ -174,6 +174,7 @@ export class Controller<
     ogma.events.on("destroy", () => {
       this.destroy();
     });
+    top.timeline = this;
   }
 
   refresh({
@@ -292,6 +293,14 @@ export class Controller<
       this.timeline.setSelection({ nodes, edges });
     } else {
       this.barchart.setSelection({ nodes, edges });
+    }
+  }
+
+  getSelection() {
+    if (this.mode === "timeline") {
+      return this.timeline.getSelection();
+    } else {
+      return this.barchart.getSelection();
     }
   }
 

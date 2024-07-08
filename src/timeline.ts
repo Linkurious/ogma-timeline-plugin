@@ -237,4 +237,21 @@ export class Timeline extends Chart {
     }
     this.chart.setSelection([...nodeIds, ...edgeIds]);
   }
+  getSelection() {
+    const nodeIds: ItemId[] = [];
+    const edgeIds: ItemId[] = [];
+
+    this.chart.getSelection().forEach((id) => {
+      if (this.edgeItems.itemToElements[id]) {
+        edgeIds.push(this.edgeItems.itemToElements[id].getId());
+      }
+      if (this.nodeItems.itemToElements[id]) {
+        nodeIds.push(this.nodeItems.itemToElements[id].getId());
+      }
+    });
+    return {
+      nodes: this.ogma.getNodes(nodeIds),
+      edges: this.ogma.getEdges(edgeIds),
+    };
+  }
 }

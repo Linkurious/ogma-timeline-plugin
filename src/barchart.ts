@@ -400,7 +400,6 @@ export class Barchart extends Chart {
 
         itemToElements = items
           .sort((a, b) => a.x - b.x)
-          // .sort(([a], [b]) => +a - +b)
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .reduce((itemToElements, { ids }, i) => {
             itemToElements[i] = isNode
@@ -467,5 +466,31 @@ export class Barchart extends Chart {
         if (isEdge) edgeIndex++;
       }
     });
+  }
+  getSelection() {
+    let nodeIndex = 0;
+    let edgeIndex = 0;
+    const selectedNodes: ItemId[] = [];
+    const selectedEdges: ItemId[] = [];
+    const isLine = this.options.graph2dOptions.style === "line";
+    this.rects.forEach((rect, i) => {
+      const isNode = rect.classList.contains("node");
+      const isEdge = rect.classList.contains("edge");
+      if (isLine || !rect.classList.contains("vis-point")) {
+        if (isNode) nodeIndex++;
+        if (isEdge) edgeIndex++;
+      }
+      if (!rect.classList.contains("vis-selected")) return;
+      if (isNode) {
+        selectedNodes.push(...this.currentNodeData.items[nodeIndex - 1].ids);
+      }
+      if (isEdge) {
+        selectedEdges.push(...this.currentEdgeData.items[edgeIndex - 1].ids);
+      }
+    });
+    return {
+      nodes: this.ogma.getNodes(selectedNodes),
+      edges: this.ogma.getEdges(selectedEdges),
+    };
   }
 }
