@@ -174,7 +174,6 @@ export class Controller<
     ogma.events.on("destroy", () => {
       this.destroy();
     });
-    top.timeline = this;
   }
 
   refresh({

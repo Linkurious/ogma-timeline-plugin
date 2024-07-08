@@ -473,7 +473,7 @@ export class Barchart extends Chart {
     const selectedNodes: ItemId[] = [];
     const selectedEdges: ItemId[] = [];
     const isLine = this.options.graph2dOptions.style === "line";
-    this.rects.forEach((rect, i) => {
+    this.rects.forEach((rect) => {
       const isNode = rect.classList.contains("node");
       const isEdge = rect.classList.contains("edge");
       if (isLine || !rect.classList.contains("vis-point")) {
