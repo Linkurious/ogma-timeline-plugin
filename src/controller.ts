@@ -272,7 +272,9 @@ export class Controller<
     end: number | Date,
     options?: TimelineAnimationOptions
   ) {
-    if (!Number.isFinite(start) || !Number.isFinite(end)) return;
+    if (!Number.isFinite(+start) || !Number.isFinite(+end)) {
+      return this.onTimeChange();
+    }
     if (this.mode === "timeline") {
       this.timeline.setWindow(start, end, options);
     } else {
