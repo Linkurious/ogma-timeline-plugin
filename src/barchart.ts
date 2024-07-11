@@ -25,6 +25,7 @@ import {
   ItemGenerator,
 } from "./types";
 import { Chart, defaultChartOptions } from "./chart";
+import { BCBackground } from "./barchart-background";
 import { DataSet } from "vis-data";
 import merge from "lodash.merge";
 
@@ -46,6 +47,7 @@ export class Barchart extends Chart {
   private options: BarchartOptions;
   private rects: SVGRectElement[];
   private groupDataset: DataSet<DataGroup>;
+  private bcBackground: BCBackground;
 
   /**
    * @param {HTMLDivElement} container
@@ -62,6 +64,7 @@ export class Barchart extends Chart {
       merge(defaultBarchartOptions.graph2dOptions, options.graph2dOptions)
     );
     this.options = options;
+    this.bcBackground = new BCBackground(barchart);
     this.chart = barchart;
     this.nodeItemsByScale = {};
     this.edgeItemsByScale = {};
@@ -246,6 +249,7 @@ export class Barchart extends Chart {
   }
 
   protected onRangeChange(force = false) {
+    this.bcBackground.refresh();
     const { scale } = this.getScale();
     if (
       (!force && scale === this.currentScale) ||
@@ -279,11 +283,13 @@ export class Barchart extends Chart {
       ...currentNodeData.groups,
       ...currentEdgeData.groups,
     ]);
+    this.updateBackgrounds();
     this.dataset.add([
       ...currentNodeData.items,
       ...currentEdgeData.items,
+      // ...this.backgrounds.ma,
     ] as unknown as DataItem[]);
-
+    this.bcBackground.refresh();
     this.chart.redraw();
     if (!currentNodeData.tooZoomed) {
       this.emit(rangechanged);
@@ -301,6 +307,9 @@ export class Barchart extends Chart {
     this.chart.setOptions(options.graph2dOptions as unknown as TimelineOptions);
   }
 
+  protected updateBackgrounds(): void {
+    this.bcBackground.refresh();
+  }
   protected registerEvents(): void {
     super.registerEvents();
   }

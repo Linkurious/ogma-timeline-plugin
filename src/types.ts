@@ -74,6 +74,7 @@ export interface Options {
   timeBars: TimebarOptions[];
   edgeFilter: FilterOptions;
   nodeFilter: FilterOptions;
+  timebarSpans: boolean;
   nodeStartPath: string;
   nodeEndPath: string;
   edgeStartPath: string;
