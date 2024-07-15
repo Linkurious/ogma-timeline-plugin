@@ -48,7 +48,7 @@ export const defaultOptions: Partial<Options> = {
 };
 export class Controller<
   ND = unknown,
-  ED = unknown
+  ED = unknown,
 > extends EventEmitter<ControlerEvents> {
   private mode: TimelineMode;
   public timeline: Timeline;
@@ -280,7 +280,7 @@ export class Controller<
     } else {
       this.barchart.setWindow(start, end, options);
     }
-    this.onTimeChange();
+    return this.onTimeChange();
   }
 
   getWindow() {
