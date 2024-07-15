@@ -22,6 +22,8 @@ module.exports = {
   },
   rules: {
     "no-console": 2,
+    '@typescript-eslint/no-non-null-assertion': 0,
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
   },
   plugins: ["promise", "import-order", "jsdoc", "html"],
 };

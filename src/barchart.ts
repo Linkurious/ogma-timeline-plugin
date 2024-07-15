@@ -311,7 +311,7 @@ export class Barchart extends Chart {
     groupFunction: GroupFunction<ItemList>,
     itemGenerator: ItemGenerator<BarChartItem, ItemList>,
     starts: number[],
-    ends: number[]
+    _: number[]
   ) {
     const ids = elements.getId();
     const isNode = elements.isNode;

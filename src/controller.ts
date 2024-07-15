@@ -48,7 +48,7 @@ export const defaultOptions: Partial<Options> = {
 };
 export class Controller<
   ND = unknown,
-  ED = unknown,
+  ED = unknown
 > extends EventEmitter<ControlerEvents> {
   private mode: TimelineMode;
   public timeline: Timeline;
