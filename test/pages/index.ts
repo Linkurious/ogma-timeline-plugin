@@ -3,15 +3,15 @@ import { Controller } from "../../src/controller";
 
 function afterBarchartRedraw() {
   return new Promise((resolve) => {
-    controller.barchart.once("redraw", () => {
-      resolve(controller);
+    window['controller'].barchart.once("redraw", () => {
+      resolve(window['controller']);
     });
   });
 }
 function afterTimelineRedraw() {
   return new Promise((resolve) => {
-    controller.timeline.once("redraw", () => {
-      resolve(controller);
+    window['controller'].timeline.once("redraw", () => {
+      resolve(window['controller']);
     });
   });
 }
@@ -29,27 +29,27 @@ function createOgma(options) {
     container: "ogma",
     ...options,
   });
-  window.ogma = ogma;
+  window['ogma'] = ogma;
   return ogma;
 }
 function createController(options) {
   const controller = new Controller(
-    window.ogma,
-    document.getElementById("timeline"),
+    window['ogma'],
+    document.getElementById("timeline") as HTMLDivElement,
     options
   );
-  window.controller = controller;
+  window['controller'] = controller;
   return controller;
 }
 function cleanup() {
-  if (window.controller) window.controller.destroy();
-  if (window.ogma) window.ogma.destroy();
+  if (window['controller']) window['controller'].destroy();
+  if (window['ogma']) window['ogma'].destroy();
 }
-window.Ogma = Ogma;
-window.Controller = Controller;
-window.wait = wait;
-window.createOgma = createOgma;
-window.createController = createController;
-window.afterBarchartRedraw = afterBarchartRedraw;
-window.afterTimelineRedraw = afterTimelineRedraw;
-window.cleanup = cleanup;
+window['Ogma'] = Ogma;
+window['controller'] = Controller;
+window['wait'] = wait;
+window['createOgma'] = createOgma;
+window['createController'] = createController;
+window['afterBarchartRedraw'] = afterBarchartRedraw;
+window['afterTimelineRedraw'] = afterTimelineRedraw;
+window['cleanup'] = cleanup;
