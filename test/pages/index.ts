@@ -47,9 +47,12 @@ function cleanup() {
 }
 window['Ogma'] = Ogma;
 window['controller'] = Controller;
+// @ts-expect-error
 window['wait'] = wait;
 window['createOgma'] = createOgma;
 window['createController'] = createController;
+// @ts-expect-error
 window['afterBarchartRedraw'] = afterBarchartRedraw;
+// @ts-expect-error
 window['afterTimelineRedraw'] = afterTimelineRedraw;
 window['cleanup'] = cleanup;
