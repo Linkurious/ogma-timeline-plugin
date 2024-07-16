@@ -1,5 +1,5 @@
-import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { expect } from "@playwright/test";
+import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { BrowserSession } from "./utils";
 
 describe("Barchart", async () => {
@@ -63,7 +63,7 @@ describe("Barchart", async () => {
                 start: Date.now(),
               },
             },
-            ...new Array(10).fill(0).map((_, i) => ({
+            ...new Array(10).fill(0).map(() => ({
               source: 0,
               target: 1,
               data: {
