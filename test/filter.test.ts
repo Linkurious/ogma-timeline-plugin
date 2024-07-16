@@ -1,5 +1,5 @@
-import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { expect } from "@playwright/test";
+import { afterAll, beforeAll, beforeEach, describe, test } from "vitest";
 import { BrowserSession } from "./utils";
 
 describe("Barchart", async () => {
