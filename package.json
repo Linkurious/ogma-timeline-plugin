@@ -99,7 +99,15 @@
     "vuepress": "next"
   },
   "eslintConfig": {
-    "extends": "@linkurious/eslint-config-ogma"
+    "extends": "@linkurious/eslint-config-ogma",
+    "rules": {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_"
+        }
+      ]
+    }
   },
   "private": false
 }
