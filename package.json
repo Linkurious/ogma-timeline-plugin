@@ -79,36 +79,35 @@
   },
   "devDependencies": {
     "@linkurious/code-tools": "0.0.14",
+    "@linkurious/eslint-config-ogma": "^1.0.11",
     "@playwright/test": "^1.31.2",
     "@types/lodash.merge": "^4.6.7",
     "@types/lodash.throttle": "^4.1.7",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
-    "@typescript-eslint/parser": "^7.16.1",
-    "@vitest/coverage-c8": "^0.33.0",
     "@vitest/coverage-v8": "^0.34.0",
     "@vitest/ui": "^0.34.0",
     "@vuepress/plugin-search": "next",
-    "eslint": "^8.35.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-es5": "^1.5.0",
-    "eslint-plugin-html": "^8.0.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-import-order": "^2.1.4",
-    "eslint-plugin-jsdoc": "^40.0.0",
-    "eslint-plugin-prefer-arrow": "^1.2.3",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-promise": "^6.1.1",
     "get-port": "^7.0.0",
     "gh-pages": "^6.0.0",
     "lodash.throttle": "^4.1.1",
     "markdown-it-html5-media": "^0.7.1",
     "moment": "^2.29.4",
     "playwright": "^1.31.2",
-    "prettier": "^2.8.4",
     "typescript": "^5.0.0",
     "vite": "latest",
     "vitest": "latest",
     "vuepress": "next"
+  },
+  "eslintConfig": {
+    "extends": "@linkurious/eslint-config-ogma",
+    "rules": {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_"
+        }
+      ]
+    }
   },
   "private": false
 }
