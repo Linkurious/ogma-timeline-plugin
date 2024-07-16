@@ -1,8 +1,10 @@
 import Ogma, { NodeList, EdgeList } from "@linkurious/ogma";
 import EventEmitter from "eventemitter3";
-import throttle from "lodash.throttle";
 import merge from "lodash.merge";
+import throttle from "lodash.throttle";
 
+import { TimelineAnimationOptions } from "vis-timeline";
+import { Barchart, defaultBarchartOptions } from "./barchart";
 import {
   rangechange,
   scaleChange,
@@ -12,7 +14,6 @@ import {
 } from "./constants";
 import { getSelector } from "./selector";
 import { Timeline, defaultTimelineOptions } from "./timeline";
-import { Barchart, defaultBarchartOptions } from "./barchart";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 import "./style.css";
 import {
@@ -23,7 +24,6 @@ import {
   TimebarOptions,
   TimelineMode,
 } from "./types";
-import { TimelineAnimationOptions } from "vis-timeline";
 
 export const defaultOptions: Partial<Options> = {
   nodeStartPath: "start",
@@ -49,7 +49,7 @@ export const defaultOptions: Partial<Options> = {
 };
 export class Controller<
   ND = unknown,
-  ED = unknown
+  ED = unknown,
 > extends EventEmitter<ControlerEvents> {
   private mode: TimelineMode;
   public timeline: Timeline;
@@ -273,12 +273,15 @@ export class Controller<
     end: number | Date,
     options?: TimelineAnimationOptions
   ) {
+    if (!Number.isFinite(+start) || !Number.isFinite(+end)) {
+      return this.onTimeChange();
+    }
     if (this.mode === "timeline") {
       this.timeline.setWindow(start, end, options);
     } else {
       this.barchart.setWindow(start, end, options);
     }
-    this.onTimeChange();
+    return this.onTimeChange();
   }
 
   getWindow() {
@@ -299,6 +302,13 @@ export class Controller<
   setTimebarBackground(value: boolean) {
     this.timeline.setTimebarBackground(value);
     this.barchart.setTimebarBackground(value);
+  }
+  getSelection() {
+    if (this.mode === "timeline") {
+      return this.timeline.getSelection();
+    } else {
+      return this.barchart.getSelection();
+    }
   }
 
   onTimeChange() {

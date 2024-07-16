@@ -3,3 +3,5 @@ dist/
 docs/.vuepress/.cache
 docs/.vuepress/.temp
 reports/
+coverage/
+
