@@ -272,12 +272,15 @@ export class Controller<
     end: number | Date,
     options?: TimelineAnimationOptions
   ) {
+    if (!Number.isFinite(+start) || !Number.isFinite(+end)) {
+      return this.onTimeChange();
+    }
     if (this.mode === "timeline") {
       this.timeline.setWindow(start, end, options);
     } else {
       this.barchart.setWindow(start, end, options);
     }
-    this.onTimeChange();
+    return this.onTimeChange();
   }
 
   getWindow() {
@@ -292,6 +295,14 @@ export class Controller<
       this.timeline.setSelection({ nodes, edges });
     } else {
       this.barchart.setSelection({ nodes, edges });
+    }
+  }
+
+  getSelection() {
+    if (this.mode === "timeline") {
+      return this.timeline.getSelection();
+    } else {
+      return this.barchart.getSelection();
     }
   }
 

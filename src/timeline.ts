@@ -28,7 +28,6 @@ import {
   TimelineOptions,
 } from "./types";
 
-
 /**
  * @typedef {object} TimelineOptions
  * @property {number} [barWidth=50] Barchart bar width
@@ -192,26 +191,29 @@ export class Timeline extends Chart {
     const itemToElements: Lookup<Item> = {};
     const elementToItem: Lookup<ItemId> = {};
 
-    const groupIdToNode = ids.reduce((groups, id, i) => {
-      const element = elements.get(i);
-      const groupid = idFunction(element);
-      if (!groups[groupid]) {
-        groups[groupid] = [];
-      }
-      groups[groupid].push(element);
-      itemToElements[id] = element;
-      elementToItem[i] = id;
-      const content = itemGenerator(element, groupid);
-      items.push({
-        id,
-        start: starts[i],
-        end: ends[i],
-        group: groupid,
-        className: `timeline-item ${groupid} ${id} ${prefix}`,
-        ...content,
-      } as DataItem);
-      return groups;
-    }, {} as Record<string, Item[]>);
+    const groupIdToNode = ids.reduce(
+      (groups, id, i) => {
+        const element = elements.get(i);
+        const groupid = idFunction(element);
+        if (!groups[groupid]) {
+          groups[groupid] = [];
+        }
+        groups[groupid].push(element);
+        itemToElements[id] = element;
+        elementToItem[i] = id;
+        const content = itemGenerator(element, groupid);
+        items.push({
+          id,
+          start: starts[i],
+          end: ends[i],
+          group: groupid,
+          className: `timeline-item ${groupid} ${id} ${prefix}`,
+          ...content,
+        } as DataItem);
+        return groups;
+      },
+      {} as Record<string, Item[]>
+    );
 
     const groups: DataGroup[] = Object.entries(groupIdToNode).map(
       ([groupid, items]) => ({
@@ -237,5 +239,22 @@ export class Timeline extends Chart {
       ids.push(this.edgeItems.elementToItem[edgeIds[i]]);
     }
     this.chart.setSelection([...nodeIds, ...edgeIds]);
+  }
+  getSelection() {
+    const nodeIds: ItemId[] = [];
+    const edgeIds: ItemId[] = [];
+
+    this.chart.getSelection().forEach((id) => {
+      if (this.edgeItems.itemToElements[id]) {
+        edgeIds.push(this.edgeItems.itemToElements[id].getId());
+      }
+      if (this.nodeItems.itemToElements[id]) {
+        nodeIds.push(this.nodeItems.itemToElements[id].getId());
+      }
+    });
+    return {
+      nodes: this.ogma.getNodes(nodeIds),
+      edges: this.ogma.getEdges(edgeIds),
+    };
   }
 }
