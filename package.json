@@ -1,6 +1,6 @@
 {
   "name": "@linkurious/ogma-timeline-plugin",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "keywords": [
     "ogma",
     "timeline",
@@ -14,7 +14,7 @@
     "url": "git+https://github.com/Linkurious/ogma-timeline-plugin.git"
   },
   "engines": {
-    "node": "18.19.1"
+    "node": "20.17.0"
   },
   "license": "Apache-2.0",
   "author": "Linkurious SAS",
@@ -52,7 +52,7 @@
     "dev": "vite --config=demo.vite.config.ts",
     "docs:build": "vuepress build docs --config docs/vuepress.config.ts",
     "docs:dev": "vuepress dev docs --config docs/vuepress.config.ts",
-    "docs:publish": "gh-pages -d docs/.vuepress/dist",
+    "docs:publish": "gh-pages -t --nojekyll -d docs/.vuepress/dist",
     "lint": "eslint --ext .js,.ts,.vue demo src",
     "lint:fix": "eslint --ext .js,.ts,.vue demo src --fix",
     "lint:ci": "eslint -f checkstyle -o reports/checkstyle.xml src ./test/**/*.test.ts",
