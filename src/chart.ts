@@ -43,7 +43,9 @@ export abstract class Chart extends EventEmitter<Events> {
   protected ogma: Ogma;
   private chartRange: number;
   public visible: boolean;
+  protected timebarBackground: boolean;
   private destroyed: boolean;
+  protected backgrounds: DataItem[] = [];
 
   constructor(container: HTMLDivElement, ogma: Ogma) {
     super();
@@ -55,7 +57,9 @@ export abstract class Chart extends EventEmitter<Events> {
     this.visible = false;
     this.chartRange = 0;
     this.destroyed = false;
+    this.timebarBackground = true;
     this.ogma = ogma;
+    window["c"] = this;
   }
 
   protected registerEvents(): void {
@@ -91,6 +95,8 @@ export abstract class Chart extends EventEmitter<Events> {
         .forEach((t) => {
           t.delta = +this.chart.getCustomTime(t.id) - +start;
         });
+      this.updateBackgrounds();
+      // this.dataset.update(this.backgrounds);
       this.emit(timechange);
     });
     this.chart.on(timechanged, () => {
@@ -138,6 +144,32 @@ export abstract class Chart extends EventEmitter<Events> {
     this.timebars.forEach((t) => this.chart.removeCustomTime(t.id));
     this.timebars = [];
     return timebars.forEach((timebar) => this.addTimeBar(timebar));
+  }
+
+  public setTimebarBackground(value: boolean) {
+    this.timebarBackground = value;
+  }
+
+  protected updateBackgrounds() {
+    if (!this.timebarBackground) {
+      this.backgrounds = [];
+      return;
+    }
+    this.backgrounds = this.timebars
+      .map((t, i) => {
+        if (i % 2 === 0) return;
+        const prev = this.timebars[i - 1];
+        return {
+          id: `bg_${t.id}`,
+          start: this.chart.getCustomTime(prev.id),
+          end: this.chart.getCustomTime(t.id),
+          type: "background",
+          content: "",
+          className: "vis-background",
+        };
+      })
+      .filter((e) => e) as DataItem[];
+    console.log(this.backgrounds);
   }
 
   public setWindow(
