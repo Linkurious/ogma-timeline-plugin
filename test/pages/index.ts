@@ -36,7 +36,7 @@ function createController(options) {
   const controller = new Controller(
     window["ogma"],
     document.getElementById("timeline") as HTMLDivElement,
-    options,
+    options
   );
   window["controller"] = controller;
   return controller;
@@ -47,12 +47,12 @@ function cleanup() {
 }
 window["Ogma"] = Ogma;
 window["controller"] = Controller;
-// @ts-expect-error
+// @ts-expect-error expose for testing
 window["wait"] = wait;
 window["createOgma"] = createOgma;
 window["createController"] = createController;
-// @ts-expect-error
+// @ts-expect-error expose for testing
 window["afterBarchartRedraw"] = afterBarchartRedraw;
-// @ts-expect-error
+// @ts-expect-error expose for testing
 window["afterTimelineRedraw"] = afterTimelineRedraw;
 window["cleanup"] = cleanup;
