@@ -8,7 +8,7 @@ import Ogma, {
   NodeId,
   NodeList,
 } from "@linkurious/ogma";
-import merge from "lodash.merge";
+import { deepmerge } from "deepmerge-ts";
 import {
   DataGroup,
   DataItem,
@@ -79,7 +79,7 @@ export class Timeline extends Chart {
     const timeline = new VTimeline(
       container,
       this.dataset,
-      merge(defaultTimelineOptions.timelineOptions, options.timelineOptions)
+      deepmerge(defaultTimelineOptions.timelineOptions, options.timelineOptions)
     );
     this.chart = timeline;
     // state flags

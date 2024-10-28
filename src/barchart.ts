@@ -7,7 +7,7 @@ import Ogma, {
   NodeId,
   NodeList,
 } from "@linkurious/ogma";
-import merge from "lodash.merge";
+import { deepmerge } from "deepmerge-ts";
 import { DataSet } from "vis-data";
 import {
   DataItem,
@@ -59,7 +59,7 @@ export class Barchart extends Chart {
       container,
       this.dataset,
       this.groupDataset,
-      merge(defaultBarchartOptions.graph2dOptions, options.graph2dOptions)
+      deepmerge(defaultBarchartOptions.graph2dOptions, options.graph2dOptions)
     );
     this.options = options;
     this.chart = barchart;
@@ -319,15 +319,18 @@ export class Barchart extends Chart {
     const prefix = isNode ? "node" : "edge";
     let tooZoomed = false;
     const idToIndex: Record<ItemId, number> = {};
-    const groupIdToElementsArray = ids.reduce((groups, id, i) => {
-      const groupid = `${idFunction(elements.get(i))}`;
-      if (!groups[groupid]) {
-        groups[groupid] = [];
-      }
-      groups[groupid].push(elements.get(i));
-      idToIndex[id] = i;
-      return groups;
-    }, {} as Record<string, Item[]>);
+    const groupIdToElementsArray = ids.reduce(
+      (groups, id, i) => {
+        const groupid = `${idFunction(elements.get(i))}`;
+        if (!groups[groupid]) {
+          groups[groupid] = [];
+        }
+        groups[groupid].push(elements.get(i));
+        idToIndex[id] = i;
+        return groups;
+      },
+      {} as Record<string, Item[]>
+    );
     const groupIdToElement = Object.entries(groupIdToElementsArray).reduce(
       (acc, [groupid, elements]) => {
         acc[groupid] = isNode
@@ -360,10 +363,13 @@ export class Barchart extends Chart {
         const itemsPerGroup: Record<
           string,
           Record<number, BarChartItem>
-        > = Object.keys(groupIdToElement).reduce((acc, groupid) => {
-          acc[groupid] = {};
-          return acc;
-        }, {} as Record<string, Record<number, BarChartItem>>);
+        > = Object.keys(groupIdToElement).reduce(
+          (acc, groupid) => {
+            acc[groupid] = {};
+            return acc;
+          },
+          {} as Record<string, Record<number, BarChartItem>>
+        );
 
         let itemToElements: Lookup<ItemList> = {};
         const elementToItem: Lookup<NodeId | EdgeId> = {};
@@ -425,14 +431,20 @@ export class Barchart extends Chart {
       }, {} as Lookup<ItemByScale>);
   }
   setSelection({ nodes, edges }: { nodes?: NodeList; edges?: EdgeList }) {
-    const nodeIds = (nodes ? nodes.getId() : []).reduce((acc, id) => {
-      acc[id] = true;
-      return acc;
-    }, {} as Record<NodeId, boolean>);
-    const edgeIds = (edges ? edges.getId() : []).reduce((acc, id) => {
-      acc[id] = true;
-      return acc;
-    }, {} as Record<EdgeId, boolean>);
+    const nodeIds = (nodes ? nodes.getId() : []).reduce(
+      (acc, id) => {
+        acc[id] = true;
+        return acc;
+      },
+      {} as Record<NodeId, boolean>
+    );
+    const edgeIds = (edges ? edges.getId() : []).reduce(
+      (acc, id) => {
+        acc[id] = true;
+        return acc;
+      },
+      {} as Record<EdgeId, boolean>
+    );
     let edgeIndex = 0;
     let nodeIndex = 0;
     const isLine = this.options.graph2dOptions.style === "line";
