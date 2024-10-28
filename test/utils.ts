@@ -1,7 +1,7 @@
 import Ogma, { OgmaParameters } from "@linkurious/ogma";
 import getPort from "get-port";
 import { chromium, type Browser, type Page } from "playwright";
-import { preview, type  PreviewServer } from "vite";
+import { preview, type PreviewServer } from "vite";
 import { Controller } from "../src";
 import { DeepPartial, Options } from "../src/types";
 declare global {
@@ -34,7 +34,7 @@ export class BrowserSession {
     await this.browser.close();
     await new Promise<void>((resolve, reject) => {
       this.server.httpServer.close((error) =>
-        error ? reject(error) : resolve()
+        error ? reject(error) : resolve(),
       );
     });
   }
