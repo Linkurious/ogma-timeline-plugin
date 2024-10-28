@@ -1,6 +1,6 @@
 .vis-text,
 .vis-data-axis {
-  font-family: 'Roboto';
+  font-family: "Roboto";
   font-weight: 500;
 }
 .vis-timeline .vis-data-axis {
@@ -8,7 +8,7 @@
 }
 
 .timeline-item {
-  font-family: 'Roboto';
+  font-family: "Roboto";
   color: #1a1a1a;
   border-color: #1499ff;
   background-color: #d4ecff;
@@ -41,10 +41,10 @@
 
 div.vis-item,
 rect.vis-group,
-rect.vis-group.vis-selected{
+rect.vis-group.vis-selected {
   cursor: pointer;
 }
-path.vis-group{
+path.vis-group {
   pointer-events: none;
 }
 .vis-group.edge {
@@ -53,12 +53,11 @@ path.vis-group{
   fill: #9914ff;
 }
 .vis-group.edge.vis-selected {
-  stroke: #DD66ff;
+  stroke: #dd66ff;
   fill: #e4bcef;
 }
 
-
-#timeline>div {
+#timeline > div {
   position: absolute !important;
   bottom: 2px;
   left: 0;

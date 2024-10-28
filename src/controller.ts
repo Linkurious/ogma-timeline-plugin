@@ -1,6 +1,7 @@
 import Ogma, { NodeList, EdgeList } from "@linkurious/ogma";
+import { deepmerge } from "deepmerge-ts";
 import EventEmitter from "eventemitter3";
-import merge from "lodash.merge";
+// eslint-disable-next-line depend/ban-dependencies
 import throttle from "lodash.throttle";
 
 import { TimelineAnimationOptions } from "vis-timeline";
@@ -48,7 +49,7 @@ export const defaultOptions: Partial<Options> = {
 };
 export class Controller<
   ND = unknown,
-  ED = unknown
+  ED = unknown,
 > extends EventEmitter<ControlerEvents> {
   private mode: TimelineMode;
   public timeline: Timeline;
@@ -68,12 +69,12 @@ export class Controller<
   constructor(
     ogma: Ogma<ND, ED>,
     container: HTMLDivElement,
-    options: DeepPartial<Options> = {}
+    options: DeepPartial<Options> = {},
   ) {
     super();
     this.mode = "barchart";
     this.ogma = ogma;
-    this.options = merge(defaultOptions, options) as Options;
+    this.options = deepmerge(defaultOptions, options) as Options;
     this.filteredNodes = new Set();
     this.filteredEdges = new Set();
     this.nodes = ogma.createNodeList();
@@ -92,12 +93,12 @@ export class Controller<
     const timeline = new Timeline(
       timelineContainer,
       ogma,
-      this.options.timeline
+      this.options.timeline,
     );
     const barchart = new Barchart(
       barchartContainer,
       ogma,
-      this.options.barchart
+      this.options.barchart,
     );
     this.timeline = timeline;
     this.barchart = barchart;
@@ -150,7 +151,7 @@ export class Controller<
     this.options.timeBars
       .sort(
         (a, b) =>
-          +((a as { date: Date }).date || a) - +((b as { date: Date }) || b)
+          +((a as { date: Date }).date || a) - +((b as { date: Date }) || b),
       )
       .forEach((timeBar) => {
         this.timeline.addTimeBar(timeBar);
@@ -162,14 +163,14 @@ export class Controller<
       this.options.start ||
         Math.min(
           this.nodeStarts.reduce((min, s) => Math.min(min, s), Infinity),
-          this.edgeStarts.reduce((min, s) => Math.min(min, s), Infinity)
+          this.edgeStarts.reduce((min, s) => Math.min(min, s), Infinity),
         ),
       this.options.end ||
         Math.max(
           this.nodeStarts.reduce((max, s) => Math.max(max, s), -Infinity),
-          this.edgeStarts.reduce((max, s) => Math.max(max, s), -Infinity)
+          this.edgeStarts.reduce((max, s) => Math.max(max, s), -Infinity),
         ),
-      { animation: false }
+      { animation: false },
     );
     ogma.events.on("destroy", () => {
       this.destroy();
@@ -188,10 +189,10 @@ export class Controller<
         ? this.barchart.getWindow()
         : this.timeline.getWindow();
     this.nodes = (nodes ? nodes : this.ogma.createNodeList()).filter(
-      (n) => n.getData(this.options.nodeStartPath) !== undefined
+      (n) => n.getData(this.options.nodeStartPath) !== undefined,
     );
     this.edges = (edges ? edges : this.ogma.createEdgeList()).filter(
-      (e) => e.getData(this.options.edgeStartPath) !== undefined
+      (e) => e.getData(this.options.edgeStartPath) !== undefined,
     );
     this.nodeStarts = this.nodes.getData(this.options.nodeStartPath);
     this.nodeEnds = this.nodes.getData(this.options.nodeEndPath);
@@ -203,7 +204,7 @@ export class Controller<
       this.nodeStarts,
       this.nodeEnds,
       this.edgeStarts,
-      this.edgeEnds
+      this.edgeEnds,
     );
     this.barchart.refresh(
       this.nodes,
@@ -211,7 +212,7 @@ export class Controller<
       this.nodeStarts,
       this.nodeEnds,
       this.edgeStarts,
-      this.edgeEnds
+      this.edgeEnds,
     );
     if (!this.options.nodeFilter.enabled) {
       this.filteredNodes.clear();
@@ -270,7 +271,7 @@ export class Controller<
   setWindow(
     start: number | Date,
     end: number | Date,
-    options?: TimelineAnimationOptions
+    options?: TimelineAnimationOptions,
   ) {
     if (!Number.isFinite(+start) || !Number.isFinite(+end)) {
       return this.onTimeChange();
@@ -321,7 +322,7 @@ export class Controller<
       const selector = getSelector(
         times,
         this.options.nodeFilter.strategy,
-        this.options.nodeFilter.tolerance
+        this.options.nodeFilter.tolerance,
       );
       this.filteredNodes.clear();
       for (let i = 0; i < this.nodes.size; i++) {
@@ -333,7 +334,7 @@ export class Controller<
       const selector = getSelector(
         times,
         this.options.edgeFilter.strategy,
-        this.options.edgeFilter.tolerance
+        this.options.edgeFilter.tolerance,
       );
       this.filteredEdges.clear();
       for (let i = 0; i < this.edges.size; i++) {
@@ -346,7 +347,7 @@ export class Controller<
 
   setOptions(options: DeepPartial<Options>) {
     const mode = this.mode;
-    this.options = merge(this.options, options) as Options;
+    this.options = deepmerge(this.options, options) as Options;
     this.timeline.setOptions(this.options.timeline);
     this.barchart.setOptions(this.options.barchart);
     this.refresh({ nodes: this.nodes, edges: this.edges });

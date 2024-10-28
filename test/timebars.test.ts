@@ -37,7 +37,7 @@ describe("Options", async () => {
       });
 
       return afterTimelineRedraw().then(
-        () => [...document.querySelectorAll(".vis-custom-time")].length
+        () => [...document.querySelectorAll(".vis-custom-time")].length,
       );
     });
     expect(filteredNodes).toEqual(3);
@@ -174,7 +174,7 @@ describe("Options", async () => {
         end: new Date("1 1 1970"),
       });
       return afterTimelineRedraw().then(() =>
-        controller.getTimebars().map(({ date }) => date)
+        controller.getTimebars().map(({ date }) => date),
       );
     });
     expect(dates).toEqual([new Date("1 1 1950"), new Date("1 1 1960")]);
