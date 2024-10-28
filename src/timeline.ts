@@ -79,7 +79,10 @@ export class Timeline extends Chart {
     const timeline = new VTimeline(
       container,
       this.dataset,
-      deepmerge(defaultTimelineOptions.timelineOptions, options.timelineOptions)
+      deepmerge(
+        defaultTimelineOptions.timelineOptions,
+        options.timelineOptions,
+      ),
     );
     this.chart = timeline;
     // state flags
@@ -96,7 +99,7 @@ export class Timeline extends Chart {
     nodeStarts: number[],
     nodeEnds: number[],
     edgeStarts: number[],
-    edgeEnds: number[]
+    edgeEnds: number[],
   ): void {
     this.nodeItems = this._group(
       nodes,
@@ -104,7 +107,7 @@ export class Timeline extends Chart {
       this.options.nodeGroupContent as unknown as GroupFunction<ItemList>,
       this.options.nodeItemGenerator as ItemGenerator<DataItem, Item>,
       nodeStarts,
-      nodeEnds
+      nodeEnds,
     );
     this.edgeItems = this._group(
       edges,
@@ -112,7 +115,7 @@ export class Timeline extends Chart {
       this.options.edgeGroupContent as unknown as GroupFunction<ItemList>,
       this.options.edgeItemGenerator as ItemGenerator<DataItem, Item>,
       edgeStarts,
-      edgeEnds
+      edgeEnds,
     );
     this.dataset.clear();
     this.dataset.add(this.edgeItems.items);
@@ -181,7 +184,7 @@ export class Timeline extends Chart {
     groupFunction: GroupFunction<ItemList>,
     itemGenerator: ItemGenerator<DataItem, Item>,
     starts: number[],
-    ends: number[]
+    ends: number[],
   ): TimelineData {
     const items: DataItem[] = [];
     const ids = elements.getId();
@@ -212,7 +215,7 @@ export class Timeline extends Chart {
         } as DataItem);
         return groups;
       },
-      {} as Record<string, Item[]>
+      {} as Record<string, Item[]>,
     );
 
     const groups: DataGroup[] = Object.entries(groupIdToNode).map(
@@ -220,11 +223,11 @@ export class Timeline extends Chart {
         id: groupid,
         content: groupFunction(
           groupid,
-          this.ogma.getNodes(items as unknown as NodeId[])
+          this.ogma.getNodes(items as unknown as NodeId[]),
         ),
         className: `vis-group ${groupid}`,
         options: {},
-      })
+      }),
     );
     return { items, groups, itemToElements, elementToItem };
   }
