@@ -1,18 +1,3 @@
-body{
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}
-#app{
-  display: grid;
-  grid-template-rows: auto 256px;
-  grid-template-columns: 100%;
-  height: 100vh;
-  max-height: 100vh;
-  padding: 0;
-  margin: 0;
-  grid-auto-flow: column;
-}
 
 .vis-group.car {
   stroke: #ff9914;
