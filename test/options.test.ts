@@ -24,6 +24,10 @@ describe("Options", async () => {
               ...new Array(3).fill(0).map((_, i) => ({
                 id: i + 1,
                 data: { start: Date.now() / 2 },
+                attributes: {
+                  x: i * 20,
+                  y: i * 10,
+                },
               })),
               {
                 id: 11,

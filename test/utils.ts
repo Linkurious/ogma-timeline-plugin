@@ -1,7 +1,7 @@
 import Ogma, { OgmaParameters } from "@linkurious/ogma";
 import getPort from "get-port";
 import { chromium, type Browser, type Page } from "playwright";
-import { preview, type  PreviewServer } from "vite";
+import { preview, type PreviewServer } from "vite";
 import { Controller } from "../src";
 import { DeepPartial, Options } from "../src/types";
 declare global {

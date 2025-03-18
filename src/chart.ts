@@ -143,7 +143,7 @@ export abstract class Chart extends EventEmitter<Events> {
   public setWindow(
     minTime: number | Date,
     maxTime: number | Date,
-    options?: TimelineAnimationOptions
+    options?: TimelineAnimationOptions,
   ): void {
     this.chart.setWindow(minTime, maxTime, options);
     this.updateDeltas();
@@ -168,7 +168,7 @@ export abstract class Chart extends EventEmitter<Events> {
     nodeStarts: number[],
     nodeEnds: number[],
     edgeStarts: number[],
-    edgeEnds: number[]
+    edgeEnds: number[],
   ): void;
 
   protected getScale() {
@@ -188,7 +188,7 @@ export abstract class Chart extends EventEmitter<Events> {
         }
         return scale;
       },
-      { bars: Infinity, scale: Infinity, i: -1, name: "undefined" }
+      { bars: Infinity, scale: Infinity, i: -1, name: "undefined" },
     );
   }
   destroy() {

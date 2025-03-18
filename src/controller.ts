@@ -1,6 +1,7 @@
 import Ogma, { NodeList, EdgeList } from "@linkurious/ogma";
+import { deepmerge } from "deepmerge-ts";
 import EventEmitter from "eventemitter3";
-import merge from "lodash.merge";
+// eslint-disable-next-line depend/ban-dependencies
 import throttle from "lodash.throttle";
 
 import { TimelineAnimationOptions } from "vis-timeline";
@@ -48,7 +49,7 @@ export const defaultOptions: Partial<Options> = {
 };
 export class Controller<
   ND = unknown,
-  ED = unknown
+  ED = unknown,
 > extends EventEmitter<ControlerEvents> {
   private mode: TimelineMode;
   public timeline: Timeline;
@@ -73,7 +74,7 @@ export class Controller<
     super();
     this.mode = "barchart";
     this.ogma = ogma;
-    this.options = merge(defaultOptions, options) as Options;
+    this.options = deepmerge(defaultOptions, options) as Options;
     this.filteredNodes = new Set();
     this.filteredEdges = new Set();
     this.nodes = ogma.createNodeList();
@@ -86,8 +87,11 @@ export class Controller<
     timelineContainer.classList.add("timeline-container");
     const barchartContainer = document.createElement("div");
     barchartContainer.classList.add("barchart-container");
-    container.appendChild(timelineContainer);
-    container.appendChild(barchartContainer);
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("ogma-timeline-wrapper");
+    wrapper.appendChild(timelineContainer);
+    wrapper.appendChild(barchartContainer);
+    container.appendChild(wrapper);
     this.container = container;
     const timeline = new Timeline(
       timelineContainer,
@@ -346,7 +350,7 @@ export class Controller<
 
   setOptions(options: DeepPartial<Options>) {
     const mode = this.mode;
-    this.options = merge(this.options, options) as Options;
+    this.options = deepmerge(this.options, options) as Options;
     this.timeline.setOptions(this.options.timeline);
     this.barchart.setOptions(this.options.barchart);
     this.refresh({ nodes: this.nodes, edges: this.edges });

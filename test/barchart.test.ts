@@ -69,7 +69,7 @@ describe("Barchart", async () => {
         .then(() =>
           controller.setWindow(new Date("1 1 1960"), new Date("1 1 1980"), {
             animation: false,
-          })
+          }),
         )
         .then(() => wait(200))
         .then(() => [
@@ -150,8 +150,8 @@ describe("Barchart", async () => {
         .then(
           () =>
             [...document.querySelectorAll(".vis-group")].filter(
-              (bar) => bar.tagName === "path"
-            ).length
+              (bar) => bar.tagName === "path",
+            ).length,
         );
     });
     expect(lines).toBe(1);

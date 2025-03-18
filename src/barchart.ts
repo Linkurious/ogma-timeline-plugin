@@ -7,7 +7,7 @@ import Ogma, {
   NodeId,
   NodeList,
 } from "@linkurious/ogma";
-import merge from "lodash.merge";
+import { deepmerge } from "deepmerge-ts";
 import { DataSet } from "vis-data";
 import {
   DataItem,
@@ -59,7 +59,7 @@ export class Barchart extends Chart {
       container,
       this.dataset,
       this.groupDataset,
-      merge(defaultBarchartOptions.graph2dOptions, options.graph2dOptions)
+      deepmerge(defaultBarchartOptions.graph2dOptions, options.graph2dOptions),
     );
     this.options = options;
     this.chart = barchart;
@@ -89,7 +89,7 @@ export class Barchart extends Chart {
     });
     this.chart.on("rangechanged", () => {
       this.rects = Array.from(
-        this.container.querySelectorAll(".vis-line-graph>svg>rect")
+        this.container.querySelectorAll(".vis-line-graph>svg>rect"),
       ) as SVGRectElement[];
     });
     super.registerEvents();
@@ -101,7 +101,7 @@ export class Barchart extends Chart {
     nodeStarts: number[],
     nodeEnds: number[],
     edgeStarts: number[],
-    edgeEnds: number[]
+    edgeEnds: number[],
   ): void {
     this.computeGroups(
       nodes,
@@ -109,7 +109,7 @@ export class Barchart extends Chart {
       nodeStarts,
       nodeEnds,
       edgeStarts,
-      edgeEnds
+      edgeEnds,
     );
     this.onRangeChange(true);
   }
@@ -124,7 +124,7 @@ export class Barchart extends Chart {
     nodeStarts: number[],
     nodeEnds: number[],
     edgeStarts: number[],
-    edgeEnds: number[]
+    edgeEnds: number[],
   ) {
     this.nodeItemsByScale = this._group(
       nodes,
@@ -132,7 +132,7 @@ export class Barchart extends Chart {
       this.options.nodeGroupContent as unknown as GroupFunction<ItemList>,
       this.options.nodeItemGenerator as ItemGenerator<BarChartItem, ItemList>,
       nodeStarts,
-      nodeEnds
+      nodeEnds,
     );
     this.edgeItemsByScale = this._group(
       edges,
@@ -140,7 +140,7 @@ export class Barchart extends Chart {
       this.options.edgeGroupContent as unknown as GroupFunction<ItemList>,
       this.options.edgeItemGenerator as ItemGenerator<BarChartItem, ItemList>,
       edgeStarts,
-      edgeEnds
+      edgeEnds,
     );
     this.isTooZoomedByScale = Object.keys(this.nodeItemsByScale).reduce(
       (acc, scale) => {
@@ -153,7 +153,7 @@ export class Barchart extends Chart {
             max = Math.max(max, acc[index]);
             return acc;
           },
-          {} as Lookup<number>
+          {} as Lookup<number>,
         );
         heightAtIndex = this.edgeItemsByScale[scale].items.reduce(
           (acc, item) => {
@@ -163,14 +163,14 @@ export class Barchart extends Chart {
             max = Math.max(max, acc[index]);
             return acc;
           },
-          heightAtIndex
+          heightAtIndex,
         );
         acc[scale] =
           Object.values(heightAtIndex).reduce((max, h) => Math.max(max, h), 0) <
           5;
         return acc;
       },
-      {} as Lookup<boolean>
+      {} as Lookup<boolean>,
     );
   }
 
@@ -178,7 +178,7 @@ export class Barchart extends Chart {
     const { x, y, event } = evt;
     if (!x || !y || !this.rects.length) return;
     const svg: SVGAElement | null = this.container.querySelector(
-      ".vis-line-graph>svg"
+      ".vis-line-graph>svg",
     );
     if (!svg) return;
     const offsetX = +svg.style.left.slice(0, -2);
@@ -216,12 +216,12 @@ export class Barchart extends Chart {
             edgeIndex,
             nodes: isNode
               ? this.ogma.getNodes(
-                  this.currentNodeData.items[nodeIndex - 1].ids
+                  this.currentNodeData.items[nodeIndex - 1].ids,
                 )
               : undefined,
             edges: isEdge
               ? this.ogma.getEdges(
-                  this.currentEdgeData.items[edgeIndex - 1].ids
+                  this.currentEdgeData.items[edgeIndex - 1].ids,
                 )
               : undefined,
           };
@@ -239,7 +239,7 @@ export class Barchart extends Chart {
       { nodes: undefined, edges: undefined } as {
         nodes?: NodeList;
         edges?: EdgeList;
-      }
+      },
     );
     this.emit(click, { nodes, edges, evt });
     this.emit(select, { nodes, edges, evt: event as MouseEvent });
@@ -312,22 +312,25 @@ export class Barchart extends Chart {
     itemGenerator: ItemGenerator<BarChartItem, ItemList>,
     starts: number[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ends: number[]
+    ends: number[],
   ) {
     const ids = elements.getId();
     const isNode = elements.isNode;
     const prefix = isNode ? "node" : "edge";
     let tooZoomed = false;
     const idToIndex: Record<ItemId, number> = {};
-    const groupIdToElementsArray = ids.reduce((groups, id, i) => {
-      const groupid = `${idFunction(elements.get(i))}`;
-      if (!groups[groupid]) {
-        groups[groupid] = [];
-      }
-      groups[groupid].push(elements.get(i));
-      idToIndex[id] = i;
-      return groups;
-    }, {} as Record<string, Item[]>);
+    const groupIdToElementsArray = ids.reduce(
+      (groups, id, i) => {
+        const groupid = `${idFunction(elements.get(i))}`;
+        if (!groups[groupid]) {
+          groups[groupid] = [];
+        }
+        groups[groupid].push(elements.get(i));
+        idToIndex[id] = i;
+        return groups;
+      },
+      {} as Record<string, Item[]>,
+    );
     const groupIdToElement = Object.entries(groupIdToElementsArray).reduce(
       (acc, [groupid, elements]) => {
         acc[groupid] = isNode
@@ -335,7 +338,7 @@ export class Barchart extends Chart {
           : this.ogma.getEdges(elements as unknown as EdgeId[]);
         return acc;
       },
-      {} as Record<string, ItemList>
+      {} as Record<string, ItemList>,
     );
 
     const groups: DataGroup[] = Object.entries(groupIdToElement).map(
@@ -344,7 +347,7 @@ export class Barchart extends Chart {
         content: groupFunction(groupid, elements),
         className: `vis-group ${groupid} ${prefix}`,
         options: {},
-      })
+      }),
     );
     return scales
       .slice()
@@ -360,10 +363,13 @@ export class Barchart extends Chart {
         const itemsPerGroup: Record<
           string,
           Record<number, BarChartItem>
-        > = Object.keys(groupIdToElement).reduce((acc, groupid) => {
-          acc[groupid] = {};
-          return acc;
-        }, {} as Record<string, Record<number, BarChartItem>>);
+        > = Object.keys(groupIdToElement).reduce(
+          (acc, groupid) => {
+            acc[groupid] = {};
+            return acc;
+          },
+          {} as Record<string, Record<number, BarChartItem>>,
+        );
 
         let itemToElements: Lookup<ItemList> = {};
         const elementToItem: Lookup<NodeId | EdgeId> = {};
@@ -425,14 +431,20 @@ export class Barchart extends Chart {
       }, {} as Lookup<ItemByScale>);
   }
   setSelection({ nodes, edges }: { nodes?: NodeList; edges?: EdgeList }) {
-    const nodeIds = (nodes ? nodes.getId() : []).reduce((acc, id) => {
-      acc[id] = true;
-      return acc;
-    }, {} as Record<NodeId, boolean>);
-    const edgeIds = (edges ? edges.getId() : []).reduce((acc, id) => {
-      acc[id] = true;
-      return acc;
-    }, {} as Record<EdgeId, boolean>);
+    const nodeIds = (nodes ? nodes.getId() : []).reduce(
+      (acc, id) => {
+        acc[id] = true;
+        return acc;
+      },
+      {} as Record<NodeId, boolean>,
+    );
+    const edgeIds = (edges ? edges.getId() : []).reduce(
+      (acc, id) => {
+        acc[id] = true;
+        return acc;
+      },
+      {} as Record<EdgeId, boolean>,
+    );
     let edgeIndex = 0;
     let nodeIndex = 0;
     const isLine = this.options.graph2dOptions.style === "line";

@@ -3,7 +3,7 @@ import { FilterStrategy, FilterTolerance } from "./types";
 export function getSelector(
   bars: number[],
   strategy: FilterStrategy,
-  tolerance: FilterTolerance
+  tolerance: FilterTolerance,
 ): (a: number, b: number) => boolean {
   const firstBar = bars[0];
   const lastBar = bars[bars.length - 1];
@@ -17,8 +17,8 @@ export function getSelector(
             ? true
             : b < firstBar
           : isNaN(b)
-          ? a < firstBar
-          : a < firstBar || b < firstBar;
+            ? a < firstBar
+            : a < firstBar || b < firstBar;
     }
   }
 
@@ -32,8 +32,8 @@ export function getSelector(
             ? true
             : b > lastBar
           : isNaN(b)
-          ? a > lastBar
-          : a > lastBar || b > lastBar;
+            ? a > lastBar
+            : a > lastBar || b > lastBar;
     }
   }
   if (strategy === "between") {
@@ -61,8 +61,8 @@ export function getSelector(
                 ? true
                 : a < max && a > min
               : isNaN(a)
-              ? b < max && b > min
-              : a < max && b > min
+                ? b < max && b > min
+                : a < max && b > min
           )
             return true;
         }
@@ -86,8 +86,8 @@ export function getSelector(
           (isNanA
             ? b < min || b > max
             : isNanB
-            ? a < min || a > max
-            : (a < min && b < min) || (a > max && b > max));
+              ? a < min || a > max
+              : (a < min && b < min) || (a > max && b > max));
       }
       return res;
     };
@@ -105,8 +105,8 @@ export function getSelector(
           (isNanA
             ? b < min || b > max
             : isNanB
-            ? a < min || a > max
-            : a < min || b < min || a > max || b > max);
+              ? a < min || a > max
+              : a < min || b < min || a > max || b > max);
       }
       return res;
     };
