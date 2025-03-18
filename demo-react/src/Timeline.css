@@ -1,0 +1,28 @@
+
+.vis-group.car {
+  stroke: #ff9914;
+  fill: #ff9914;
+}
+.vis-group.truck {
+  stroke: #09b531;
+  fill: #60f779;
+}
+
+.vis-group.car.vis-selected {
+  stroke: #e9bd84;
+  fill: #e9bd84;
+}
+.vis-group.truck.vis-selected {
+  stroke: #78d88e;
+  fill: #78d88e;
+}
+
+.bar-item {
+  stroke: #1499ff;
+  fill: #d4ecff;
+}
+
+.bar-item.edge {
+  stroke: #99ff14;
+  fill: #ecffd4;
+}
