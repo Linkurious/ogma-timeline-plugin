@@ -34,7 +34,7 @@ export class BrowserSession {
     await this.browser.close();
     await new Promise<void>((resolve, reject) => {
       this.server.httpServer.close((error) =>
-        error ? reject(error) : resolve(),
+        error ? reject(error) : resolve()
       );
     });
   }
