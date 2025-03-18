@@ -3,11 +3,8 @@ import Ogma from "@linkurious/ogma";
 import { Controller as TimelinePlugin, day } from "../src";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-  <div>
-    <h1>Demo timeline plugin</h1>
     <div id="ogma"></div>
     <div id="timeline"></div>
-  </div>
 `;
 const nodesN = 30;
 const edgesN = 30;
