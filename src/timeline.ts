@@ -120,7 +120,8 @@ export class Timeline extends Chart {
     this.dataset.clear();
     this.dataset.add(this.edgeItems.items);
     this.dataset.add(this.nodeItems.items);
-
+    this.updateBackgrounds();
+    this.dataset.add(this.backgrounds);
     const totalGroups =
       this.edgeItems.groups.length + this.nodeItems.groups.length;
     if (totalGroups > 1) {

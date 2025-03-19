@@ -31,6 +31,7 @@ export const defaultOptions: Partial<Options> = {
   nodeEndPath: "end",
   edgeStartPath: "start",
   edgeEndPath: "end",
+  timebarSpans: true,
   edgeFilter: {
     enabled: true,
     strategy: "between",
@@ -302,6 +303,10 @@ export class Controller<
     }
   }
 
+  setTimebarBackground(value: boolean) {
+    this.timeline.setTimebarBackground(value);
+    this.barchart.setTimebarBackground(value);
+  }
   getSelection() {
     if (this.mode === "timeline") {
       return this.timeline.getSelection();
