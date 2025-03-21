@@ -52,14 +52,14 @@ export class Controller<
   ED = unknown,
 > extends EventEmitter<ControlerEvents> {
   private mode: TimelineMode;
-  public timeline: Timeline;
+  public timeline: Timeline<ND, ED>;
   public nodes: NodeList;
   public edges: EdgeList;
-  public barchart: Barchart;
+  public barchart: Barchart<ND, ED>;
   public filteredNodes: Set<Id>;
   public filteredEdges: Set<Id>;
   private ogma: Ogma<ND, ED>;
-  private options: Options;
+  private options: Options<ND, ED>;
   private container: HTMLDivElement;
   private nodeStarts: number[];
   private nodeEnds: number[];
@@ -69,12 +69,12 @@ export class Controller<
   constructor(
     ogma: Ogma<ND, ED>,
     container: HTMLDivElement,
-    options: DeepPartial<Options> = {}
+    options: DeepPartial<Options<ND, ED>> = {}
   ) {
     super();
     this.mode = "barchart";
     this.ogma = ogma;
-    this.options = deepmerge(defaultOptions, options) as Options;
+    this.options = deepmerge(defaultOptions, options) as Options<ND, ED>;
     this.filteredNodes = new Set();
     this.filteredEdges = new Set();
     this.nodes = ogma.createNodeList();
@@ -348,9 +348,9 @@ export class Controller<
     return this.emit(timechange);
   }
 
-  setOptions(options: DeepPartial<Options>) {
+  setOptions(options: DeepPartial<Options<ND, ED>>) {
     const mode = this.mode;
-    this.options = deepmerge(this.options, options) as Options;
+    this.options = deepmerge(this.options, options) as Options<ND, ED>;
     this.timeline.setOptions(this.options.timeline);
     this.barchart.setOptions(this.options.barchart);
     this.refresh({ nodes: this.nodes, edges: this.edges });

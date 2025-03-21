@@ -25,13 +25,18 @@ export const defaultChartOptions: BaseOptions<
 > = {
   nodeGroupIdFunction: () => `nodes`,
   edgeGroupIdFunction: () => `edges`,
+  getNodeClass: () => ``,
+  getEdgeClass: () => ``,
   nodeGroupContent: (groupId: string) => groupId,
   edgeGroupContent: (groupId: string) => groupId,
   nodeItemGenerator: () => ({}),
   edgeItemGenerator: () => ({}),
 };
 
-export abstract class Chart extends EventEmitter<Events> {
+export abstract class Chart<
+  ND = unknown,
+  ED = unknown,
+> extends EventEmitter<Events> {
   public chart!: VChart;
 
   protected dataset: DataSet<DataItem>;
@@ -40,12 +45,12 @@ export abstract class Chart extends EventEmitter<Events> {
   protected currentScale: number;
   protected timebars: Timebar[];
   protected isChangingRange: boolean;
-  protected ogma: Ogma;
+  protected ogma: Ogma<ND, ED>;
   private chartRange: number;
   public visible: boolean;
   private destroyed: boolean;
 
-  constructor(container: HTMLDivElement, ogma: Ogma) {
+  constructor(container: HTMLDivElement, ogma: Ogma<ND, ED>) {
     super();
     this.dataset = new DataSet([]);
     this.container = container;
@@ -143,7 +148,7 @@ export abstract class Chart extends EventEmitter<Events> {
   public setWindow(
     minTime: number | Date,
     maxTime: number | Date,
-    options?: TimelineAnimationOptions,
+    options?: TimelineAnimationOptions
   ): void {
     this.chart.setWindow(minTime, maxTime, options);
     this.updateDeltas();
@@ -168,7 +173,7 @@ export abstract class Chart extends EventEmitter<Events> {
     nodeStarts: number[],
     nodeEnds: number[],
     edgeStarts: number[],
-    edgeEnds: number[],
+    edgeEnds: number[]
   ): void;
 
   protected getScale() {
@@ -188,7 +193,7 @@ export abstract class Chart extends EventEmitter<Events> {
         }
         return scale;
       },
-      { bars: Infinity, scale: Infinity, i: -1, name: "undefined" },
+      { bars: Infinity, scale: Infinity, i: -1, name: "undefined" }
     );
   }
   destroy() {

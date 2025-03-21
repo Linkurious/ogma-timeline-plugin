@@ -44,9 +44,11 @@ export interface BaseOptions<T, U, V> {
   nodeGroupIdFunction: IdFunction<Node>;
   nodeGroupContent: GroupFunction<Node>;
   nodeItemGenerator: ItemGenerator<T, U>;
+  getNodeClass: ItemGenerator<string, U>;
   edgeGroupIdFunction: IdFunction<Edge>;
   edgeGroupContent: GroupFunction<Edge>;
   edgeItemGenerator: ItemGenerator<T, V>;
+  getEdgeClass: ItemGenerator<string, V>;
 }
 /**
  * @typedef {object} BarchartOptions
@@ -54,11 +56,12 @@ export interface BaseOptions<T, U, V> {
  * @property {Function} groupIdFunction Similar to [Ogma addNodeGrouping](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeGrouping) groupIdFunction
  * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
  */
-export interface BarchartOptions
-  extends BaseOptions<BarChartItem, NodeList, EdgeList> {
+export interface BarchartOptions<ND = unknown, ED = unknown>
+  extends BaseOptions<BarChartItem, NodeList<ND, ED>, EdgeList<ED, ND>> {
   graph2dOptions: Graph2dOptions;
 }
-export interface TimelineOptions extends BaseOptions<DataItem, Node, Edge> {
+export interface TimelineOptions<ND = unknown, ED = unknown>
+  extends BaseOptions<DataItem, Node<ND, ED>, Edge<ED, ND>> {
   timelineOptions: VTimelineOptions;
 }
 
@@ -68,9 +71,9 @@ export interface TimelineOptions extends BaseOptions<DataItem, Node, Edge> {
  * @property {BarchartOptions} groupIdFunction Similar to [Ogma addNodeGrouping](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeGrouping) groupIdFunction
  * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
  */
-export interface Options {
-  timeline: TimelineOptions;
-  barchart: BarchartOptions;
+export interface Options<ND = unknown, ED = unknown> {
+  timeline: TimelineOptions<ND, ED>;
+  barchart: BarchartOptions<ND, ED>;
   timeBars: TimebarOptions[];
   edgeFilter: FilterOptions;
   nodeFilter: FilterOptions;
