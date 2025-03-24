@@ -37,16 +37,24 @@ export type FilterOptions = {
   strategy: FilterStrategy;
   tolerance: FilterTolerance;
 };
-export type IdFunction<U> = (item: U) => string;
-export type GroupFunction<U> = (groupId: string, items: U) => string;
-export type ItemGenerator<T, U> = (elements: U, groupId: string) => Partial<T>;
-export interface BaseOptions<T, U, V> {
-  nodeGroupIdFunction: IdFunction<Node>;
-  nodeGroupContent: GroupFunction<Node>;
-  nodeItemGenerator: ItemGenerator<T, U>;
-  edgeGroupIdFunction: IdFunction<Edge>;
-  edgeGroupContent: GroupFunction<Edge>;
-  edgeItemGenerator: ItemGenerator<T, V>;
+export type IdFunction<ElementType> = (item: ElementType) => string;
+export type GroupFunction<ElementType> = (
+  groupId: string,
+  items: ElementType
+) => string;
+export type ItemGenerator<T, ElementType> = (
+  elements: ElementType,
+  groupId: string
+) => Partial<T>;
+export interface BaseOptions<T, NodeType, EdgeType> {
+  nodeGroupIdFunction?: IdFunction<NodeType>;
+  nodeGroupContent?: GroupFunction<NodeType>;
+  nodeItemGenerator?: ItemGenerator<T, NodeType>;
+  getNodeClass?: ItemGenerator<string, NodeType>;
+  edgeGroupIdFunction?: IdFunction<EdgeType>;
+  edgeGroupContent?: GroupFunction<EdgeType>;
+  edgeItemGenerator?: ItemGenerator<T, EdgeType>;
+  getEdgeClass?: ItemGenerator<string, EdgeType>;
 }
 /**
  * @typedef {object} BarchartOptions
@@ -54,12 +62,21 @@ export interface BaseOptions<T, U, V> {
  * @property {Function} groupIdFunction Similar to [Ogma addNodeGrouping](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeGrouping) groupIdFunction
  * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
  */
-export interface BarchartOptions
-  extends BaseOptions<BarChartItem, NodeList, EdgeList> {
-  graph2dOptions: Graph2dOptions;
+export interface BarchartOptions<ND = unknown, ED = unknown>
+  extends BaseOptions<
+    Exclude<BarChartItem, "ids" | "group" | "x" | "y">,
+    NodeList<ND, ED>,
+    EdgeList<ED, ND>
+  > {
+  graph2dOptions?: Graph2dOptions;
 }
-export interface TimelineOptions extends BaseOptions<DataItem, Node, Edge> {
-  timelineOptions: VTimelineOptions;
+export interface TimelineOptions<ND = unknown, ED = unknown>
+  extends BaseOptions<
+    Exclude<DataItem, "className" | "id" | "start" | "end" | "group">,
+    Node<ND, ED>,
+    Edge<ED, ND>
+  > {
+  timelineOptions?: VTimelineOptions;
 }
 
 /**
@@ -68,18 +85,18 @@ export interface TimelineOptions extends BaseOptions<DataItem, Node, Edge> {
  * @property {BarchartOptions} groupIdFunction Similar to [Ogma addNodeGrouping](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeGrouping) groupIdFunction
  * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
  */
-export interface Options {
-  timeline: TimelineOptions;
-  barchart: BarchartOptions;
-  timeBars: TimebarOptions[];
-  edgeFilter: FilterOptions;
-  nodeFilter: FilterOptions;
-  nodeStartPath: string;
-  nodeEndPath: string;
-  edgeStartPath: string;
-  edgeEndPath: string;
-  switchOnZoom: boolean;
-  showBarchart: boolean;
+export interface Options<ND = unknown, ED = unknown> {
+  timeline?: TimelineOptions<ND, ED>;
+  barchart?: BarchartOptions<ND, ED>;
+  timeBars?: TimebarOptions[];
+  edgeFilter?: FilterOptions;
+  nodeFilter?: FilterOptions;
+  nodeStartPath?: string;
+  nodeEndPath?: string;
+  edgeStartPath?: string;
+  edgeEndPath?: string;
+  switchOnZoom?: boolean;
+  showBarchart?: boolean;
   start?: number | Date;
   end?: number | Date;
 }
@@ -88,13 +105,6 @@ export type Id = number | string;
 export type Lookup<T> = {
   [key in Id]: T;
 };
-export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-export type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: DeepPartial<T[P]>;
-    }
-  : T;
-
 export type BarChartItem = {
   ids: ItemId[];
   group: string;
