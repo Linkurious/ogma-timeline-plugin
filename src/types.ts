@@ -37,18 +37,24 @@ export type FilterOptions = {
   strategy: FilterStrategy;
   tolerance: FilterTolerance;
 };
-export type IdFunction<U> = (item: U) => string;
-export type GroupFunction<U> = (groupId: string, items: U) => string;
-export type ItemGenerator<T, U> = (elements: U, groupId: string) => Partial<T>;
-export interface BaseOptions<T, U, V> {
-  nodeGroupIdFunction: IdFunction<Node>;
-  nodeGroupContent: GroupFunction<Node>;
-  nodeItemGenerator: ItemGenerator<T, U>;
-  getNodeClass: ItemGenerator<string, U>;
-  edgeGroupIdFunction: IdFunction<Edge>;
-  edgeGroupContent: GroupFunction<Edge>;
-  edgeItemGenerator: ItemGenerator<T, V>;
-  getEdgeClass: ItemGenerator<string, V>;
+export type IdFunction<ElementType> = (item: ElementType) => string;
+export type GroupFunction<ElementType> = (
+  groupId: string,
+  items: ElementType
+) => string;
+export type ItemGenerator<T, ElementType> = (
+  elements: ElementType,
+  groupId: string
+) => Partial<T>;
+export interface BaseOptions<T, NodeType, EdgeType> {
+  nodeGroupIdFunction?: IdFunction<NodeType>;
+  nodeGroupContent?: GroupFunction<NodeType>;
+  nodeItemGenerator?: ItemGenerator<T, NodeType>;
+  getNodeClass?: ItemGenerator<string, NodeType>;
+  edgeGroupIdFunction?: IdFunction<EdgeType>;
+  edgeGroupContent?: GroupFunction<EdgeType>;
+  edgeItemGenerator?: ItemGenerator<T, EdgeType>;
+  getEdgeClass?: ItemGenerator<string, EdgeType>;
 }
 /**
  * @typedef {object} BarchartOptions
@@ -57,11 +63,19 @@ export interface BaseOptions<T, U, V> {
  * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
  */
 export interface BarchartOptions<ND = unknown, ED = unknown>
-  extends BaseOptions<BarChartItem, NodeList<ND, ED>, EdgeList<ED, ND>> {
+  extends BaseOptions<
+    Exclude<BarChartItem, "ids" | "group" | "x" | "y">,
+    NodeList<ND, ED>,
+    EdgeList<ED, ND>
+  > {
   graph2dOptions: Graph2dOptions;
 }
 export interface TimelineOptions<ND = unknown, ED = unknown>
-  extends BaseOptions<DataItem, Node<ND, ED>, Edge<ED, ND>> {
+  extends BaseOptions<
+    Exclude<DataItem, "className" | "id" | "start" | "end" | "group">,
+    Node<ND, ED>,
+    Edge<ED, ND>
+  > {
   timelineOptions: VTimelineOptions;
 }
 
@@ -72,17 +86,17 @@ export interface TimelineOptions<ND = unknown, ED = unknown>
  * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
  */
 export interface Options<ND = unknown, ED = unknown> {
-  timeline: TimelineOptions<ND, ED>;
-  barchart: BarchartOptions<ND, ED>;
-  timeBars: TimebarOptions[];
-  edgeFilter: FilterOptions;
-  nodeFilter: FilterOptions;
-  nodeStartPath: string;
-  nodeEndPath: string;
-  edgeStartPath: string;
-  edgeEndPath: string;
-  switchOnZoom: boolean;
-  showBarchart: boolean;
+  timeline?: TimelineOptions<ND, ED>;
+  barchart?: BarchartOptions<ND, ED>;
+  timeBars?: TimebarOptions[];
+  edgeFilter?: FilterOptions;
+  nodeFilter?: FilterOptions;
+  nodeStartPath?: string;
+  nodeEndPath?: string;
+  edgeStartPath?: string;
+  edgeEndPath?: string;
+  switchOnZoom?: boolean;
+  showBarchart?: boolean;
   start?: number | Date;
   end?: number | Date;
 }

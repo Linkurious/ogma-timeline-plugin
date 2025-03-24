@@ -43,7 +43,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
   private currentNodeData: ItemByScale;
   private currentEdgeData: ItemByScale;
   private isTooZoomedByScale: Lookup<boolean>;
-  private options: BarchartOptions<ND, ED>;
+  private options: Required<BarchartOptions<ND, ED>>;
   private rects: SVGRectElement[];
   private groupDataset: DataSet<DataGroup>;
 
@@ -55,7 +55,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
   constructor(
     container: HTMLDivElement,
     ogma: Ogma<ND, ED>,
-    options: BarchartOptions<ND, ED>
+    options: Required<BarchartOptions<ND, ED>>
   ) {
     super(container, ogma);
     this.groupDataset = new DataSet<DataGroup>();
@@ -132,7 +132,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
   ) {
     this.nodeItemsByScale = this._group(
       nodes,
-      this.options.nodeGroupIdFunction as IdFunction<Item>,
+      this.options.nodeGroupIdFunction as unknown as IdFunction<Item>,
       this.options.nodeGroupContent as unknown as GroupFunction<ItemList>,
       this.options.nodeItemGenerator as ItemGenerator<BarChartItem, ItemList>,
       nodeStarts,
@@ -140,7 +140,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
     );
     this.edgeItemsByScale = this._group(
       edges,
-      this.options.edgeGroupIdFunction as IdFunction<Item>,
+      this.options.edgeGroupIdFunction as unknown as IdFunction<Item>,
       this.options.edgeGroupContent as unknown as GroupFunction<ItemList>,
       this.options.edgeItemGenerator as ItemGenerator<BarChartItem, ItemList>,
       edgeStarts,
@@ -300,7 +300,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
       : true;
   }
 
-  setOptions(options: BarchartOptions<ND, ED>) {
+  setOptions(options: Required<BarchartOptions<ND, ED>>) {
     this.options = options;
     this.chart.setOptions(options.graph2dOptions as unknown as TimelineOptions);
   }

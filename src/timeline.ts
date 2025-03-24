@@ -53,7 +53,7 @@ export const defaultTimelineOptions: TimelineOptions = {
 };
 
 export class Timeline<ND = unknown, ED = unknown> extends Chart<ND, ED> {
-  protected options: TimelineOptions<ND, ED>;
+  protected options: Required<TimelineOptions<ND, ED>>;
   private nodeItems: TimelineData;
   private edgeItems: TimelineData;
 
@@ -65,7 +65,7 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<ND, ED> {
   constructor(
     container: HTMLDivElement,
     ogma: Ogma<ND, ED>,
-    options: TimelineOptions<ND, ED>
+    options: Required<TimelineOptions<ND, ED>>
   ) {
     super(container, ogma);
     this.options = options;
@@ -173,7 +173,7 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<ND, ED> {
     });
   }
 
-  setOptions(options: TimelineOptions<ND, ED>) {
+  setOptions(options: Required<TimelineOptions<ND, ED>>) {
     this.options = options;
     this.chart.setOptions(options.timelineOptions);
   }

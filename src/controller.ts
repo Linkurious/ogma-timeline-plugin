@@ -18,11 +18,12 @@ import { Timeline, defaultTimelineOptions } from "./timeline";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 import "./style.css";
 import {
+  BarchartOptions,
   ControlerEvents,
-  DeepPartial,
   Id,
   Options,
   TimebarOptions,
+  TimelineOptions,
   TimelineMode,
 } from "./types";
 
@@ -59,7 +60,7 @@ export class Controller<
   public filteredNodes: Set<Id>;
   public filteredEdges: Set<Id>;
   private ogma: Ogma<ND, ED>;
-  private options: Options<ND, ED>;
+  private options: Required<Options<ND, ED>>;
   private container: HTMLDivElement;
   private nodeStarts: number[];
   private nodeEnds: number[];
@@ -69,12 +70,14 @@ export class Controller<
   constructor(
     ogma: Ogma<ND, ED>,
     container: HTMLDivElement,
-    options: DeepPartial<Options<ND, ED>> = {}
+    options: Options<ND, ED> = {}
   ) {
     super();
     this.mode = "barchart";
     this.ogma = ogma;
-    this.options = deepmerge(defaultOptions, options) as Options<ND, ED>;
+    this.options = deepmerge(defaultOptions, options) as Required<
+      Options<ND, ED>
+    >;
     this.filteredNodes = new Set();
     this.filteredEdges = new Set();
     this.nodes = ogma.createNodeList();
@@ -96,12 +99,12 @@ export class Controller<
     const timeline = new Timeline(
       timelineContainer,
       ogma,
-      this.options.timeline
+      this.options.timeline as Required<TimelineOptions<ND, ED>>
     );
     const barchart = new Barchart(
       barchartContainer,
       ogma,
-      this.options.barchart
+      this.options.barchart as Required<BarchartOptions<ND, ED>>
     );
     this.timeline = timeline;
     this.barchart = barchart;
@@ -348,11 +351,19 @@ export class Controller<
     return this.emit(timechange);
   }
 
-  setOptions(options: DeepPartial<Options<ND, ED>>) {
+  setOptions(options: Options<ND, ED>) {
     const mode = this.mode;
-    this.options = deepmerge(this.options, options) as Options<ND, ED>;
-    this.timeline.setOptions(this.options.timeline);
-    this.barchart.setOptions(this.options.barchart);
+    this.options = deepmerge(this.options, options) as Required<
+      Options<ND, ED>
+    >;
+    const timelineOptions = this.options.timeline as Required<
+      TimelineOptions<ND, ED>
+    >;
+    const barchartOptions = this.options.barchart as Required<
+      BarchartOptions<ND, ED>
+    >;
+    this.timeline.setOptions(timelineOptions);
+    this.barchart.setOptions(barchartOptions);
     this.refresh({ nodes: this.nodes, edges: this.edges });
     const wd =
       this.mode === "timeline"
