@@ -68,7 +68,7 @@ export interface BarchartOptions<ND = unknown, ED = unknown>
     NodeList<ND, ED>,
     EdgeList<ED, ND>
   > {
-  graph2dOptions: Graph2dOptions;
+  graph2dOptions?: Graph2dOptions;
 }
 export interface TimelineOptions<ND = unknown, ED = unknown>
   extends BaseOptions<
@@ -76,7 +76,7 @@ export interface TimelineOptions<ND = unknown, ED = unknown>
     Node<ND, ED>,
     Edge<ED, ND>
   > {
-  timelineOptions: VTimelineOptions;
+  timelineOptions?: VTimelineOptions;
 }
 
 /**
@@ -105,17 +105,11 @@ export type Id = number | string;
 export type Lookup<T> = {
   [key in Id]: T;
 };
-export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-export type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: DeepPartial<T[P]>;
-    }
-  : T;
-
 export type BarChartItem = {
   ids: ItemId[];
   group: string;
   label: string;
+  className: string;
   x: number;
   y: number;
 };

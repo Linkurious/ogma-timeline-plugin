@@ -3,10 +3,10 @@ import getPort from "get-port";
 import { chromium, type Browser, type Page } from "playwright";
 import { preview, type PreviewServer } from "vite";
 import { Controller } from "../src";
-import { DeepPartial, Options } from "../src/types";
+import { Options } from "../src/types";
 declare global {
   function createOgma(options: OgmaParameters): Ogma;
-  function createController(options: DeepPartial<Options>): Controller;
+  function createController(options: Options): Controller;
   function afterBarchartRedraw(): Promise<Controller>;
   function afterTimelineRedraw(): Promise<Controller>;
   function wait(ms: number): Promise<void>;

@@ -26,6 +26,7 @@ import {
   Lookup,
   TimelineData,
   TimelineOptions,
+  BaseOptions,
 } from "./types";
 
 /**
@@ -37,8 +38,10 @@ import {
  * @property {number} [maxTime] Unix timestamp of the latest event
  *
  */
-export const defaultTimelineOptions: TimelineOptions = {
-  ...(defaultChartOptions as unknown as TimelineOptions),
+export const defaultTimelineOptions: Required<TimelineOptions> = {
+  ...(defaultChartOptions as unknown as Required<
+    BaseOptions<DataItem, Node, Edge>
+  >),
   nodeItemGenerator: (node) => ({ content: `node ${node.getId()}` }),
   edgeItemGenerator: (edge) => ({ content: `edge ${edge.getId()}` }),
   getNodeClass: () => ``,

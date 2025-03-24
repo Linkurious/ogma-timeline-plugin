@@ -18,10 +18,8 @@ import {
   VChart,
 } from "./types";
 
-export const defaultChartOptions: BaseOptions<
-  BarChartItem | DataItem,
-  NodeList | Node,
-  EdgeList | Edge
+export const defaultChartOptions: Required<
+  BaseOptions<BarChartItem | DataItem, NodeList | Node, EdgeList | Edge>
 > = {
   nodeGroupIdFunction: () => `nodes`,
   edgeGroupIdFunction: () => `edges`,

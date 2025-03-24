@@ -28,7 +28,7 @@ import {
   ItemGenerator,
 } from "./types";
 
-export const defaultBarchartOptions: BarchartOptions = {
+export const defaultBarchartOptions: Required<BarchartOptions> = {
   graph2dOptions: {
     style: "bar",
     height: "100%",
@@ -135,6 +135,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
       this.options.nodeGroupIdFunction as unknown as IdFunction<Item>,
       this.options.nodeGroupContent as unknown as GroupFunction<ItemList>,
       this.options.nodeItemGenerator as ItemGenerator<BarChartItem, ItemList>,
+      this.options.getNodeClass as ItemGenerator<string, ItemList>,
       nodeStarts,
       nodeEnds
     );
@@ -143,6 +144,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
       this.options.edgeGroupIdFunction as unknown as IdFunction<Item>,
       this.options.edgeGroupContent as unknown as GroupFunction<ItemList>,
       this.options.edgeItemGenerator as ItemGenerator<BarChartItem, ItemList>,
+      this.options.getEdgeClass as ItemGenerator<string, ItemList>,
       edgeStarts,
       edgeEnds
     );
@@ -314,6 +316,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
     idFunction: IdFunction<Item>,
     groupFunction: GroupFunction<ItemList>,
     itemGenerator: ItemGenerator<BarChartItem, ItemList>,
+    getClass: ItemGenerator<string, ItemList>,
     starts: number[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ends: number[]
@@ -349,7 +352,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
       ([groupid, elements]) => ({
         id: groupid,
         content: groupFunction(groupid, elements),
-        className: `vis-group ${groupid} ${prefix}`,
+        className: `vis-group ${groupid} ${prefix} ${getClass(elements, groupid)}`,
         options: {},
       })
     );
