@@ -109,7 +109,6 @@ export type BarChartItem = {
   ids: ItemId[];
   group: string;
   label: string;
-  className: string;
   x: number;
   y: number;
 };
