@@ -26,6 +26,7 @@ import {
   Lookup,
   TimelineData,
   TimelineOptions,
+  BaseOptions,
 } from "./types";
 
 /**
@@ -37,11 +38,14 @@ import {
  * @property {number} [maxTime] Unix timestamp of the latest event
  *
  */
-export const defaultTimelineOptions: TimelineOptions = {
-  ...(defaultChartOptions as unknown as TimelineOptions),
+export const defaultTimelineOptions: Required<TimelineOptions> = {
+  ...(defaultChartOptions as unknown as Required<
+    BaseOptions<DataItem, Node, Edge>
+  >),
   nodeItemGenerator: (node) => ({ content: `node ${node.getId()}` }),
   edgeItemGenerator: (edge) => ({ content: `edge ${edge.getId()}` }),
-
+  getNodeClass: () => ``,
+  getEdgeClass: () => ``,
   timelineOptions: {
     editable: false,
     horizontalScroll: true,
@@ -51,8 +55,8 @@ export const defaultTimelineOptions: TimelineOptions = {
   },
 };
 
-export class Timeline extends Chart {
-  protected options: TimelineOptions;
+export class Timeline<ND = unknown, ED = unknown> extends Chart<ND, ED> {
+  protected options: Required<TimelineOptions<ND, ED>>;
   private nodeItems: TimelineData;
   private edgeItems: TimelineData;
 
@@ -61,7 +65,11 @@ export class Timeline extends Chart {
    * @param {Ogma} ogma
    * @param {TimelineOptions} options
    */
-  constructor(container: HTMLDivElement, ogma: Ogma, options: TimelineOptions) {
+  constructor(
+    container: HTMLDivElement,
+    ogma: Ogma<ND, ED>,
+    options: Required<TimelineOptions<ND, ED>>
+  ) {
     super(container, ogma);
     this.options = options;
     this.nodeItems = {
@@ -79,10 +87,7 @@ export class Timeline extends Chart {
     const timeline = new VTimeline(
       container,
       this.dataset,
-      deepmerge(
-        defaultTimelineOptions.timelineOptions,
-        options.timelineOptions,
-      ),
+      deepmerge(defaultTimelineOptions.timelineOptions, options.timelineOptions)
     );
     this.chart = timeline;
     // state flags
@@ -94,28 +99,30 @@ export class Timeline extends Chart {
   }
 
   public refresh(
-    nodes: NodeList,
-    edges: EdgeList,
+    nodes: NodeList<ND, ED>,
+    edges: EdgeList<ED, ND>,
     nodeStarts: number[],
     nodeEnds: number[],
     edgeStarts: number[],
-    edgeEnds: number[],
+    edgeEnds: number[]
   ): void {
     this.nodeItems = this._group(
       nodes,
       this.options.nodeGroupIdFunction as IdFunction<Item>,
       this.options.nodeGroupContent as unknown as GroupFunction<ItemList>,
       this.options.nodeItemGenerator as ItemGenerator<DataItem, Item>,
+      this.options.getNodeClass as ItemGenerator<string, Item>,
       nodeStarts,
-      nodeEnds,
+      nodeEnds
     );
     this.edgeItems = this._group(
       edges,
       this.options.edgeGroupIdFunction as IdFunction<Item>,
       this.options.edgeGroupContent as unknown as GroupFunction<ItemList>,
       this.options.edgeItemGenerator as ItemGenerator<DataItem, Item>,
+      this.options.getEdgeClass as ItemGenerator<string, Item>,
       edgeStarts,
-      edgeEnds,
+      edgeEnds
     );
     this.dataset.clear();
     this.dataset.add(this.edgeItems.items);
@@ -141,7 +148,7 @@ export class Timeline extends Chart {
     this.emit(scaleChange, { scale, tooZoomed: false });
   }
 
-  highlightNodes(nodes: NodeList | Id[]) {
+  highlightNodes(nodes: NodeList<ND, ED> | Id[]) {
     this.resethighlight();
     const ids = "getId" in nodes ? nodes.getId() : nodes;
     this.chart.setSelection(ids);
@@ -169,7 +176,7 @@ export class Timeline extends Chart {
     });
   }
 
-  setOptions(options: TimelineOptions) {
+  setOptions(options: Required<TimelineOptions<ND, ED>>) {
     this.options = options;
     this.chart.setOptions(options.timelineOptions);
   }
@@ -183,8 +190,9 @@ export class Timeline extends Chart {
     idFunction: IdFunction<Item>,
     groupFunction: GroupFunction<ItemList>,
     itemGenerator: ItemGenerator<DataItem, Item>,
+    itemClass: ItemGenerator<string, Item>,
     starts: number[],
-    ends: number[],
+    ends: number[]
   ): TimelineData {
     const items: DataItem[] = [];
     const ids = elements.getId();
@@ -205,17 +213,18 @@ export class Timeline extends Chart {
         itemToElements[id] = element;
         elementToItem[i] = id;
         const content = itemGenerator(element, groupid);
+        const customClass = itemClass(element, groupid);
         items.push({
           id,
           start: starts[i],
           end: ends[i],
           group: groupid,
-          className: `timeline-item ${groupid} ${id} ${prefix}`,
+          className: `timeline-item ${groupid} ${id} ${prefix} ${customClass}`,
           ...content,
         } as DataItem);
         return groups;
       },
-      {} as Record<string, Item[]>,
+      {} as Record<string, Item[]>
     );
 
     const groups: DataGroup[] = Object.entries(groupIdToNode).map(
@@ -223,15 +232,21 @@ export class Timeline extends Chart {
         id: groupid,
         content: groupFunction(
           groupid,
-          this.ogma.getNodes(items as unknown as NodeId[]),
+          this.ogma.getNodes(items as unknown as NodeId[])
         ),
         className: `vis-group ${groupid}`,
         options: {},
-      }),
+      })
     );
     return { items, groups, itemToElements, elementToItem };
   }
-  setSelection({ nodes, edges }: { nodes?: NodeList; edges?: EdgeList }) {
+  setSelection({
+    nodes,
+    edges,
+  }: {
+    nodes?: NodeList<ND, ED>;
+    edges?: EdgeList<ED, ND>;
+  }) {
     const nodeIds = nodes ? nodes.getId() : [];
     const edgeIds = edges ? edges.getId() : [];
     const ids = [];

@@ -47,7 +47,9 @@ you can do that with `nodeItemGenerator` and `edgeItemGenerator` function:
 ```ts
  timeline: {
     nodeItemGenerator: (node) => {
-      return { content: `${node.getData("type")} ${node.getId()}` };
+      return { 
+        content: `${node.getData("type")} ${node.getId()}` 
+      };
     },
   },
 ```

@@ -94,7 +94,9 @@ You can customize the names of the items with the `nodeItemGenerator` function.
 const timelinePlugin = new TimelinePlugin(ogma, container, {
   timeline: {
     nodeGroupIdFunction: (node) => node.getData('type'),
-    nodeItemGenerator: (node) => `${node.getData(type)} ${nodeId}`,
+    nodeItemGenerator: (node) => ({
+      content: `${node.getData(type)} ${nodeId}`
+    }),
     timelineOptions: {
       //here pass more options if you like
     }
