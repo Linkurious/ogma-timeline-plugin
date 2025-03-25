@@ -46,9 +46,11 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
   private isTooZoomedByScale: Lookup<boolean>;
   private options: Required<BarchartOptions<ND, ED>>;
   private rects: SVGRectElement[];
-  private nodeRects: SVGRectElement[];
+  private nodeRects: Record<string, SVGRectElement[]>;
+  private nodeGroups: string[];
+  private edgeGroups: string[];
   private nodePoints: SVGRectElement[];
-  private edgeRects: SVGRectElement[];
+  private edgeRects: Record<string, SVGRectElement[]>;
   private edgePoints: SVGRectElement[];
   private groupDataset: DataSet<DataGroup>;
 
@@ -78,7 +80,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
     this.currentNodeData = {
       items: [],
       itemToElements: {},
-      elementToItem: new Map<Id, number>(),
+      timeToIds: new Map<number, Id[]>(),
       idToTime: new Map<Id, number>(),
       groups: [],
       tooZoomed: false,
@@ -87,17 +89,19 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
     this.currentEdgeData = {
       items: [],
       itemToElements: {},
-      elementToItem: new Map<Id, number>(),
+      timeToIds: new Map<number, Id[]>(),
       idToTime: new Map<Id, number>(),
       groups: [],
       tooZoomed: false,
       maxY: 0,
     };
     this.isChangingRange = false;
-    this.nodeRects = [];
+    this.nodeRects = {};
     this.nodePoints = [];
-    this.edgeRects = [];
+    this.edgeRects = {};
     this.edgePoints = [];
+    this.nodeGroups = [];
+    this.edgeGroups = [];
     this.rects = [];
     this.chart.on("click", (e) => {
       this.onBarClick(e);
@@ -106,17 +110,36 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
       this.rects = Array.from(
         this.container.querySelectorAll(".vis-line-graph>svg>rect")
       ) as SVGRectElement[];
-      this.nodeRects = Array.from(
-        this.container.querySelectorAll(".vis-line-graph>svg>rect.node.vis-bar")
-      ) as SVGRectElement[];
-      this.nodePoints = Array.from(
-        this.container.querySelectorAll(
-          ".vis-line-graph>svg>rect.node.vis-point"
-        )
-      ) as SVGRectElement[];
-      this.edgeRects = Array.from(
-        this.container.querySelectorAll(".vis-line-graph>svg>rect.edge.vis-bar")
-      ) as SVGRectElement[];
+      this.nodeRects = this.nodeGroups.reduce(
+        (acc, group) => {
+          acc[group] = Array.from(
+            this.container.querySelectorAll(
+              `.vis-line-graph>svg>rect.node.vis-bar.${group}`
+            )
+          ) as SVGRectElement[];
+          return acc;
+        },
+        {} as Record<string, SVGRectElement[]>
+      );
+      // this.nodePoints = Array.from(
+      //   this.container.querySelectorAll(
+      //     ".vis-line-graph>svg>rect.node.vis-point"
+      //   )
+      // ) as SVGRectElement[];
+      // this.edgeRects = Array.from(
+      //   this.container.querySelectorAll(".vis-line-graph>svg>rect.edge.vis-bar")
+      // ) as SVGRectElement[];
+      this.edgeRects = this.edgeGroups.reduce(
+        (acc, group) => {
+          acc[group] = Array.from(
+            this.container.querySelectorAll(
+              `.vis-line-graph>svg>rect.edge.vis-bar.${group}`
+            )
+          ) as SVGRectElement[];
+          return acc;
+        },
+        {} as Record<string, SVGRectElement[]>
+      );
       this.edgePoints = Array.from(
         this.container.querySelectorAll(
           ".vis-line-graph>svg>rect.edge.vis-point"
@@ -157,7 +180,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
     edgeStarts: number[],
     edgeEnds: number[]
   ) {
-    this.nodeItemsByScale = this._group(
+    const nodeGroups = this._group(
       nodes,
       this.options.nodeGroupIdFunction as unknown as IdFunction<Item>,
       this.options.nodeGroupContent as unknown as GroupFunction<ItemList>,
@@ -166,7 +189,9 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
       nodeStarts,
       nodeEnds
     );
-    this.edgeItemsByScale = this._group(
+    this.nodeItemsByScale = nodeGroups.itemsByScale;
+    this.nodeGroups = nodeGroups.groups.map((g) => g.id);
+    const edgeGroups = this._group(
       edges,
       this.options.edgeGroupIdFunction as unknown as IdFunction<Item>,
       this.options.edgeGroupContent as unknown as GroupFunction<ItemList>,
@@ -175,6 +200,8 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
       edgeStarts,
       edgeEnds
     );
+    this.edgeItemsByScale = edgeGroups.itemsByScale;
+    this.edgeGroups = edgeGroups.groups.map((g) => g.id);
     this.isTooZoomedByScale = Object.keys(this.nodeItemsByScale).reduce(
       (acc, scale) => {
         let max = -Infinity;
@@ -383,7 +410,8 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
         options: {},
       })
     );
-    return scales
+
+    const itemsByScale = scales
       .slice()
       .reverse()
       .reduce((itemsByScale, { millis, round }, i, scales) => {
@@ -406,7 +434,8 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
         );
 
         let itemToElements: Lookup<ItemList> = {};
-        const elementToItem: Map<Id, number> = new Map();
+        const timeToIds: Map<number, Id[]> = new Map();
+        const timeToIndex: Map<number, number> = new Map();
         const idToTime: Map<Id, number> = new Map();
         const items: BarChartItem[] = [];
         Object.entries(groupIdToElement).forEach(([groupid, elements]) => {
@@ -447,8 +476,13 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
             itemToElements[i] = isNode
               ? this.ogma.getNodes(ids)
               : this.ogma.getEdges(ids);
+            timeToIds.set(x, ids);
+            if (!timeToIndex.has(x)) {
+              timeToIndex.set(x, [i]);
+            } else {
+              timeToIndex.get(x)!.push(i);
+            }
             ids.forEach((id) => {
-              elementToItem.set(id, i);
               idToTime.set(id, x);
             });
             return itemToElements;
@@ -462,12 +496,17 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
           groups,
           maxY,
           idToTime,
-          elementToItem,
+          timeToIndex,
+          timeToIds,
         };
         // tell the next iteration if it should be on timeline or barchart mode
         tooZoomed = false; //tooZoomed || maxY < 5;
         return itemsByScale;
       }, {} as Lookup<ItemByScale>);
+    return {
+      itemsByScale,
+      groups,
+    };
   }
   setSelection({
     nodes,
@@ -556,49 +595,59 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED> {
     selector: (a: number, b: number) => boolean,
     filteredNodes: Set<Id>
   ) {
-    const idToItem = this.currentNodeData.elementToItem;
-    const entries = this.currentNodeData.idToTime.entries();
-    const rects = this.nodeRects;
-    const points = this.nodePoints;
-
-    const start = Number(this.getWindow().start);
-    for (const [id, time] of entries) {
-      if (time < start) continue;
-      const index = idToItem.get(id)!;
-      const rect = rects[index];
-      const point = points[index];
-      if (!selector(time, time)) {
-        rect && rect.classList.add("vis-filtered");
-        point && point.classList.add("vis-filtered");
-        continue;
-      }
-      filteredNodes.add(id);
-      rect && rect.classList.remove("vis-filtered");
-      point && point.classList.remove("vis-filtered");
-    }
+    this._filter(
+      selector,
+      this.nodeGroups,
+      this.nodeRects,
+      this.currentNodeData.timeToIds,
+      filteredNodes
+    );
   }
   filterEdges(
     selector: (a: number, b: number) => boolean,
     filteredEdges: Set<Id>
   ) {
-    const idToItem = this.currentEdgeData.elementToItem;
-    const entries = this.currentEdgeData.idToTime.entries();
-    const rects = this.edgeRects;
-    const points = this.edgePoints;
-    const start = Number(this.getWindow().start);
-    for (const [id, time] of entries) {
-      if (time < start) continue;
-      const index = idToItem.get(id)!;
-      const rect = rects[index];
-      const point = points[index];
-      if (!selector(time, time)) {
-        rect && rect.classList.add("vis-filtered");
-        point && point.classList.add("vis-filtered");
-        continue;
-      }
-      filteredEdges.add(id);
-      rect && rect.classList.remove("vis-filtered");
-      point && point.classList.remove("vis-filtered");
-    }
+    this._filter(
+      selector,
+      this.edgeGroups,
+      this.edgeRects,
+      this.currentEdgeData.timeToIds,
+      filteredEdges
+    );
+  }
+
+  private _filter(
+    selector: (a: number, b: number) => boolean,
+    elementGroups: string[],
+    rectsByGroup: Record<string, SVGRectElement[]>,
+    timeToIds: Map<number, Id[]>,
+    filteredElements: Set<Id>
+  ) {
+    const groups = this.chart.linegraph.groups;
+    const svg = this.container.querySelector(".vis-line-graph>svg");
+    const left = Number((svg && svg.style?.left.slice(0, -2)) || 0);
+
+    elementGroups.forEach((id) => {
+      const itemsData = groups[id].itemsData as {
+        screen_x: number;
+        x: Date;
+      }[];
+      const rects = rectsByGroup[id] || [];
+      const offset = 0;
+      itemsData.forEach((item, i) => {
+        const screen_x = item.screen_x;
+        const x = Number(item.x);
+        if (screen_x + left < 0) {
+          return;
+        }
+        const rect = rects[i + offset];
+        if (selector(x, x)) {
+          rect && rect.classList.remove("vis-filtered");
+        } else {
+          timeToIds.get(x)?.forEach((id) => filteredElements.delete(id));
+          rect && rect.classList.add("vis-filtered");
+        }
+      });
+    });
   }
 }

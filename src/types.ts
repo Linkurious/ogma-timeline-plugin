@@ -115,7 +115,7 @@ export type ItemByScale = {
   items: BarChartItem[];
   itemToElements: Lookup<ItemList>;
   groups: DataGroup[];
-  elementToItem: Map<Id, number>;
+  timeToIds: Map<number, Id[]>;
   idToTime: Map<Id, number>;
   tooZoomed: boolean;
   maxY: number;

@@ -146,7 +146,9 @@ export class Controller<
       throttled();
     });
     this.barchart.on(rangechanged, () => {
-      throttled();
+      // do not throttle here because it is called once at the end of drag
+      // and it would look glitchy with filtered bars
+      this.onTimeChange();
     });
 
     this.barchart.on(select, (evt) => {
@@ -258,6 +260,7 @@ export class Controller<
     this.timeline.visible = false;
     this.barchart.visible = true;
     this.barchart.chart.setWindow(+start, +end, { animation: false });
+    this.barchart.chart.redraw();
   }
 
   addTimeBar(timebar: TimebarOptions): void {
@@ -342,6 +345,9 @@ export class Controller<
           this.filteredNodes.add(this.nodes.get(i).getId());
         }
       } else {
+        for (let i = 0; i < this.nodes.size; i++)
+          this.filteredNodes.add(this.nodes.get(i).getId());
+
         this.barchart.filterNodes(selector, this.filteredNodes);
       }
     }
@@ -351,6 +357,7 @@ export class Controller<
         this.options.edgeFilter.strategy,
         this.options.edgeFilter.tolerance
       );
+      window.edgeSelector = selector;
       this.filteredEdges.clear();
       if (this.mode === "timeline") {
         for (let i = 0; i < this.edges.size; i++) {
@@ -358,6 +365,8 @@ export class Controller<
           this.filteredEdges.add(this.edges.get(i).getId());
         }
       } else {
+        for (let i = 0; i < this.edges.size; i++)
+          this.filteredEdges.add(this.edges.get(i).getId());
         this.barchart.filterEdges(selector, this.filteredEdges);
       }
     }
