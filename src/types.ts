@@ -110,13 +110,12 @@ export type BarChartItem = {
   x: number;
   y: number;
 };
-
+export type TimeToIds = Map<number, Map<IdType, ItemId[]>>;
 export type ItemByScale = {
   items: BarChartItem[];
   itemToElements: Lookup<ItemList>;
   groups: DataGroup[];
-  timeToIds: Map<number, Id[]>;
-  idToTime: Map<Id, number>;
+  timeToIds: TimeToIds;
   tooZoomed: boolean;
   maxY: number;
 };
