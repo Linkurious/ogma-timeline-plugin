@@ -59,6 +59,9 @@ const timelinePlugin = new TimelinePlugin(
   ogma,
   document.getElementById("timeline"),
   {
+    timeline: {
+      getNodeClass: (node) => node.getData("type"),
+    },
     barchart: {
       nodeGroupIdFunction: (node) => node.getData("type"),
       graph2dOptions: {
@@ -73,7 +76,7 @@ const timelinePlugin = new TimelinePlugin(
     ],
     //configure filtering
     nodeFilter: {
-      enabled: true,
+      enabled: false,
       strategy: "between",
       tolerance: "loose",
     },

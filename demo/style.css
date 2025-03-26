@@ -38,6 +38,46 @@ body{
 }
 
 .bar-item.edge {
-  stroke: #99ff14;
-  fill: #ecffd4;
+  stroke: #9914ff;
+  fill: #ccaae5
+}
+.vis-filtered{
+  opacity: 0.2;
+}
+.vis-box.truck,
+.vis-line.truck,
+.vis-dot.truck{
+  background-color: #60f779;
+  border-color: #09b531;
+}
+.vis-item.vis-box.truck.vis-selected,
+.vis-item.vis-line.truck.vis-selected,
+.vis-item.vis-dot.truck.vis-selected {
+  background-color: #a8f7c2;
+  border-color: #5ae08c;
+}
+.vis-box.car,
+.vis-line.car,
+.vis-dot.car{
+  background-color: #ff9914;
+  border-color: #ff9914;
+}
+.vis-item.vis-box.car.vis-selected,
+.vis-item.vis-line.car.vis-selected,
+.vis-item.vis-dot.car.vis-selected {
+  background-color: #ffd8a1;
+  border-color: #ffc47a;
+}
+.vis-box.edge,
+.vis-line.edge,
+.vis-dot.edge{
+  background-color: #ccaae5;
+  border-color: #9914ff;
+}
+
+.vis-item.vis-box.edge.vis-selected,
+.vis-item.vis-line.edge.vis-selected,
+.vis-item.vis-dot.edge.vis-selected{
+  background-color: #decbeb;
+  border-color: #b561f6;
 }
