@@ -132,8 +132,11 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
     this.dataset.add(this.edgeItems.items);
     this.dataset.add(this.nodeItems.items);
 
-    const totalGroups =
-      this.edgeItems.groups.length + this.nodeItems.groups.length;
+    const totalGroups = new Set(
+      this.edgeItems.groups
+        .map((g) => g.id)
+        .concat(this.nodeItems.groups.map((g) => g.id))
+    ).size;
     if (totalGroups > 1) {
       this.chart.setGroups([
         ...this.nodeItems.groups,
@@ -301,8 +304,9 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       const id = item.id;
-      const timelineItem =
-        this.chart.itemSet.groups[item.group as string].items[id];
+      const timelineItem = this.chart.itemSet.groups[item.group as string]
+        ? this.chart.itemSet.groups[item.group as string].items[id]
+        : this.chart.itemSet.items[id];
       if (!timelineItem) continue;
       const start = +item.start;
       const end = +item.end;
@@ -310,7 +314,6 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
       const line = timelineItem.dom?.line;
       const dot = timelineItem.dom?.dot;
       if (!selector(start, end)) {
-        // dom.classList.add("vis-filtered");
         box && box.classList.add("vis-filtered");
         line && line.classList.add("vis-filtered");
         dot && dot.classList.add("vis-filtered");

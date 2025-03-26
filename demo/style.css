@@ -41,9 +41,6 @@ body{
   stroke: #9914ff;
   fill: #ccaae5
 }
-.vis-filtered{
-  opacity: 0.2;
-}
 .vis-box.truck,
 .vis-line.truck,
 .vis-dot.truck{

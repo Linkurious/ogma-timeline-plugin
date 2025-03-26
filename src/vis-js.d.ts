@@ -1,5 +1,11 @@
 import "vis-timeline";
-
+type BoxItem = {
+  dom?: {
+    box: HTMLDivElement;
+    line: HTMLDivElement;
+    dot: HTMLDivElement;
+  };
+};
 declare module "vis-timeline" {
   interface Graph2d {
     linegraph: {
@@ -21,18 +27,10 @@ declare module "vis-timeline" {
       groups: Record<
         string,
         {
-          items: Record<
-            IdType,
-            {
-              dom?: {
-                box: HTMLDivElement;
-                line: HTMLDivElement;
-                dot: HTMLDivElement;
-              };
-            }
-          >;
+          items: Record<IdType, BoxItem>;
         }
       >;
+      items: Record<IdType, BoxItem>;
     };
   }
 }

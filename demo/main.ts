@@ -60,12 +60,17 @@ const timelinePlugin = new TimelinePlugin(
   document.getElementById("timeline"),
   {
     timeline: {
+      // nodeGroupIdFunction: (node) => node.getData("type"),
+      nodeGroupIdFunction: () => "",
+      edgeGroupIdFunction: () => "",
       getNodeClass: (node) => node.getData("type"),
+      timelineOptions: {},
     },
     barchart: {
       nodeGroupIdFunction: (node) => node.getData("type"),
       graph2dOptions: {
         legend: true,
+        drawPoints: false,
         // style: "line",
       },
     },
@@ -87,6 +92,8 @@ const timelinePlugin = new TimelinePlugin(
     },
   }
 );
+window.timeline = timelinePlugin;
+window.ogma = ogma;
 
 //create filters
 const nodeFilter = ogma.transformations.addNodeFilter({
