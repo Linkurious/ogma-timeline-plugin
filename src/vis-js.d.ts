@@ -16,4 +16,23 @@ declare module "vis-timeline" {
       >;
     };
   }
+  interface Timeline {
+    itemSet: {
+      groups: Record<
+        string,
+        {
+          items: Record<
+            IdType,
+            {
+              dom?: {
+                box: HTMLDivElement;
+                line: HTMLDivElement;
+                dot: HTMLDivElement;
+              };
+            }
+          >;
+        }
+      >;
+    };
+  }
 }

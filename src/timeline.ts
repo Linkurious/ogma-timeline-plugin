@@ -55,7 +55,11 @@ export const defaultTimelineOptions: Required<TimelineOptions> = {
   },
 };
 
-export class Timeline<ND = unknown, ED = unknown> extends Chart<ND, ED> {
+export class Timeline<ND = unknown, ED = unknown> extends Chart<
+  ND,
+  ED,
+  VTimeline
+> {
   protected options: Required<TimelineOptions<ND, ED>>;
   private nodeItems: TimelineData;
   private edgeItems: TimelineData;
@@ -274,5 +278,48 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<ND, ED> {
       nodes: this.ogma.getNodes(nodeIds),
       edges: this.ogma.getEdges(edgeIds),
     };
+  }
+
+  filterNodes(
+    selector: (a: number, b: number) => boolean,
+    filteredNodes: Set<Id>
+  ) {
+    this._filter(selector, this.nodeItems, filteredNodes);
+  }
+  filterEdges(
+    selector: (a: number, b: number) => boolean,
+    filteredEdges: Set<Id>
+  ) {
+    this._filter(selector, this.edgeItems, filteredEdges);
+  }
+  private _filter(
+    selector: (a: number, b: number) => boolean,
+    timelineData: TimelineData,
+    elementSet: Set<Id>
+  ) {
+    const items = timelineData.items;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const id = item.id;
+      const timelineItem =
+        this.chart.itemSet.groups[item.group as string].items[id];
+      if (!timelineItem) continue;
+      const start = +item.start;
+      const end = +item.end;
+      const box = timelineItem.dom?.box;
+      const line = timelineItem.dom?.line;
+      const dot = timelineItem.dom?.dot;
+      if (!selector(start, end)) {
+        // dom.classList.add("vis-filtered");
+        box && box.classList.add("vis-filtered");
+        line && line.classList.add("vis-filtered");
+        dot && dot.classList.add("vis-filtered");
+        elementSet.delete(id);
+        continue;
+      }
+      box && box.classList.remove("vis-filtered");
+      line && line.classList.remove("vis-filtered");
+      dot && dot.classList.remove("vis-filtered");
+    }
   }
 }

@@ -339,15 +339,11 @@ export class Controller<
         this.options.nodeFilter.tolerance
       );
       this.filteredNodes.clear();
+      for (let i = 0; i < this.nodes.size; i++)
+        this.filteredNodes.add(this.nodes.get(i).getId());
       if (this.mode === "timeline") {
-        for (let i = 0; i < this.nodes.size; i++) {
-          if (!selector(this.nodeStarts[i], this.nodeEnds[i])) continue;
-          this.filteredNodes.add(this.nodes.get(i).getId());
-        }
+        this.timeline.filterNodes(selector, this.filteredNodes);
       } else {
-        for (let i = 0; i < this.nodes.size; i++)
-          this.filteredNodes.add(this.nodes.get(i).getId());
-
         this.barchart.filterNodes(selector, this.filteredNodes);
       }
     }
@@ -357,16 +353,12 @@ export class Controller<
         this.options.edgeFilter.strategy,
         this.options.edgeFilter.tolerance
       );
-      window.edgeSelector = selector;
       this.filteredEdges.clear();
+      for (let i = 0; i < this.edges.size; i++)
+        this.filteredEdges.add(this.edges.get(i).getId());
       if (this.mode === "timeline") {
-        for (let i = 0; i < this.edges.size; i++) {
-          if (!selector(this.edgeStarts[i], this.edgeEnds[i])) continue;
-          this.filteredEdges.add(this.edges.get(i).getId());
-        }
+        this.timeline.filterEdges(selector, this.filteredEdges);
       } else {
-        for (let i = 0; i < this.edges.size; i++)
-          this.filteredEdges.add(this.edges.get(i).getId());
         this.barchart.filterEdges(selector, this.filteredEdges);
       }
     }
