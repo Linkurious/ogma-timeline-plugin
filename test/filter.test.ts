@@ -44,7 +44,7 @@ describe("Barchart", async () => {
   });
 
   test("should filter edges", async () => {
-    const size = await session.page.evaluate(() => {
+    const size = await session.page.evaluate(async () => {
       createOgma({
         graph: {
           nodes: [{ id: 0 }, { id: 1 }],
@@ -75,6 +75,16 @@ describe("Barchart", async () => {
       });
       const controller = createController({
         timeBars: [(1 / 3) * Date.now(), (2 / 3) * Date.now()],
+        edgeFilter: {
+          enabled: true,
+          strategy: "between",
+          tolerance: "strict",
+        },
+      });
+      await new Promise<null>((resolve) => {
+        controller.once("timechange", () => {
+          resolve(null);
+        });
       });
       return controller.filteredEdges.size;
     });

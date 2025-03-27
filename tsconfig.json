@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES2020",
+    "pretty": true,
     "useDefineForClassFields": true,
-    "module": "ESNext",
-    "lib": ["ESNext", "DOM", "dom.iterable"],
-    "moduleResolution": "Node",
-    "strict": true,
+    "module": "ES2020",
+    "lib": ["ES2020", "DOM", "dom.iterable"],
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -16,8 +16,9 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noImplicitReturns": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "strictFunctionTypes": true,
+    "removeComments": false
   },
-  "include": ["src"],
-  
+  "include": ["src/**/*.ts"]
 }

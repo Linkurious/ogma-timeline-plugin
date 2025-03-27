@@ -3,9 +3,7 @@ import {
   Node,
   NodeList,
   EdgeList,
-  NodeId,
   ItemList,
-  EdgeId,
   ItemId,
   Item,
 } from "@linkurious/ogma";
@@ -112,12 +110,12 @@ export type BarChartItem = {
   x: number;
   y: number;
 };
-
+export type TimeToIds = Map<number, Map<IdType, ItemId[]>>;
 export type ItemByScale = {
   items: BarChartItem[];
   itemToElements: Lookup<ItemList>;
   groups: DataGroup[];
-  elementToItem: Lookup<NodeId | EdgeId>;
+  timeToIds: TimeToIds;
   tooZoomed: boolean;
   maxY: number;
 };
