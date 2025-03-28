@@ -52,7 +52,7 @@ export const scales: Scale[] = [
         x.getFullYear(),
         x.getMonth(),
         x.getDate() - x.getDay() + 2,
-        12,
+        12
       ),
   },
   {

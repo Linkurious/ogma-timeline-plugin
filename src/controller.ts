@@ -60,6 +60,8 @@ export class Controller<
   public barchart: Barchart<ND, ED>;
   public filteredNodes: Set<Id>;
   public filteredEdges: Set<Id>;
+  public selectedNodes: Set<Id>;
+  public selectedEdges: Set<Id>;
   private ogma: Ogma<ND, ED>;
   private options: Required<Options<ND, ED>>;
   private container: HTMLDivElement;
@@ -81,6 +83,8 @@ export class Controller<
     >;
     this.filteredNodes = new Set();
     this.filteredEdges = new Set();
+    this.selectedNodes = new Set();
+    this.selectedEdges = new Set();
     this.nodes = ogma.createNodeList();
     this.edges = ogma.createEdgeList();
     this.nodeStarts = [];
@@ -100,12 +104,16 @@ export class Controller<
     const timeline = new Timeline(
       timelineContainer,
       ogma,
-      this.options.timeline as Required<TimelineOptions<ND, ED>>
+      this.options.timeline as Required<TimelineOptions<ND, ED>>,
+      this.selectedNodes,
+      this.selectedEdges
     );
     const barchart = new Barchart(
       barchartContainer,
       ogma,
-      this.options.barchart as Required<BarchartOptions<ND, ED>>
+      this.options.barchart as Required<BarchartOptions<ND, ED>>,
+      this.selectedNodes,
+      this.selectedEdges
     );
     this.timeline = timeline;
     this.barchart = barchart;
@@ -249,6 +257,7 @@ export class Controller<
     this.timeline.visible = true;
     this.barchart.visible = false;
     this.timeline.chart.setWindow(+start, +end, { animation: false });
+    this.timeline.redraw();
   }
 
   showBarchart() {
@@ -260,7 +269,7 @@ export class Controller<
     this.timeline.visible = false;
     this.barchart.visible = true;
     this.barchart.chart.setWindow(+start, +end, { animation: false });
-    this.barchart.chart.redraw();
+    this.barchart.redraw();
   }
 
   addTimeBar(timebar: TimebarOptions): void {
@@ -306,10 +315,22 @@ export class Controller<
   }
 
   setSelection({ nodes, edges }: { nodes?: NodeList; edges?: EdgeList }) {
+    this.selectedNodes.clear();
+    if (nodes) {
+      nodes.getId().forEach((id) => {
+        this.selectedNodes.add(id);
+      });
+    }
+    this.selectedEdges.clear();
+    if (edges) {
+      edges.getId().forEach((id) => {
+        this.selectedEdges.add(id);
+      });
+    }
     if (this.mode === "timeline") {
-      this.timeline.setSelection({ nodes, edges });
+      this.timeline.redraw();
     } else {
-      this.barchart.setSelection({ nodes, edges });
+      this.barchart.redraw();
     }
   }
 
@@ -321,7 +342,7 @@ export class Controller<
     }
   }
 
-  onTimeChange() {
+  private onTimeChange() {
     if (!this.options.nodeFilter.enabled && !this.options.edgeFilter.enabled) {
       return this.emit(timechange);
     }

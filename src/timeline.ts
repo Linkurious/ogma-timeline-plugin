@@ -72,9 +72,11 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
   constructor(
     container: HTMLDivElement,
     ogma: Ogma<ND, ED>,
-    options: Required<TimelineOptions<ND, ED>>
+    options: Required<TimelineOptions<ND, ED>>,
+    selectedNodes: Set<Id>,
+    selectedEdges: Set<Id>
   ) {
-    super(container, ogma);
+    super(container, ogma, selectedNodes, selectedEdges);
     this.options = options;
     this.nodeItems = {
       items: [],
@@ -99,6 +101,7 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
     this.chart.on("click", (e) => {
       this.onBarClick(e);
     });
+
     this.registerEvents();
   }
 
@@ -145,6 +148,7 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
     } else {
       this.chart.setGroups();
     }
+    this.applySelection();
   }
 
   protected onRangeChange() {
@@ -175,6 +179,10 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
       ? this.edgeItems.itemToElements[item]
       : undefined) as unknown as Edge | undefined;
 
+    this.selectedNodes.clear();
+    this.selectedEdges.clear();
+    nodes && this.selectedNodes.add(nodes.getId());
+    edges && this.selectedEdges.add(edges.getId());
     this.emit(click, { nodes, edges, evt });
     this.emit(select, {
       evt: event as MouseEvent,
@@ -247,23 +255,11 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
     );
     return { items, groups, itemToElements, elementToItem };
   }
-  setSelection({
-    nodes,
-    edges,
-  }: {
-    nodes?: NodeList<ND, ED>;
-    edges?: EdgeList<ED, ND>;
-  }) {
-    const nodeIds = nodes ? nodes.getId() : [];
-    const edgeIds = edges ? edges.getId() : [];
-    const ids = [];
-    for (let i = 0; i < nodeIds.length; i++) {
-      ids.push(this.nodeItems.elementToItem[nodeIds[i]]);
-    }
-    for (let i = 0; i < edgeIds.length; i++) {
-      ids.push(this.edgeItems.elementToItem[edgeIds[i]]);
-    }
-    this.chart.setSelection([...nodeIds, ...edgeIds]);
+  applySelection() {
+    const ids = Array.from(this.selectedNodes.keys()).concat(
+      Array.from(this.selectedEdges.keys())
+    );
+    this.chart.setSelection(ids);
   }
   getSelection() {
     const nodeIds: ItemId[] = [];

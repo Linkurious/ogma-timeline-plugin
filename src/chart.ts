@@ -16,6 +16,7 @@ import {
   Timebar,
   TimebarOptions,
   VChart,
+  Id,
 } from "./types";
 
 export const defaultChartOptions: Required<
@@ -38,7 +39,8 @@ export abstract class Chart<
 > extends EventEmitter<Events> {
   public chart!: C;
   protected dataset: DataSet<DataItem>;
-
+  protected selectedNodes: Set<Id>;
+  protected selectedEdges: Set<Id>;
   public container: HTMLDivElement;
   protected currentScale: number;
   protected timebars: Timebar[];
@@ -48,7 +50,12 @@ export abstract class Chart<
   public visible: boolean;
   private destroyed: boolean;
 
-  constructor(container: HTMLDivElement, ogma: Ogma<ND, ED>) {
+  constructor(
+    container: HTMLDivElement,
+    ogma: Ogma<ND, ED>,
+    nodeSelection: Set<Id>,
+    edgeSelection: Set<Id>
+  ) {
     super();
     this.dataset = new DataSet([]);
     this.container = container;
@@ -59,6 +66,8 @@ export abstract class Chart<
     this.chartRange = 0;
     this.destroyed = false;
     this.ogma = ogma;
+    this.selectedNodes = nodeSelection;
+    this.selectedEdges = edgeSelection;
   }
 
   protected registerEvents(): void {
@@ -163,7 +172,7 @@ export abstract class Chart<
   public getWindow() {
     return this.chart.getWindow();
   }
-
+  protected abstract applySelection(): void;
   protected abstract onRangeChange(): void;
   public abstract refresh(
     nodes: NodeList,
@@ -173,6 +182,11 @@ export abstract class Chart<
     edgeStarts: number[],
     edgeEnds: number[]
   ): void;
+
+  public redraw() {
+    this.chart.redraw();
+    this.applySelection();
+  }
 
   protected getScale() {
     const { start, end } = this.chart.getWindow();
