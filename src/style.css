@@ -19,11 +19,6 @@
   fill: #d4ecff;
 }
 
-.bar-item.edge {
-  stroke: #99ff14;
-  fill: #ecffd4;
-}
-
 .vis-item.timeline-item.vis-selected {
   border-color: #34b9ff;
   background-color: rgb(205, 249, 255);
@@ -46,15 +41,6 @@ rect.vis-group.vis-selected {
 }
 path.vis-group {
   pointer-events: none;
-}
-.vis-group.edge {
-  fill-opacity: 0;
-  stroke: #9914ff;
-  fill: #9914ff;
-}
-.vis-group.edge.vis-selected {
-  stroke: #dd66ff;
-  fill: #e4bcef;
 }
 
 .ogma-timeline-wrapper{

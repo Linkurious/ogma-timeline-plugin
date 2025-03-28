@@ -68,9 +68,11 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
   constructor(
     container: HTMLDivElement,
     ogma: Ogma<ND, ED>,
-    options: Required<BarchartOptions<ND, ED>>
+    options: Required<BarchartOptions<ND, ED>>,
+    selectedNodes: Set<Id>,
+    selectedEdges: Set<Id>
   ) {
-    super(container, ogma);
+    super(container, ogma, selectedNodes, selectedEdges);
     this.groupDataset = new DataSet<DataGroup>();
     const barchart = new VGraph2d(
       container,
@@ -158,6 +160,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
         },
         {} as Record<string, SVGRectElement[]>
       );
+      this.applySelection();
     });
     super.registerEvents();
   }
@@ -254,26 +257,28 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
       ".vis-line-graph>svg"
     );
     if (!svg) return;
-    const edges = this.ogma.getEdges(
-      this._getIdsAt(
-        x,
-        y,
-        this.edgeGroups,
-        this.edgeRects,
-        this.edgePoints,
-        this.currentEdgeData.timeToIds
-      )
+    const edgeIds = this._getIdsAt(
+      x,
+      y,
+      this.edgeGroups,
+      this.edgeRects,
+      this.edgePoints,
+      this.currentEdgeData.timeToIds
     );
-    const nodes = this.ogma.getNodes(
-      this._getIdsAt(
-        x,
-        y,
-        this.nodeGroups,
-        this.nodeRects,
-        this.nodePoints,
-        this.currentNodeData.timeToIds
-      )
+    const edges = this.ogma.getEdges(edgeIds);
+    const nodeIds = this._getIdsAt(
+      x,
+      y,
+      this.nodeGroups,
+      this.nodeRects,
+      this.nodePoints,
+      this.currentNodeData.timeToIds
     );
+    const nodes = this.ogma.getNodes(nodeIds);
+    this.selectedNodes.clear();
+    this.selectedEdges.clear();
+    nodeIds.forEach((id) => this.selectedNodes.add(id));
+    edgeIds.forEach((id) => this.selectedEdges.add(id));
     this.emit(click, { nodes, edges, evt });
     this.emit(select, { nodes, edges, evt: event as MouseEvent });
   }
@@ -305,7 +310,6 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
     const currentEdgeData = this.edgeItemsByScale[scale];
     this.currentEdgeData = currentEdgeData;
     this.currentNodeData = currentNodeData;
-    this.emit(scaleChange, { scale, tooZoomed: this.isTooZoomed(scale) });
     this.dataset.clear();
     this.groupDataset.clear();
     this.groupDataset.add([
@@ -318,6 +322,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
     ] as unknown as DataItem[]);
 
     this.chart.redraw();
+    this.emit(scaleChange, { scale, tooZoomed: this.isTooZoomed(scale) });
     if (!currentNodeData.tooZoomed) {
       this.emit(rangechanged);
     }
@@ -471,40 +476,21 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
       groups,
     };
   }
-  setSelection({
-    nodes,
-    edges,
-  }: {
-    nodes?: NodeList<ND, ED>;
-    edges?: EdgeList<ED, ND>;
-  }) {
-    const nodeIds = (nodes ? nodes.getId() : []).reduce(
-      (acc, id) => {
-        acc[id] = true;
-        return acc;
-      },
-      {} as Record<NodeId, boolean>
-    );
-    const edgeIds = (edges ? edges.getId() : []).reduce(
-      (acc, id) => {
-        acc[id] = true;
-        return acc;
-      },
-      {} as Record<EdgeId, boolean>
-    );
+  applySelection() {
     let edgeIndex = 0;
     let nodeIndex = 0;
     const isLine = this.options.graph2dOptions.style === "line";
     const { itemToElements: itemToNodes } = this.currentNodeData;
     const { itemToElements: itemToEdges } = this.currentEdgeData;
-
     this.rects.forEach((rect) => {
       const isNode = rect.classList.contains("node");
       const isEdge = rect.classList.contains("edge");
       if (isNode) {
         if (
           itemToNodes[nodeIndex] &&
-          itemToNodes[nodeIndex].getId().some((id) => nodeIds[id])
+          itemToNodes[nodeIndex]
+            .getId()
+            .some((id) => this.selectedNodes.has(id))
         ) {
           rect.classList.add("vis-selected");
         } else {
@@ -514,7 +500,9 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
       if (isEdge) {
         if (
           itemToEdges[edgeIndex] &&
-          itemToEdges[edgeIndex].getId().some((id) => edgeIds[id])
+          itemToEdges[edgeIndex]
+            .getId()
+            .some((id) => this.selectedEdges.has(id))
         ) {
           rect.classList.add("vis-selected");
         } else {
@@ -659,6 +647,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
           return;
         }
         const rect = rects[i + offset];
+        if (!rect) return;
         const point = points[i + offset];
         const groupX = +(rect.getAttribute("x") as string) + svgOffset.x;
         const groupH = +(rect.getAttribute("height") as string);
@@ -672,7 +661,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
           y > groupY + groupH
         ) {
           rect.classList.remove("vis-selected");
-          point.classList.remove("vis-selected");
+          point && point.classList.remove("vis-selected");
           return;
         }
         timeToIds
@@ -680,7 +669,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
           ?.get(groupId)
           ?.forEach((id) => ids.add(id));
         rect.classList.add("vis-selected");
-        point.classList.add("vis-selected");
+        point && point.classList.add("vis-selected");
       });
     });
     return Array.from(ids);
