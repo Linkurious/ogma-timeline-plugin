@@ -8,6 +8,7 @@ import { TimelineAnimationOptions } from "vis-timeline";
 import { Barchart, defaultBarchartOptions } from "./barchart";
 import {
   rangechange,
+  rangechanged,
   scaleChange,
   select,
   timechange,
@@ -144,6 +145,12 @@ export class Controller<
     this.timeline.on(rangechange, () => {
       throttled();
     });
+    this.barchart.on(rangechanged, () => {
+      // do not throttle here because it is called once at the end of drag
+      // and it would look glitchy with filtered bars
+      this.onTimeChange();
+    });
+
     this.barchart.on(select, (evt) => {
       this.emit(select, evt);
     });
@@ -253,6 +260,7 @@ export class Controller<
     this.timeline.visible = false;
     this.barchart.visible = true;
     this.barchart.chart.setWindow(+start, +end, { animation: false });
+    this.barchart.chart.redraw();
   }
 
   addTimeBar(timebar: TimebarOptions): void {
@@ -331,9 +339,12 @@ export class Controller<
         this.options.nodeFilter.tolerance
       );
       this.filteredNodes.clear();
-      for (let i = 0; i < this.nodes.size; i++) {
-        if (!selector(this.nodeStarts[i], this.nodeEnds[i])) continue;
+      for (let i = 0; i < this.nodes.size; i++)
         this.filteredNodes.add(this.nodes.get(i).getId());
+      if (this.mode === "timeline") {
+        this.timeline.filterNodes(selector, this.filteredNodes);
+      } else {
+        this.barchart.filterNodes(selector, this.filteredNodes);
       }
     }
     if (this.options.edgeFilter.enabled) {
@@ -343,9 +354,12 @@ export class Controller<
         this.options.edgeFilter.tolerance
       );
       this.filteredEdges.clear();
-      for (let i = 0; i < this.edges.size; i++) {
-        if (!selector(this.edgeStarts[i], this.edgeEnds[i])) continue;
+      for (let i = 0; i < this.edges.size; i++)
         this.filteredEdges.add(this.edges.get(i).getId());
+      if (this.mode === "timeline") {
+        this.timeline.filterEdges(selector, this.filteredEdges);
+      } else {
+        this.barchart.filterEdges(selector, this.filteredEdges);
       }
     }
     return this.emit(timechange);

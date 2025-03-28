@@ -34,9 +34,9 @@ export const defaultChartOptions: Required<
 export abstract class Chart<
   ND = unknown,
   ED = unknown,
+  C extends VChart = VChart,
 > extends EventEmitter<Events> {
-  public chart!: VChart;
-
+  public chart!: C;
   protected dataset: DataSet<DataItem>;
 
   public container: HTMLDivElement;
