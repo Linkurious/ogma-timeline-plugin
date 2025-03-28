@@ -671,16 +671,16 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
           y < groupY ||
           y > groupY + groupH
         ) {
-          rect.classList.remove("vis-selected");
-          point.classList.remove("vis-selected");
+          rect && rect.classList.remove("vis-selected");
+          point && point.classList.remove("vis-selected");
           return;
         }
         timeToIds
           .get(time)
           ?.get(groupId)
           ?.forEach((id) => ids.add(id));
-        rect.classList.add("vis-selected");
-        point.classList.add("vis-selected");
+        rect && rect.classList.add("vis-selected");
+        point && point.classList.add("vis-selected");
       });
     });
     return Array.from(ids);
