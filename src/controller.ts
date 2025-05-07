@@ -1,7 +1,6 @@
 import Ogma, { NodeList, EdgeList } from "@linkurious/ogma";
 import { deepmerge } from "deepmerge-ts";
 import EventEmitter from "eventemitter3";
-// eslint-disable-next-line depend/ban-dependencies
 import throttle from "lodash.throttle";
 
 import { TimelineAnimationOptions } from "vis-timeline";
