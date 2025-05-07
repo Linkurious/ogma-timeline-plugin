@@ -59,7 +59,9 @@ describe("Options", async () => {
       .locator(".vis-custom-time.t0>div")
       .evaluate((e) => e.getBoundingClientRect());
     await session.page.mouse.move(x, y + height / 2);
-    await session.page.mouse.wheel(0, 1200);
+    for (let i = 0; i < 20; i++) {
+      await session.page.mouse.wheel(0, 200);
+    }
     const { timelineVisible: tv, barchartVisible: bv } =
       await session.page.evaluate(() => {
         return {
