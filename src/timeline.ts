@@ -17,7 +17,6 @@ import {
 } from "vis-timeline";
 import { Chart, defaultChartOptions } from "./chart";
 import { click, scaleChange, select } from "./constants";
-import "./style.css";
 import {
   GroupFunction,
   Id,
