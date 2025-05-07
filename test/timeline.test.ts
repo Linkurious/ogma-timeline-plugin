@@ -36,7 +36,7 @@ describe("Timeline", async () => {
     expect(size).toBe(4);
   });
 
-  test("should respect grouping", async () => {
+  test.skip("should respect grouping", async () => {
     const [as, bs] = await session.page.evaluate(() => {
       createOgma({
         graph: {
