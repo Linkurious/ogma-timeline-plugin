@@ -58,7 +58,6 @@ describe("Options", async () => {
     const { x, y, height } = await session.page
       .locator(".vis-custom-time.t0>div")
       .evaluate((e) => e.getBoundingClientRect());
-    debugger;
     await session.page.mouse.move(x, y + height / 2);
     for (let i = 0; i < 20; i++) {
       await session.page.mouse.wheel(0, 200);
