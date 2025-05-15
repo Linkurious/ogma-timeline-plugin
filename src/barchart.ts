@@ -320,8 +320,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
       ...currentNodeData.items,
       ...currentEdgeData.items,
     ] as unknown as DataItem[]);
-
-    this.chart.redraw();
+    this.redraw();
     this.emit(scaleChange, { scale, tooZoomed: this.isTooZoomed(scale) });
     if (!currentNodeData.tooZoomed) {
       this.emit(rangechanged);
