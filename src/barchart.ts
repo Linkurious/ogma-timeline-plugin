@@ -597,6 +597,13 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
       itemsData.forEach((item, i) => {
         const screen_x = item.screen_x;
         const x = Number(item.x);
+        const selected = selector(x, x);
+        if (!selected) {
+          timeToIds
+            .get(x)
+            ?.get(groupId)
+            .forEach((id) => filteredElements.add(id));
+        }
         if (isNaN(screen_x)) {
           offset--;
           return;
@@ -606,14 +613,10 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
         }
         const rect = rects[i + offset];
         const point = points[i + offset];
-        if (selector(x, x)) {
+        if (selected) {
           rect && rect.classList.remove("vis-filtered");
           point && point.classList.remove("vis-filtered");
         } else {
-          timeToIds
-            .get(x)
-            ?.get(groupId)
-            .forEach((id) => filteredElements.delete(id));
           rect && rect.classList.add("vis-filtered");
           point && point.classList.add("vis-filtered");
         }

@@ -359,8 +359,6 @@ export class Controller<
         this.options.nodeFilter.tolerance
       );
       this.filteredNodes.clear();
-      for (let i = 0; i < this.nodes.size; i++)
-        this.filteredNodes.add(this.nodes.get(i).getId());
       if (this.mode === "timeline") {
         this.timeline.filterNodes(selector, this.filteredNodes);
       } else {
@@ -374,8 +372,6 @@ export class Controller<
         this.options.edgeFilter.tolerance
       );
       this.filteredEdges.clear();
-      for (let i = 0; i < this.edges.size; i++)
-        this.filteredEdges.add(this.edges.get(i).getId());
       if (this.mode === "timeline") {
         this.timeline.filterEdges(selector, this.filteredEdges);
       } else {
