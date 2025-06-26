@@ -312,7 +312,7 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
         box && box.classList.add("vis-filtered");
         line && line.classList.add("vis-filtered");
         dot && dot.classList.add("vis-filtered");
-        elementSet.delete(id);
+        elementSet.add(id);
         continue;
       }
       box && box.classList.remove("vis-filtered");
