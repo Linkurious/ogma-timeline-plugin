@@ -40,7 +40,7 @@ describe("Barchart", async () => {
       });
       return controller.filteredNodes.size;
     });
-    expect(size).toBe(10);
+    expect(size).toBe(2);
   });
 
   test("should filter edges", async () => {
@@ -88,7 +88,7 @@ describe("Barchart", async () => {
       });
       return controller.filteredEdges.size;
     });
-    expect(size).toBe(10);
+    expect(size).toBe(2);
   });
 
   test("should be disabled if asked", async () => {
@@ -120,7 +120,7 @@ describe("Barchart", async () => {
       });
       return controller.filteredNodes.size;
     });
-    expect(size).toBe(12);
+    expect(size).toBe(0);
   });
 
   test("should respect strategy and tolerance", async () => {
@@ -162,7 +162,7 @@ describe("Barchart", async () => {
       });
       return [...controller.filteredNodes.values()].map((v) => v);
     });
-    expect(ids).toEqual([1, 5]);
+    expect(ids).toEqual([2, 3, 4]);
   });
 
   test("should refresh on drag", async () => {
@@ -213,7 +213,7 @@ describe("Barchart", async () => {
       });
       return [...controller.filteredNodes.values()].map((v) => v);
     });
-    expect(ids).toEqual([1, 2, 4, 5]);
+    expect(ids).toEqual([3]);
 
     const { x, y, width, height } = await session.page
       .locator(".vis-custom-time.t0>div")
@@ -230,6 +230,6 @@ describe("Barchart", async () => {
     const ids2 = await session.page.evaluate(() => [
       ...controller.filteredNodes.values(),
     ]);
-    expect(ids2).toEqual([1, 2, 3, 4, 5]);
+    expect(ids2).toEqual([]);
   });
 });

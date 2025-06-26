@@ -71,7 +71,7 @@ describe("Options", async () => {
       });
       return afterTimelineRedraw().then(() => controller.filteredNodes.size);
     });
-    expect(filteredNodes).toEqual(1);
+    expect(filteredNodes).toEqual(0);
     const { x, y, width, height } = await session.page
       .locator(".vis-custom-time.t0>div")
       .evaluate((e) => e.getBoundingClientRect());
@@ -85,7 +85,7 @@ describe("Options", async () => {
     const filteredNodes2 = await session.page.evaluate(() => {
       return controller.filteredNodes.size;
     });
-    expect(filteredNodes2).toEqual(1);
+    expect(filteredNodes2).toEqual(0);
   });
 
   test("should allow fixed timebars", async () => {
@@ -119,7 +119,7 @@ describe("Options", async () => {
         timebars: controller.getTimebars().map(({ date }) => date),
       }));
     });
-    expect(filteredNodes).toEqual(1);
+    expect(filteredNodes).toEqual(0);
 
     const expectedDates = [new Date("1 1 1950"), new Date("1 1 1960")];
     timebars.forEach((date, i) => {
@@ -142,7 +142,7 @@ describe("Options", async () => {
         timebars2: controller.getTimebars().map(({ date }) => date),
       };
     });
-    expect(filteredNodes2).toEqual(0);
+    expect(filteredNodes2).toEqual(1);
     const expectedDates2 = [
       new Date("1940-06-14T13:23:46.522Z"),
       new Date("1950-06-14T13:23:46.522Z"),

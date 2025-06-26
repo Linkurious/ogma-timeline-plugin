@@ -98,13 +98,13 @@ window.ogma = ogma;
 //create filters
 const nodeFilter = ogma.transformations.addNodeFilter({
   criteria: (node) => {
-    return timelinePlugin.filteredNodes.has(node.getId());
+    return !timelinePlugin.filteredNodes.has(node.getId());
   },
   enabled: false,
 });
 const edgeFilter = ogma.transformations.addEdgeFilter({
   criteria: (edge) => {
-    return timelinePlugin.filteredEdges.has(edge.getId());
+    return !timelinePlugin.filteredEdges.has(edge.getId());
   },
 });
 

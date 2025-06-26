@@ -255,7 +255,7 @@ describe("Options", async () => {
         Array.from(controller.filteredNodes)
       );
     });
-    expect(filteredNodes).toEqual([1]);
+    expect(filteredNodes).toEqual([]);
   });
   test("should respect filter disabled", async () => {
     const filteredNodes = await session.page.evaluate(() => {
@@ -283,7 +283,7 @@ describe("Options", async () => {
         Array.from(controller.filteredNodes)
       );
     });
-    expect(filteredNodes).toEqual([1]);
+    expect(filteredNodes).toEqual([]);
   });
   test("should respect filter after", async () => {
     const filteredNodes = await session.page.evaluate(() => {
@@ -311,6 +311,6 @@ describe("Options", async () => {
         Array.from(controller.filteredNodes)
       );
     });
-    expect(filteredNodes).toEqual([]);
+    expect(filteredNodes).toEqual([1]);
   });
 });
