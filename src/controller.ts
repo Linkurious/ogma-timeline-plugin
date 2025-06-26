@@ -236,13 +236,9 @@ export class Controller<
     );
     if (!this.options.nodeFilter.enabled) {
       this.filteredNodes.clear();
-      for (let i = 0; i < this.nodes.size; i++)
-        this.filteredNodes.add(this.nodes.get(i).getId());
     }
     if (!this.options.edgeFilter.enabled) {
       this.filteredEdges.clear();
-      for (let i = 0; i < this.edges.size; i++)
-        this.filteredEdges.add(this.edges.get(i).getId());
     }
     this.setWindow(wd.start, wd.end, { animation: false });
   }
