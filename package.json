@@ -82,7 +82,7 @@
   "devDependencies": {
     "@linkurious/code-tools": "0.0.14",
     "@linkurious/eslint-config-ogma": "^1.0.11",
-    "@playwright/test": "^1.31.2",
+    "@playwright/test": "^1.56.1",
     "@types/lodash.merge": "^4.6.7",
     "@types/lodash.throttle": "^4.1.7",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
@@ -94,7 +94,7 @@
     "lodash.throttle": "^4.1.1",
     "markdown-it-html5-media": "^0.7.1",
     "moment": "^2.29.4",
-    "playwright": "^1.31.2",
+    "playwright": "^1.56.1",
     "typescript": "^5.0.0",
     "vite": "latest",
     "vitest": "latest",
