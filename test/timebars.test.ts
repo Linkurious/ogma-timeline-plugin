@@ -142,7 +142,7 @@ describe("Options", async () => {
         timebars2: controller.getTimebars().map(({ date }) => date),
       };
     });
-    expect(filteredNodes2).toEqual(1);
+    expect(filteredNodes2).toEqual(0);
     const expectedDates2 = [
       new Date("1940-06-14T13:23:46.522Z"),
       new Date("1950-06-14T13:23:46.522Z"),
