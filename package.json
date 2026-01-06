@@ -27,7 +27,7 @@
     "dist/ogma-timeline-plugin.js",
     "dist/ogma-timeline-plugin.umd.js",
     "dist/types/*.d.ts",
-    "dist/style.css"
+    "dist/ogma-timeline-plugin.css"
   ],
   "exports": {
     ".": {
@@ -35,7 +35,7 @@
       "require": "./dist/ogma-timeline-plugin.umd.js",
       "types": "./dist/types/index.d.ts"
     },
-    "./style.css": "./dist/style.css"
+    "./style.css": "./dist/ogma-timeline-plugin.css"
   },
   "typesVersions": {
     "*": {
@@ -50,13 +50,13 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite --config=demo.vite.config.ts",
-    "docs:build": "vuepress build docs --config docs/vuepress.config.ts",
-    "docs:dev": "vuepress dev docs --config docs/vuepress.config.ts",
-    "docs:publish": "gh-pages -t --nojekyll -d docs/.vuepress/dist",
+    "docs:build": "vitepress build docs",
+    "docs:dev": "vitepress dev docs",
+    "docs:publish": "gh-pages -t --nojekyll -d docs/.vitepress/dist",
     "lint": "eslint --ext .js,.ts,.vue demo src",
     "lint:fix": "eslint --ext .js,.ts,.vue demo src --fix",
     "lint:ci": "eslint -f checkstyle -o reports/checkstyle.xml src ./test/**/*.test.ts",
-    "predocs:build": "rm -rf docs/.vuepress/dist docs/.vuepress/.cache docs/.vuepress/.temp",
+    "predocs:build": "rm -rf docs/.vitepress/dist docs/.vitepress/.cache docs/.vitepress/.temp",
     "predocs:publish": "npm run docs:build",
     "preview": "vite preview",
     "test": "vite build --config=test/vite.config.ts && vitest run",
@@ -67,7 +67,8 @@
     "postbuild": "scripts/postbuild.sh",
     "postversion": "sync_versions",
     "bump:patch": "npm version --no-git-tag-version patch",
-    "prepare": "npx playwright install chromium"
+    "prepare": "npx playwright install chromium",
+    "docs:preview": "vitepress preview docs"
   },
   "peerDependencies": {
     "@linkurious/ogma": "^4.4.0 || ^5.0.0",
@@ -81,24 +82,23 @@
   },
   "devDependencies": {
     "@linkurious/code-tools": "0.0.14",
-    "@linkurious/eslint-config-ogma": "^1.0.11",
-    "@playwright/test": "^1.31.2",
-    "@types/lodash.merge": "^4.6.7",
-    "@types/lodash.throttle": "^4.1.7",
-    "@typescript-eslint/eslint-plugin": "^7.16.1",
-    "@vitest/coverage-v8": "^3.0.0",
-    "@vitest/ui": "^3.0.0",
-    "@vuepress/plugin-search": "next",
-    "get-port": "^7.0.0",
-    "gh-pages": "^6.0.0",
-    "lodash.throttle": "^4.1.1",
-    "markdown-it-html5-media": "^0.7.1",
-    "moment": "^2.29.4",
-    "playwright": "^1.31.2",
-    "typescript": "^5.0.0",
-    "vite": "latest",
-    "vitest": "latest",
-    "vuepress": "next"
+    "@linkurious/eslint-config-ogma": "1.0.11",
+    "@playwright/test": "1.57.0",
+    "@types/lodash.merge": "4.6.9",
+    "@types/lodash.throttle": "4.1.9",
+    "@typescript-eslint/eslint-plugin": "8.52.0",
+    "@vitest/coverage-v8": "4.0.16",
+    "@vitest/ui": "4.0.16",
+    "get-port": "7.1.0",
+    "gh-pages": "6.3.0",
+    "lodash.throttle": "4.1.1",
+    "markdown-it-html5-media": "0.8.0",
+    "moment": "2.30.1",
+    "playwright": "1.57.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.0",
+    "vitepress": "1.6.4",
+    "vitest": "4.0.16"
   },
   "eslintConfig": {
     "extends": "@linkurious/eslint-config-ogma",

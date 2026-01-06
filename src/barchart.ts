@@ -1,4 +1,5 @@
-import Ogma, {
+import {
+  Ogma,
   EdgeId,
   EdgeList,
   Item,

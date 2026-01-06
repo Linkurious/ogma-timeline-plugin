@@ -1,5 +1,5 @@
 import "./style.css";
-import Ogma from "@linkurious/ogma";
+import { Ogma } from "@linkurious/ogma";
 import { Controller as TimelinePlugin, day } from "../src";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
