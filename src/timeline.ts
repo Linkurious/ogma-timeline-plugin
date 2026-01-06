@@ -181,8 +181,8 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
 
     this.selectedNodes.clear();
     this.selectedEdges.clear();
-    nodes && this.selectedNodes.add(nodes.getId());
-    edges && this.selectedEdges.add(edges.getId());
+    if (nodes) this.selectedNodes.add(nodes.getId());
+    if (edges) this.selectedEdges.add(edges.getId());
     this.emit(click, { nodes, edges, evt });
     this.emit(select, {
       evt: event as MouseEvent,
@@ -310,15 +310,15 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
       const line = timelineItem.dom?.line;
       const dot = timelineItem.dom?.dot;
       if (!selector(start, end)) {
-        box && box.classList.add("vis-filtered");
-        line && line.classList.add("vis-filtered");
-        dot && dot.classList.add("vis-filtered");
+        if (box) box.classList.add("vis-filtered");
+        if (line) line.classList.add("vis-filtered");
+        if (dot) dot.classList.add("vis-filtered");
         elementSet.add(id);
         continue;
       }
-      box && box.classList.remove("vis-filtered");
-      line && line.classList.remove("vis-filtered");
-      dot && dot.classList.remove("vis-filtered");
+      if (box) box.classList.remove("vis-filtered");
+      if (line) line.classList.remove("vis-filtered");
+      if (dot) dot.classList.remove("vis-filtered");
     }
   }
 }
