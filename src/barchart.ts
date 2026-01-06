@@ -615,11 +615,11 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
         const rect = rects[i + offset];
         const point = points[i + offset];
         if (selected) {
-          rect && rect.classList.remove("vis-filtered");
-          point && point.classList.remove("vis-filtered");
+          if (rect) rect.classList.remove("vis-filtered");
+          if (point) point.classList.remove("vis-filtered");
         } else {
-          rect && rect.classList.add("vis-filtered");
-          point && point.classList.add("vis-filtered");
+          if (rect) rect.classList.add("vis-filtered");
+          if (point) point.classList.add("vis-filtered");
         }
       });
     });
@@ -665,7 +665,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
           y > groupY + groupH
         ) {
           rect.classList.remove("vis-selected");
-          point && point.classList.remove("vis-selected");
+          if (point) point.classList.remove("vis-selected");
           return;
         }
         timeToIds
@@ -673,7 +673,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
           ?.get(groupId)
           ?.forEach((id) => ids.add(id));
         rect.classList.add("vis-selected");
-        point && point.classList.add("vis-selected");
+        if (point) point.classList.add("vis-selected");
       });
     });
     return Array.from(ids);
