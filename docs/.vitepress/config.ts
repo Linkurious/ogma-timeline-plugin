@@ -6,6 +6,7 @@ export default defineConfig({
   head: [["link", { rel: "icon", type: "image/x-icon", href: "/favicon.ico" }]],
   description: "Timeline filtering for Ogma graph visualization",
   base: "/ogma-timeline-plugin/",
+
   themeConfig: {
     logo: {
       light: "https://doc.linkurious.com/ogma/latest/logo-white.svg",
