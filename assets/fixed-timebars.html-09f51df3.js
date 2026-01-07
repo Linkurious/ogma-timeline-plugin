@@ -1,1 +1,0 @@
-const e=JSON.parse('{"key":"v-8b8a3ff4","path":"/examples/fixed-timebars.html","title":"","lang":"en-US","frontmatter":{},"headers":[],"git":{"updatedTime":1680187348000,"contributors":[{"name":"Leo Nicolle","email":"leo@linkurio.us","commits":1}]},"filePathRelative":"examples/fixed-timebars.md"}');export{e as data};
