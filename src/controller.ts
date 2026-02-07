@@ -157,7 +157,6 @@ export class Controller<
       // and it would look glitchy with filtered bars
       this.onTimeChange();
     });
-
     this.barchart.on(select, (evt) => {
       this.emit(select, evt);
     });
@@ -177,21 +176,23 @@ export class Controller<
         this.timeline.addTimeBar(timeBar);
         this.barchart.addTimeBar(timeBar);
       });
-
     this.refresh({ nodes, edges });
-    this.setWindow(
-      this.options.start ||
-        Math.min(
-          this.nodeStarts.reduce((min, s) => Math.min(min, s), Infinity),
-          this.edgeStarts.reduce((min, s) => Math.min(min, s), Infinity)
-        ),
-      this.options.end ||
-        Math.max(
-          this.nodeStarts.reduce((max, s) => Math.max(max, s), -Infinity),
-          this.edgeStarts.reduce((max, s) => Math.max(max, s), -Infinity)
-        ),
-      { animation: false }
-    );
+    requestAnimationFrame(() => {
+      this.setWindow(
+        this.options.start ||
+          Math.min(
+            this.nodeStarts.reduce((min, s) => Math.min(min, s), Infinity),
+            this.edgeStarts.reduce((min, s) => Math.min(min, s), Infinity)
+          ),
+        this.options.end ||
+          Math.max(
+            this.nodeStarts.reduce((max, s) => Math.max(max, s), -Infinity),
+            this.edgeStarts.reduce((max, s) => Math.max(max, s), -Infinity)
+          ),
+        { animation: false }
+      );
+    });
+
     ogma.events.on("destroy", () => {
       this.destroy();
     });

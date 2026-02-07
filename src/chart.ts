@@ -53,6 +53,7 @@ export abstract class Chart<
   protected isChangingRange: boolean;
   protected ogma: Ogma<ND, ED>;
   private chartRange: number;
+  private willRedraw: boolean;
   public visible: boolean;
   private destroyed: boolean;
 
@@ -71,6 +72,7 @@ export abstract class Chart<
     this.visible = false;
     this.chartRange = 0;
     this.destroyed = false;
+    this.willRedraw = false;
     this.ogma = ogma;
     this.selectedNodes = nodeSelection;
     this.selectedEdges = edgeSelection;
@@ -190,8 +192,13 @@ export abstract class Chart<
   ): void;
 
   public redraw() {
-    this.chart.redraw();
-    this.applySelection();
+    if (this.willRedraw) return;
+    this.willRedraw = true;
+    requestAnimationFrame(() => {
+      this.chart.redraw();
+      this.applySelection();
+      this.willRedraw = false;
+    });
   }
 
   protected getScale() {
