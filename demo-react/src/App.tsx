@@ -1,4 +1,4 @@
-import Ogma from "@linkurious/ogma";
+import { Ogma } from "@linkurious/ogma";
 import { graph } from "./createGraph";
 import { Ogma as Vis } from "@linkurious/ogma-react";
 import Timeline from "./Timeline";

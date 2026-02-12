@@ -1,4 +1,4 @@
-import Ogma, { OgmaParameters } from "@linkurious/ogma";
+import { Ogma, OgmaParameters } from "@linkurious/ogma";
 import getPort from "get-port";
 import { chromium, type Browser, type Page } from "playwright";
 import { preview, type PreviewServer } from "vite";
@@ -15,10 +15,10 @@ declare global {
 }
 
 export class BrowserSession {
-  public server: PreviewServer;
-  public browser: Browser;
-  public page: Page;
-  public port: number;
+  public server!: PreviewServer;
+  public browser!: Browser;
+  public page!: Page;
+  public port!: number;
   async start(headless = true) {
     this.port = await getPort();
     this.server = await preview({

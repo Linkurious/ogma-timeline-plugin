@@ -1,5 +1,19 @@
-import Ogma from "@linkurious/ogma";
-import { Controller } from "../../src/controller";
+import { Ogma, OgmaParameters } from "@linkurious/ogma";
+import { Controller, Options } from "../../src";
+
+declare global {
+  interface Window {
+    Ogma: typeof Ogma;
+    controller: Controller;
+    ogma: Ogma;
+    createOgma: (options: OgmaParameters) => Ogma;
+    createController: (options: Options) => Controller;
+    afterBarchartRedraw: () => Promise<Controller>;
+    afterTimelineRedraw: () => Promise<Controller>;
+    wait: (ms: number) => Promise<void>;
+    cleanup: () => void;
+  }
+}
 
 function afterBarchartRedraw() {
   return new Promise((resolve) => {
@@ -24,7 +38,7 @@ function wait(ms: number) {
   });
 }
 
-function createOgma(options) {
+function createOgma(options: OgmaParameters) {
   const ogma = new Ogma({
     container: "ogma",
     ...options,
@@ -32,7 +46,7 @@ function createOgma(options) {
   window["ogma"] = ogma;
   return ogma;
 }
-function createController(options) {
+function createController(options: Options) {
   const controller = new Controller(
     window["ogma"],
     document.getElementById("timeline") as HTMLDivElement,
@@ -45,14 +59,14 @@ function cleanup() {
   if (window["controller"]) window["controller"].destroy();
   if (window["ogma"]) window["ogma"].destroy();
 }
-window["Ogma"] = Ogma;
-window["controller"] = Controller;
-// @ts-expect-error expose for testing
-window["wait"] = wait;
-window["createOgma"] = createOgma;
-window["createController"] = createController;
-// @ts-expect-error expose for testing
-window["afterBarchartRedraw"] = afterBarchartRedraw;
-// @ts-expect-error expose for testing
-window["afterTimelineRedraw"] = afterTimelineRedraw;
-window["cleanup"] = cleanup;
+
+Object.assign(window, {
+  controller: Controller,
+  Ogma,
+  wait,
+  createController,
+  afterBarchartRedraw,
+  afterTimelineRedraw,
+  createOgma,
+  cleanup,
+});
