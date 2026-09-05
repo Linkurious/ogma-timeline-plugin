@@ -89,7 +89,7 @@
     "@typescript-eslint/eslint-plugin": "8.52.0",
     "@vitest/coverage-v8": "4.0.16",
     "@vitest/ui": "4.0.16",
-    "get-port": "7.1.0",
+    "get-port": "7.2.0",
     "gh-pages": "6.3.0",
     "lodash.throttle": "4.1.1",
     "markdown-it-html5-media": "0.8.0",
