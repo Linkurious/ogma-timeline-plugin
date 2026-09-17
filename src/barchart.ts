@@ -603,7 +603,7 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
           timeToIds
             .get(x)
             ?.get(groupId)
-            .forEach((id) => filteredElements.add(id));
+            ?.forEach((id) => filteredElements.add(id));
         }
         if (isNaN(screen_x)) {
           offset--;

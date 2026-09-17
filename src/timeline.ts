@@ -303,12 +303,13 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       const id = item.id;
+      if (id === undefined) continue;
       const timelineItem = this.chart.itemSet.groups[item.group as string]
         ? this.chart.itemSet.groups[item.group as string].items[id]
         : this.chart.itemSet.items[id];
       if (!timelineItem) continue;
       const start = +item.start;
-      const end = +item.end;
+      const end = item.end !== undefined ? +item.end : start;
       const box = timelineItem.dom?.box;
       const line = timelineItem.dom?.line;
       const dot = timelineItem.dom?.dot;
