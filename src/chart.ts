@@ -60,7 +60,7 @@ export abstract class Chart<
     container: HTMLDivElement,
     ogma: Ogma<ND, ED>,
     nodeSelection: Set<Id>,
-    edgeSelection: Set<Id>
+    edgeSelection: Set<Id>,
   ) {
     super();
     this.dataset = new DataSet([]);
@@ -114,9 +114,6 @@ export abstract class Chart<
     this.chart.on(timechanged, () => {
       this.emit(timechanged);
     });
-    this.chart.on(timechanged, () => {
-      this.emit(timechanged);
-    });
     this.chart.on("changed", () => {
       this.emit("redraw");
     });
@@ -161,7 +158,7 @@ export abstract class Chart<
   public setWindow(
     minTime: number | Date,
     maxTime: number | Date,
-    options?: TimelineAnimationOptions
+    options?: TimelineAnimationOptions,
   ): void {
     this.chart.setWindow(minTime, maxTime, options);
     this.updateDeltas();
@@ -186,7 +183,7 @@ export abstract class Chart<
     nodeStarts: number[],
     nodeEnds: number[],
     edgeStarts: number[],
-    edgeEnds: number[]
+    edgeEnds: number[],
   ): void;
 
   public redraw() {
@@ -211,7 +208,7 @@ export abstract class Chart<
         }
         return scale;
       },
-      { bars: Infinity, scale: Infinity, i: -1, name: "undefined" }
+      { bars: Infinity, scale: Infinity, i: -1, name: "undefined" },
     );
   }
   destroy() {

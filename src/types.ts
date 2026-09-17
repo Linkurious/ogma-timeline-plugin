@@ -38,11 +38,11 @@ export type FilterOptions = {
 export type IdFunction<ElementType> = (item: ElementType) => string;
 export type GroupFunction<ElementType> = (
   groupId: string,
-  items: ElementType
+  items: ElementType,
 ) => string;
 export type ItemGenerator<T, ElementType> = (
   elements: ElementType,
-  groupId: string
+  groupId: string,
 ) => Partial<T>;
 export interface BaseOptions<T, NodeType, EdgeType> {
   nodeGroupIdFunction?: IdFunction<NodeType>;
@@ -60,20 +60,24 @@ export interface BaseOptions<T, NodeType, EdgeType> {
  * @property {Function} groupIdFunction Similar to [Ogma addNodeGrouping](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeGrouping) groupIdFunction
  * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
  */
-export interface BarchartOptions<ND = unknown, ED = unknown>
-  extends BaseOptions<
-    Exclude<BarChartItem, "ids" | "group" | "x" | "y">,
-    NodeList<ND, ED>,
-    EdgeList<ED, ND>
-  > {
+export interface BarchartOptions<
+  ND = unknown,
+  ED = unknown,
+> extends BaseOptions<
+  Exclude<BarChartItem, "ids" | "group" | "x" | "y">,
+  NodeList<ND, ED>,
+  EdgeList<ED, ND>
+> {
   graph2dOptions?: Graph2dOptions;
 }
-export interface TimelineOptions<ND = unknown, ED = unknown>
-  extends BaseOptions<
-    Exclude<DataItem, "className" | "id" | "start" | "end" | "group">,
-    Node<ND, ED>,
-    Edge<ED, ND>
-  > {
+export interface TimelineOptions<
+  ND = unknown,
+  ED = unknown,
+> extends BaseOptions<
+  Exclude<DataItem, "className" | "id" | "start" | "end" | "group">,
+  Node<ND, ED>,
+  Edge<ED, ND>
+> {
   timelineOptions?: VTimelineOptions;
 }
 

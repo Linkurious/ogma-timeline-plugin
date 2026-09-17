@@ -53,9 +53,11 @@
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
     "docs:publish": "gh-pages -t --nojekyll -d docs/.vitepress/dist",
-    "lint": "eslint --ext .js,.ts,.vue demo src",
-    "lint:fix": "eslint --ext .js,.ts,.vue demo src --fix",
-    "lint:ci": "eslint -f checkstyle -o reports/checkstyle.xml src ./test/**/*.test.ts",
+    "lint": "oxlint -c .oxlintrc.json demo src test",
+    "lint:fix": "npm run lint -- --fix",
+    "lint:ci": "mkdir -p reports && oxlint -c .oxlintrc.json -f checkstyle demo src test > reports/checkstyle.xml",
+    "format": "oxfmt -c .oxfmtrc.json \"{src,demo,test}/**/*.{ts,css,html}\"",
+    "format:check": "oxfmt -c .oxfmtrc.json --check \"{src,demo,test}/**/*.{ts,css,html}\"",
     "predocs:build": "rm -rf docs/.vitepress/dist docs/.vitepress/.cache docs/.vitepress/.temp",
     "predocs:publish": "npm run docs:build",
     "preview": "vite preview",
@@ -67,47 +69,48 @@
     "postbuild": "scripts/postbuild.sh",
     "postversion": "sync_versions",
     "bump:patch": "npm version --no-git-tag-version patch",
-    "prepare": "npx playwright install chromium",
+    "prepare": "husky && npx playwright install chromium",
     "docs:preview": "vitepress preview docs"
   },
   "peerDependencies": {
     "@linkurious/ogma": ">=4.4.0"
   },
   "dependencies": {
-    "deepmerge-ts": "^7.1.3",
+    "deepmerge-ts": "8.0.2",
     "eventemitter3": "^5.0.0",
     "lodash.merge": "^4.6.2",
-    "vis-data": "^7.1.4",
-    "vis-timeline": "^7.7.0"
+    "vis-data": "8.0.5",
+    "vis-timeline": "8.0.1"
   },
   "devDependencies": {
     "@linkurious/code-tools": "0.1.0",
-    "@linkurious/eslint-config-ogma": "1.0.11",
+    "@linkurious/eslint-config-ogma": "2.1.0",
     "@playwright/test": "1.57.0",
     "@types/lodash.merge": "4.6.9",
     "@types/lodash.throttle": "4.1.9",
-    "@typescript-eslint/eslint-plugin": "8.52.0",
     "@vitest/coverage-v8": "4.0.16",
     "@vitest/ui": "4.0.16",
     "get-port": "7.1.0",
     "gh-pages": "6.3.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.5.1",
     "lodash.throttle": "4.1.1",
     "markdown-it-html5-media": "0.8.0",
     "moment": "2.30.1",
+    "oxfmt": "0.68.0",
+    "oxlint": "1.83.0",
     "playwright": "1.57.0",
     "typescript": "5.9.3",
     "vitepress": "1.6.4"
   },
-  "eslintConfig": {
-    "extends": "@linkurious/eslint-config-ogma",
-    "rules": {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          "argsIgnorePattern": "^_"
-        }
-      ]
-    }
+  "lint-staged": {
+    "{src,demo,test}/**/*.ts": [
+      "oxlint -c .oxlintrc.json --fix",
+      "oxfmt -c .oxfmtrc.json"
+    ],
+    "{src,demo,test}/**/*.{css,html}": [
+      "oxfmt -c .oxfmtrc.json"
+    ]
   },
   "private": false
 }

@@ -90,7 +90,7 @@ const timelinePlugin = new TimelinePlugin(
       strategy: "between",
       tolerance: "loose",
     },
-  }
+  },
 );
 window.timeline = timelinePlugin;
 window.ogma = ogma;
@@ -136,5 +136,5 @@ ogma.events.on(
       nodes: ogma.getSelectedNodes(),
       edges: ogma.getSelectedEdges(),
     });
-  }
+  },
 );

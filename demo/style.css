@@ -1,9 +1,9 @@
-body{
+body {
   margin: 0;
   padding: 0;
   overflow: hidden;
 }
-#app{
+#app {
   display: grid;
   grid-template-rows: auto 256px;
   grid-template-columns: 100%;
@@ -39,11 +39,11 @@ body{
 
 .bar-item.edge {
   stroke: #9914ff;
-  fill: #ccaae5
+  fill: #ccaae5;
 }
 .vis-box.truck,
 .vis-line.truck,
-.vis-dot.truck{
+.vis-dot.truck {
   background-color: #60f779;
   border-color: #09b531;
 }
@@ -55,7 +55,7 @@ body{
 }
 .vis-box.car,
 .vis-line.car,
-.vis-dot.car{
+.vis-dot.car {
   background-color: #ff9914;
   border-color: #ff9914;
 }
@@ -67,14 +67,14 @@ body{
 }
 .vis-box.edge,
 .vis-line.edge,
-.vis-dot.edge{
+.vis-dot.edge {
   background-color: #ccaae5;
   border-color: #9914ff;
 }
 
 .vis-item.vis-box.edge.vis-selected,
 .vis-item.vis-line.edge.vis-selected,
-.vis-item.vis-dot.edge.vis-selected{
+.vis-item.vis-dot.edge.vis-selected {
   background-color: #decbeb;
   border-color: #b561f6;
 }
