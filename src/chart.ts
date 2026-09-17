@@ -114,9 +114,6 @@ export abstract class Chart<
     this.chart.on(timechanged, () => {
       this.emit(timechanged);
     });
-    this.chart.on(timechanged, () => {
-      this.emit(timechanged);
-    });
     this.chart.on("changed", () => {
       this.emit("redraw");
     });
