@@ -85,7 +85,7 @@
   "devDependencies": {
     "@linkurious/code-tools": "0.1.0",
     "@linkurious/eslint-config-ogma": "2.1.0",
-    "@playwright/test": "1.57.0",
+    "@playwright/test": "1.63.0",
     "@types/lodash.merge": "4.6.9",
     "@types/lodash.throttle": "4.1.9",
     "@vitest/coverage-v8": "4.0.16",
@@ -99,7 +99,7 @@
     "moment": "2.30.1",
     "oxfmt": "0.68.0",
     "oxlint": "1.83.0",
-    "playwright": "1.57.0",
+    "playwright": "1.63.0",
     "typescript": "5.9.3",
     "vitepress": "1.6.4"
   },
