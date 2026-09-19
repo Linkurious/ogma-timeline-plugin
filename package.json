@@ -83,7 +83,7 @@
     "vis-timeline": "8.0.1"
   },
   "devDependencies": {
-    "@linkurious/code-tools": "0.1.0",
+    "@linkurious/code-tools": "0.2.0",
     "@linkurious/eslint-config-ogma": "2.1.0",
     "@playwright/test": "1.57.0",
     "@types/lodash.merge": "4.6.9",
