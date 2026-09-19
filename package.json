@@ -96,7 +96,7 @@
     "lint-staged": "17.5.1",
     "lodash.throttle": "4.1.1",
     "markdown-it-html5-media": "0.8.0",
-    "moment": "2.30.1",
+    "moment": "2.31.0",
     "oxfmt": "0.68.0",
     "oxlint": "1.83.0",
     "playwright": "1.57.0",
