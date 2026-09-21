@@ -88,8 +88,7 @@
     "@playwright/test": "1.57.0",
     "@types/lodash.merge": "4.6.9",
     "@types/lodash.throttle": "4.1.9",
-    "@vitest/coverage-v8": "4.0.16",
-    "@vitest/ui": "4.0.16",
+    "@vitest/ui": "5.0.1",
     "get-port": "7.1.0",
     "gh-pages": "6.3.0",
     "husky": "9.1.7",
@@ -101,7 +100,9 @@
     "oxlint": "1.83.0",
     "playwright": "1.57.0",
     "typescript": "5.9.3",
-    "vitepress": "1.6.4"
+    "vite": "8.3.0",
+    "vitepress": "1.6.4",
+    "vitest": "5.0.1"
   },
   "lint-staged": {
     "{src,demo,test}/**/*.ts": [

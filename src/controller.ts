@@ -1,6 +1,6 @@
 import { Ogma, type NodeList, type EdgeList } from "@linkurious/ogma";
 import { deepmerge } from "deepmerge-ts";
-import EventEmitter from "eventemitter3";
+import { EventEmitter } from "eventemitter3";
 import throttle from "lodash.throttle";
 
 import { TimelineAnimationOptions } from "vis-timeline";
