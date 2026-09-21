@@ -1,6 +1,7 @@
 import "./style.css";
 import { Ogma } from "@linkurious/ogma";
 import { Controller as TimelinePlugin, day } from "../src";
+import { name, version } from "../package.json";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div id="ogma"></div>
@@ -19,9 +20,10 @@ const ogma = new Ogma({
         type: i % 2 === 0 ? "car" : "truck",
       },
     })),
+    // every node but the hub (id 1) gets at least one edge back to it,
+    // so the force layout never leaves an orphan node stretching the view
     edges: new Array(edgesN).fill(0).map((_, i) => ({
-      // id: i + 1,
-      source: ((i + 1) % (nodesN - 1)) + 1,
+      source: 2 + (i % (nodesN - 1)),
       target: 1,
       data: {
         start: Date.now() - Math.floor(1 + 100 * Math.random()) * day,
@@ -29,6 +31,11 @@ const ogma = new Ogma({
     })),
   },
 });
+
+ogma.tools.brand.set(
+  `<span class="plugin-brand-name">${name}</span><span class="plugin-brand-version">v${version}</span>`,
+  { position: "bottom-right", className: "plugin-brand" },
+);
 
 ogma.styles.addRule({
   nodeAttributes: {

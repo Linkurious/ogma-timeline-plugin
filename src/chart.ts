@@ -5,7 +5,7 @@ import {
   type Edge,
   type Node,
 } from "@linkurious/ogma";
-import EventEmitter from "eventemitter3";
+import { EventEmitter } from "eventemitter3";
 import { DataSet } from "vis-data";
 import { DataItem, TimelineAnimationOptions } from "vis-timeline";
 import {

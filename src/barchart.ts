@@ -580,6 +580,34 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
     };
   }
 
+  /** Adds every id registered at `time` for `groupId` (per `timeToIds`) to
+   * `target`. Shared by `_filter` (unselected items) and `_getIdsAt` (hit
+   * items). */
+  private _collectIds(
+    timeToIds: TimeToIds,
+    time: number,
+    groupId: IdType,
+    target: Set<Id> | Set<IdType>,
+  ) {
+    timeToIds
+      .get(time)
+      ?.get(groupId)
+      ?.forEach((id) => target.add(id));
+  }
+
+  /** Toggles `className` on both the rect and point SVG elements of an item,
+   * when present. Shared by `_filter` (vis-filtered) and `_getIdsAt`
+   * (vis-selected). */
+  private _toggleClass(
+    rect: SVGRectElement | undefined,
+    point: SVGRectElement | undefined,
+    className: string,
+    active: boolean,
+  ) {
+    rect?.classList.toggle(className, active);
+    point?.classList.toggle(className, active);
+  }
+
   private _filter(
     selector: (a: number, b: number) => boolean,
     elementGroups: IdType[],
@@ -600,27 +628,20 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
         const x = Number(item.x);
         const selected = selector(x, x);
         if (!selected) {
-          timeToIds
-            .get(x)
-            ?.get(groupId)
-            ?.forEach((id) => filteredElements.add(id));
+          this._collectIds(timeToIds, x, groupId, filteredElements);
         }
-        if (isNaN(screen_x)) {
+        const isUnpositioned = isNaN(screen_x);
+        if (isUnpositioned) {
           offset--;
           return;
         }
-        if (screen_x + left < 0) {
+        const isOffscreen = screen_x + left < 0;
+        if (isOffscreen) {
           return;
         }
         const rect = rects[i + offset];
         const point = points[i + offset];
-        if (selected) {
-          if (rect) rect.classList.remove("vis-filtered");
-          if (point) point.classList.remove("vis-filtered");
-        } else {
-          if (rect) rect.classList.add("vis-filtered");
-          if (point) point.classList.add("vis-filtered");
-        }
+        this._toggleClass(rect, point, "vis-filtered", !selected);
       });
     });
   }
@@ -664,16 +685,11 @@ export class Barchart<ND = unknown, ED = unknown> extends Chart<
           y < groupY ||
           y > groupY + groupH
         ) {
-          rect.classList.remove("vis-selected");
-          if (point) point.classList.remove("vis-selected");
+          this._toggleClass(rect, point, "vis-selected", false);
           return;
         }
-        timeToIds
-          .get(time)
-          ?.get(groupId)
-          ?.forEach((id) => ids.add(id));
-        rect.classList.add("vis-selected");
-        if (point) point.classList.add("vis-selected");
+        this._collectIds(timeToIds, time, groupId, ids);
+        this._toggleClass(rect, point, "vis-selected", true);
       });
     });
     return Array.from(ids);
