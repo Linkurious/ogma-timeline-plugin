@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@linkurious/ogma": "^5.2.2",
+    "@linkurious/ogma": "^6.0.0",
     "@linkurious/ogma-react": "^5.1.2-develop.139",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
