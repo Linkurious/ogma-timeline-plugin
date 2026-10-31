@@ -77,7 +77,7 @@
     "eventemitter3": "^5.0.0",
     "lodash.merge": "^4.6.2",
     "vis-data": "8.0.5",
-    "vis-timeline": "8.0.1"
+    "vis-timeline": "8.5.6"
   },
   "devDependencies": {
     "@linkurious/code-tools": "0.2.0",
