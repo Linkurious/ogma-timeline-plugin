@@ -1,0 +1,1142 @@
+# @linkurious/ogma-timeline-plugin
+
+> Timeline and bar-chart view synced with an Ogma graph. It reads `start`/`end` dates from node and edge data and filters the graph by time. Requires `@linkurious/ogma` >= 4.4.0.
+
+## Docs
+
+- [Getting started](https://linkurious.github.io/ogma-timeline-plugin/getting-started.html): install and first timeline
+- [API](https://linkurious.github.io/ogma-timeline-plugin/API.html): options, methods, events
+- [Filtering](https://linkurious.github.io/ogma-timeline-plugin/filtering.html): strategies and tolerance
+- [Time bars](https://linkurious.github.io/ogma-timeline-plugin/timebars.html)
+- [Grouping](https://linkurious.github.io/ogma-timeline-plugin/grouping.html)
+- [Styling](https://linkurious.github.io/ogma-timeline-plugin/styling.html)
+- [Selecting](https://linkurious.github.io/ogma-timeline-plugin/selecting.html)
+- [Timezones and locales](https://linkurious.github.io/ogma-timeline-plugin/timezone.html)
+- [Examples](https://linkurious.github.io/ogma-timeline-plugin/examples/index.html)
+
+## Live examples
+
+- [Timeline](https://doc.linkurious.com/ogma/latest/examples/timeline.html)
+- [Timeline lifespan](https://doc.linkurious.com/ogma/latest/examples/timeline-lifespan.html)
+
+## Optional
+
+- [llms-full.txt](https://linkurious.github.io/ogma-timeline-plugin/llms-full.txt): this file plus all docs pages and the TypeScript typings
+- [README](https://github.com/Linkurious/ogma-timeline-plugin/blob/develop/README.md)
+- [npm](https://www.npmjs.com/package/@linkurious/ogma-timeline-plugin)
+
+## Key facts
+
+1. Filtering is driven by time bars, not by the visible window. `Controller.onTimeChange()` takes the sorted `timeBars` dates and applies `nodeFilter`/`edgeFilter` (`strategy` + `tolerance`) to them. Panning or zooming does not change which items are filtered.
+2. No time bars means everything is filtered out. The default is `timeBars: []` with `strategy: 'between'`; the `between` loop never runs, so every dated item lands in `filteredNodes`. Pass at least two time bars, or disable filtering (`enabled: false`).
+3. `filteredNodes` / `filteredEdges` hold the ids of the excluded items. Intended pattern:
+   ```ts
+   const filter = ogma.transformations.addNodeFilter({
+     criteria: node => !timeline.filteredNodes.has(node.getId())
+   });
+   timeline.on('timechange', () => filter.refresh());
+   ```
+4. Strategies, applied to the sorted bar dates:
+   - `between`: inside bar pairs (1-2, 3-4, ...)
+   - `outside`: outside all pairs
+   - `before`: before the first bar
+   - `after`: after the last bar
+
+   `tolerance: 'strict'` means the whole `[start, end]` range must match; `'loose'` means any overlap counts. Defaults for both nodes and edges: `{ enabled: true, strategy: 'between', tolerance: 'loose' }`.
+5. Items that have neither `start` nor `end` are never filtered out.
+6. Valid top-level options are only those in the `Options` type: `timeline`, `barchart`, `timeBars`, `nodeFilter`, `edgeFilter`, the `node|edge` + `Start|End` + `Path` options, `switchOnZoom`, `showBarchart`, `start`, `end`. `minTime`/`maxTime` do not exist. `start`/`end` only set the initial visible window.
+7. `timechange` fires when a time bar is dragged and when the range changes. `setWindow()` also re-filters and emits it.
+
+
+---
+
+<!-- docs/getting-started.md -->
+
+# Getting Started
+
+Ogma-Timeline-Plugin for [Ogma](https://doc.linkurio.us/ogma/latest/).
+
+[demo](https://doc.linkurious.com/ogma/latest/examples/timeline.html)
+
+## Installation
+
+First, you need to own a valid **Ogma** licence. Reach out [Ogma sales](https://doc.linkurio.us/ogma/latest/support.html) for more details.
+Let's say you start from scratch:
+
+```bash
+npm create vite@latest
+cd my-ogma-app
+```
+
+### Install Ogma and Ogma-timeline-plugin
+
+```bash
+npm i @linkurious/ogma @linkurious/ogma-timeline-plugin
+```
+
+## Use Ogma-timeline-plugin in your App
+
+```ts
+import { Ogma } from "@linkurious/ogma";
+import { Controller as TimelinePlugin } from "@linkurious/ogma-timeline-plugin";
+
+const ogma = new Ogma({
+  container: "graph-container",
+});
+const timelineContainer = document.getElementById("timeline") as HTMLDivElement;
+const timelinePlugin = new TimelinePlugin(ogma, container);
+```
+
+That's it ! You have a fully functionnal Ogma instance within your app, and a timeline showing your data.
+
+## Get the timestamps on your nodes and edges
+
+By default the plugin looks for `start` and `end` keys within node data, and uses it to generate the timeline.
+If you store your data within the `creation.date` and `deletion.date` keys for instance, then you can pass `nodeStartPath` and `nodeEndPath` properties to the Controller constructor:
+
+```ts
+const timelinePlugin = new TimelinePlugin(ogma, container, {
+  nodeStartPath: "creation.date",
+  nodeEndPath: "deletion.date",
+});
+```
+
+If some of your data does not have an `end` date, no worries, the plugin deals with `undefined` end dates. Though start date are **mandatory**.
+
+## Filter nodes and edges depending on time
+
+The plugin provides a simple API to filter out nodes depending on user's input:
+
+- add some timeBars to the controller
+- create an ogma [nodeFilter](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeFilter)
+- Link it to the timeline events
+
+```ts
+const timelinePlugin = new TimelinePlugin(ogma, container, {
+  timeBars: [
+    // place the bars at now and 01/01/70 to start
+    new Date(Date.now()),
+    new Date(0),
+  ],
+  //configure filtering
+  nodeFilter: {
+    enabled: true,
+    strategy: "between",
+    tolerance: "loose",
+  },
+  edgeFilter: {
+    enabled: true,
+    strategy: "between",
+    tolerance: "loose",
+  },
+});
+
+//create filters
+const nodeFilter = ogma.transformations.addNodeFilter({
+  criteria: (node) => {
+    return controller.filteredNodes.has(node.getId());
+  },
+});
+const edgeFilter = ogma.transformations.addEdgeFilter({
+  criteria: (edge) => {
+    return controller.filteredEdges.has(edge.getId());
+  },
+});
+//Hook it to the timeline events
+controller.on("timechange", () => {
+  nodeFilter.refresh();
+  edgeFilter.refresh();
+});
+```
+
+You can place as many bars as you want, but please place either **one** or a **multiple of two** bars.
+There are many filtering options availiable, please have a look at the [filtering](/filtering) section for more details.
+
+## Update the timeline on graph changes
+
+When you create the timeline, it gets all the nodes within the vizualisation and saves their ids.
+Then the timeline will show only thoose nodes, but your graph might evolve with time, some nodes might be created/deleted. In that case, you need to hook on Ogma's events to refresh the timeline:
+
+```ts
+ogma.events.on(
+  ["addNodes", "addEdges", "removeNodes", "removeEdges", "clearGraph"],
+  () => {
+    timeline.refresh({ nodes: ogma.getNodes(), edges: ogma.getEdges() });
+  }
+);
+```
+
+## Display only edges, or only nodes
+
+If you just want to show nodes within your timeline, just call:
+
+```ts
+timeline.refresh({ nodes: ogma.getNodes() });
+```
+
+If you want to show just edges, call:
+
+```ts
+timeline.refresh({ edges: ogma.getEdges() });
+```
+
+
+---
+
+<!-- docs/API.md -->
+
+# API
+
+## Options
+
+Options described here are the options for the controller constructor. Everything you need to customize your timeline happens here.
+
+| Name          | Description                                                                                                                                                    | Type                                | Default   |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | --------- |
+| start         | The date from which the timeline will start. If undefined it will take the minimum date from the input nodes/edges                                             | number \| Date                      | undefined |
+| end           | The date from which the timeline will end. If undefined it will take the maximum date from the input nodes/edges                                               | number \| Date                      | undefined |
+| showBarchart  | Whether to show the barchart by default. Has no effect if switchOnZoom is true, as it will pick the most appropriate view depending on the number of elements. | boolean                             | false     |
+| switchOnZoom  | Whether the timeline should automatically switch between barchart and timeline mode during zoom in/out.                                                        | boolean                             | true      |
+| nodeStartPath | The path to retrieve start dates from nodes data. Use dotted notation if it is nested.                                                                         | string                              | start     |
+| nodeEndPath   | The path to retrieve end dates from nodes data.                                                                                                                | string                              | end       |
+| edgeStartPath | The path to retrieve start dates from edges data.                                                                                                              | string                              | start     |
+| edgeEndPath   | The path to retrieve end dates from edges data.                                                                                                                | string                              | end       |
+| timebars      | The "blue bars", shown on the timeline. They are used for filtering. See [Timebar](#timebar).                                                                  | [Timebar](#timebar)                 | []        |
+| edgeFilter    | Options for edge filtering. See [FitlerOptions](#filteroptions)                                                                                                | [FitlerOptions](#filteroptions)     |           |
+| nodeFilter    | Options for node filtering. See [FitlerOptions](#filteroptions)                                                                                                | [FitlerOptions](#filteroptions)     |           |
+| barchart      | Options for barchart. See [barchartOptions](#barchartoptions).                                                                                                 | [BarchartOptions](#barchartoptions) |           |
+| timeline      | Options for timeline. See [timelineOptions](#timelineoptions).                                                                                                 | [TimelineOptions](#timelineoptions) |           |
+
+### FilterOptions
+
+| Name      | Description                                                                                                                                          | Type    | Default   |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | --------- |
+| enabled   | Whether the filter is enabled or not.                                                                                                                | boolean | true      |
+| strategy  | Which strategy to apply for filtering. See [Filtering](./filtering) for further details. Possible values are `before`, `after`, `between`, `outside` | string  | undefined |
+| tolerance | Which tolerance to apply for filtering. See [Filtering](./filtering) for further details. Possible values are `strict`, `loose`                      | string  | loose     |
+
+### Timebar
+
+Timebars can be an object: `{ fixed?: boolean; date: Date }` a number or a Date. If you specify a number or a date, the timebar will not be fixed.
+
+| Name  | Description                                                                                    | Type    | Default   |
+| ----- | ---------------------------------------------------------------------------------------------- | ------- | --------- |
+| fixed | Whheter or not the timebar remains at the same position on screen while dragging the timeline. | boolean | false     |
+| date  | The date of the timebar                                                                        | string  | undefined |
+
+### TimelineOptions
+
+| Name                | Description                                                                                                                                                                                                                           | Type                                                                                                         | Default            |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------ |
+| nodeGroupIdFunction | Similar to [Ogma groups](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeGrouping), pass a function that takes a node as an argument and returns a string representing in which group the node belongs.   | (node: Node) => string                                                                                       | node => `nodes`    |
+| nodeGroupContent    | A function that takes the groupId returned by groupIdFunction, the nodes in the group and returns the title to display for this group in the timeline.                                                                                | (groupId: string, nodes: NodeList) => string                                                                 | groupid => groupid |
+| nodeItemGenerator   | A function that takes a node and its groupid, which returns a [DataItem](https://visjs.github.io/vis-timeline/docs/timeline/#Data_Format) Object.                                                                                     | (node: Node, groupId: string) => [DataItem](https://visjs.github.io/vis-timeline/docs/timeline/#Data_Format) |                    |
+| getNodeClass        | A function that takes the groupId returned by groupIdFunction, a node and returns a `CSS` class to apply to the element.                                                                                                              | (groupId: string, node: Node) => string                                                                      | () => ``           |
+| edgeGroupIdFunction | Similar to [Ogma groups](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeGrouping) , pass a function that takes an edge as an argument and returns a string representing in which group the edge belongs. | (edge: Edge) => string                                                                                       | edge => `edges`    |
+| edgeGroupContent    | A function that takes the groupId returned by groupIdFunction, the nodes in the group and returns the title to display for this group in the timeline.                                                                                | groupid => groupid                                                                                           | start              |
+| edgeItemGenerator   | A function that takes an edge and its groupid, which returns a [DataItem](https://visjs.github.io/vis-timeline/docs/timeline/#Data_Format) Object.                                                                                    | (edge: Edge, groupId: string) => [DataItem](https://visjs.github.io/vis-timeline/docs/timeline/#Data_Format) |                    |
+| getEdggeClass       | A function that takes the groupId returned by groupIdFunction, an edge and returns a `CSS` class to apply to the element.                                                                                                             | (groupId: string, edge: Edge) => string                                                                      | () => ``           |
+| timelineOptions     | Options to pass to vis-js timeline. See [Visjs Timeline Options](https://visjs.github.io/vis-timeline/docs/timeline/#Configuration_Options)                                                                                           | [TimelineOptions](https://visjs.github.io/vis-timeline/docs/timeline/#Configuration_Options)                 |                    |
+
+### BarchartOptions
+
+| Name                | Description                                                                                                                                        | Type                                                                                                          | Default            |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------ |
+| nodeGroupIdFunction | Same as in TimelineOptions                                                                                                                         | (nodes: Node) => string                                                                                       | node => `nodes`    |
+| nodeGroupContent    | Same as in TimelineOptions                                                                                                                         | (groupId: string, nodes: NodeList) => string                                                                  | groupid => groupid |
+| nodeItemGenerator   | A function that takes a nodeList and its groupid, which returns a [Graph2dItem](https://visjs.github.io/vis-timeline/docs/graph2d/#items) Object.  | (nodes: NodeList, groupId: string) => [Graph2dItem](https://visjs.github.io/vis-timeline/docs/graph2d/#items) |                    |
+| getNodeClass        | A function that takes a nodeList and its groupid, which returns a `CSS` class to apply to the element.                                             | (groupId: string, nodes: NodeList) => string                                                                  | () => ``           |
+| edgeGroupIdFunction | Same as in timelineOptions                                                                                                                         | (edge: Edge) => string                                                                                        | edge => `edges`    |
+| edgeGroupContent    | Same as in timelineOptions                                                                                                                         | groupid => groupid                                                                                            |                    |
+| edgeItemGenerator   | A function that takes an edgeList and its groupid, which returns a [Graph2dItem](https://visjs.github.io/vis-timeline/docs/graph2d/#items) Object. | (edges: EdgeList, groupId: string) => [Graph2dItem](https://visjs.github.io/vis-timeline/docs/graph2d/#items) |                    |
+| getEdgeClass        | A function that takes an edgeList and its groupid, which returns a `CSS` class to apply to the element.                                            | (groupId: string, edges: EdgeList) => string                                                                  | () => ``           |
+| graph2dOptions      | Options to pass to vis-js barchart. See [Visjs Graph2d Options](https://visjs.github.io/vis-timeline/docs/graph2d/#Configuration_Options)          | [Graph2dOptions](https://visjs.github.io/vis-timeline/docs/graph2d/#Configuration_Options)                    |                    |
+
+## Events
+
+The timeline plugin is an event emmitter, to hook to the events it fires, just type `plugin.on(myevent, () => }{})`
+
+| Name       | Description                                                                                                                                             | Type                                                  |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| timechange | Event triggered when a timebar has changed position. When user drags a timebar for instance.                                                            | void                                                  |
+| select     | Event triggered when selection in the barchart/timeline changes. This event contains the nodes/edges that are related to the selection in the timeline. | {nodes?: NodeList, edges?: EdgeList, evt: MouseEvent} |
+
+## Methods
+
+| Nameset       | Description                                                                                                                         | Arguments                          | Returns                            |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ---------------------------------- |
+| constructor   | Creates a new timeline plugin.                                                                                                      | [Options](#options)                | Controller                         |
+| showTimeline  | Displays the timeline instead of the barchart.                                                                                      | void                               | void                               |
+| showBarchart  | Displays the barchart instead of the timeline.                                                                                      | void                               | void                               |
+| addTimeBar    | Add a timebar to the timeline.                                                                                                      | [timebarOptions](#timebar)         | void                               |
+| removeTimeBar | Remove a timebar from the timeline at index i.                                                                                      | number                             | void                               |
+| getTimebars   | Get all the timebars from the timeline.                                                                                             | groupid => groupid                 | void                               |
+| setTimebars   | Set timebars for the timeline.                                                                                                      | [timebarOptions](#timebar)[]       | void                               |
+| setSelection  | Set nodes and edges as selected.                                                                                                    | {nodes: NodeList, edges: EdgeList} | void                               |
+| getSelection  | Get the nodes and edges selected in the timeline                                                                                    | void                               | {nodes: NodeList, edges: EdgeList} |
+| setWindow     | Set the start and end dates of the timeline. See [setWindow](https://visjs.github.io/vis-timeline/docs/timeline/#Methods) on visjs. | start:number, end: number, options | void                               |
+| getWindow     | Get the start and end dates of the timeline.                                                                                        | string                             | {start: number; end: number}       |
+| setOptions    | Set the options for the timeline.                                                                                                   | [Options](#options)                | void                               |
+
+
+---
+
+<!-- docs/filtering.md -->
+
+# Filtering
+
+Please refer to [Getting started](/#filter-nodes-depending-on-time) section to learn how to link timeline filtering with Ogma `addNodeFilter`. 
+
+When user drags timebars, the plugin updates the list of filtered `NodeId` depending on the passed filtering options.
+```ts
+type FilterOptions = {
+  enabled: boolean;  
+  strategy: 'before' | 'after' | 'between' | 'outside';
+  tolerance: 'strict' | 'loose';
+}
+```
+See below how the different strategy/combination work.
+In case of `between`/`outside`, you can pass pairs of timebars, then each pair will be studied separatly. 
+In case of `before`/`after`, only the fist/last timebar is considered. 
+
+## Between loose
+![between loose](/between-loose.png)
+## Between strict
+![between strict](/between-strict.png)
+## Outside loose
+![outside loose](/outside-loose.png)
+## Outside strict
+![outside strict](/outside-strict.png)
+## Before loose
+![before loose](/before-loose.png)
+## Before strict
+![before strict](/before-strict.png)
+## After loose
+![after loose](/after-loose.png)
+## After strict
+![after strict](/after-strict.png)
+
+
+
+
+
+---
+
+<!-- docs/timebars.md -->
+
+# Timebars
+
+We provide `timebars`, which the user can drag to filter in/out nodes. Please checkout the [Getting started](#filter-nodes-depending-on-time) section to see how to hook ogma filter to the timeline.
+
+<video src="/filter-between.mp4" controls></video>
+
+Let's see how to bring some colors into this.
+
+## Add Timebars
+
+Timebars are defined by the `timeBars` option. You can pass a `number`, a `Date` or an `Object`.
+
+```ts
+const controller = new Controller(ogma, document.getElementById("timeline"), {
+  timeBars: [
+    0,
+    new Date("1/7/1950"),
+    { fixed: true, date: new Date("1/7/1960") },
+  ],
+});
+```
+
+The effect of timebars is defined by the `filter` option.
+Please check the [filtering](/filtering.md) section for further details on the filtering option.
+
+```ts
+const controller = new Controller(ogma, document.getElementById("timeline"), {
+  nodeFilter: {
+    enabled: true,
+    strategy: "between",
+    tolerance: "strict",
+  },
+});
+```
+
+You can access the timebars via controller`.getTimebars`
+You can add and remove timebars via: controller`.addTimebar` and controller`.removeTimebar` and `.setTimebars`.
+
+## Fixed Timebars
+
+By default timebars move around while dragging the timeline. If you which for having fixed timebars, just pass:
+
+```ts
+const controller = new Controller(ogma, document.getElementById("timeline"), {
+  timeBars: [
+    { fixed: true, date: new Date("1/7/1950") },
+    { fixed: true, date: new Date("1/7/1960") },
+  ],
+});
+```
+
+<video src="/filter-between-fixed.mp4" controls></video>
+
+
+---
+
+<!-- docs/grouping.md -->
+
+# Grouping
+
+Barchart automatically groups data by date, depending on zoom, but you can specify a `nodeGroupIdFunction` and/or `edgeGroupIdFunction` to make it group together nodes with different data.
+Let's say you have two types of nodes: persons and cars, like this: 
+
+## GroupIdFunction
+
+```js
+const ogma = new Ogma({
+  container: "ogma",
+  graph: {
+    nodes: [
+      ...new Array(8).fill(0).map((_, id) => ({
+        id,
+        data: { type: "car", start: new Date(`1 1 ${1950 + id}`) },
+      })),
+      ...new Array(8).fill(0).map((_, id) => ({
+        id: 8 + id,
+        data: { type: "person", start: new Date(`1 6 ${1950 + id}`) },
+      })),
+    ],
+    edges: [],
+  },
+});
+```
+By default, the timeline will render all nodes without distinction. You can split different types of nodes by passing `nodeGroupIdFunction` and/or `edgeGroupIdFunction` to the timeline: 
+
+You can then pass a `nodeGroupIdFunction` that will create bars for cars and bars for persons.
+```ts
+const timelinePlugin = new TimelinePlugin(ogma, container, {
+  barchart: {
+    nodeGroupIdFunction: (node) => node.getData('type'),
+    edgeGroupIdFunction: (edge) => edge.getData('type'),
+  },
+  timeline: {
+    nodeGroupIdFunction: (node) => node.getData('type'),
+    edgeGroupIdFunction: (edge) => edge.getData('type'),
+  }
+});
+```
+
+
+## ItemGenerator
+By default the timeline will set `Node-${id}` as labels for each element. But you might want to display different names,
+you can do that with `nodeItemGenerator` and `edgeItemGenerator` function: 
+
+```ts
+ timeline: {
+    nodeItemGenerator: (node) => {
+      return { 
+        content: `${node.getData("type")} ${node.getId()}` 
+      };
+    },
+  },
+```
+
+
+Now with both `itemGenerator` and `nodeGroupIdFunction`, your timeline shows one row for each node type and proper labels.
+Items within a group will have a class corresponding to the `groupId` return by `nodeGroupIdFunction`. You can use it to style your items. See [styling](./styling.md)
+
+## Result
+![Result](/style-grouping-timeline.png)
+
+
+
+
+
+---
+
+<!-- docs/styling.md -->
+
+# Styling
+
+By default the timeline will display every element with the same color: 
+
+
+![](/no-style-timeline.png)
+
+
+Let's see how to bring some colors into this. 
+## Barchart styling
+
+The simplest way to style barchart is to set `fill` and `stroke` properties in CSS: 
+
+```css
+.bar-item{
+  stroke: #ff9914;
+  fill: #ff9914;
+}
+```
+
+Nodes get the `node` class and edges get the `edge` class, so if you want to style the bars generated by edges, jut use the selector: 
+
+```
+.bar-item.edge{
+  stroke: #9914ff;
+  fill: #9914ff;
+}
+```
+
+If you specified a `nodeGroupIdFunction`, then your groups will have the same class as the id returned by your nodeGroupIdFunction.
+Let's say nodeGroupIdFunction returns either `car` either `person`, then you can style `car` and `person` bars like this
+
+```css
+.bar-item.car{
+  stroke: #ff9914;
+  fill: #ff9914;
+}
+.bar-item.person{
+  stroke: #08f;
+  fill: #08f;
+}
+```
+
+
+![](/style-barchart.png)
+
+
+To go further into barchart customization, you can pass [options](https://visjs.github.io/vis-timeline/docs/graph2d/#Configuration_Options) within the controller: 
+
+```ts
+const timelinePlugin = new TimelinePlugin(ogma, container, {
+  barchart: {
+    graph2dOptions: {
+      barChart:{ sideBySide: true},
+      // here pass more options if you like
+    },
+    nodeGroupIdFunction: (node) => node.getData('type')
+  }
+})
+```
+
+## Linechart styling
+
+You can get the barchart to display lines by setting the `style` key to `line`
+
+```ts
+const timelinePlugin = new TimelinePlugin(ogma, container, {
+  barchart: {
+    graph2dOptions: {
+      style: 'line'
+    },
+  }
+})
+```
+
+Then styling of the lines is as follows: 
+```css
+.vis-group{
+  fill-opacity: 0;
+}
+.vis-group.person{
+  stroke: #ff9914;
+}
+```
+
+![](/style-line.png)
+
+## Timeline styling
+
+Timeline styling follows the same rules as the other charts, elements get classes depending on their group, and you can use it to stlye them. They also get as a class the **nodeId** of the node they represent.
+You can customize the names of the items with the `nodeItemGenerator` function.
+
+```ts
+const timelinePlugin = new TimelinePlugin(ogma, container, {
+  timeline: {
+    nodeGroupIdFunction: (node) => node.getData('type'),
+    nodeItemGenerator: (node) => ({
+      content: `${node.getData(type)} ${nodeId}`
+    }),
+    timelineOptions: {
+      //here pass more options if you like
+    }
+  }
+})
+```
+```css
+.timeline-item.car {
+  stroke: #ff9914;
+  fill: #ff9914;
+}
+.timeline-item.car.vis-selected {
+  stroke: #CCff55;
+  fill: #CCff55;
+}
+```
+
+![](/style-timeline.png)
+
+
+To go further into customization, pass [options](https://visjs.github.io/vis-timeline/docs/timeline/#Configuration_Options) in the `timelineOptions` key.
+
+## Legend
+
+To get the legend on barchart, you can simply pass the `legend` key
+```ts
+const timelinePlugin = new TimelinePlugin(ogma, container, {
+  barchart: {
+    graph2dOptions: {
+      legend: {left:{position:"bottom-left"}},
+    },
+  }
+})
+```
+
+
+
+---
+
+<!-- docs/selecting.md -->
+
+# Selecting
+
+The plugin provides an easy way to synhronize selection between Ogma and the timeline:
+
+- it triggers an even when user clicks on a timeline element
+- it provides a `setSelection` method to select elements wihin the timeline
+
+```js
+let isSelecting = false;
+controller.on("select", ({ nodes, edges }) => {
+  isSelecting = true;
+  ogma.getNodes().setSelected(false);
+  ogma.getEdges().setSelected(false);
+
+  if (nodes) {
+    nodes.setSelected(true);
+  }
+  if (edges) {
+    edges.setSelected(true);
+  }
+  isSelecting = false;
+});
+ogma.events.on(
+  ["nodesSelected", "edgesSelected", "nodesUnselected", "edgesUnselected"],
+  () => {
+    if (isSelecting) return;
+    controller.setSelection({
+      nodes: ogma.getSelectedNodes(),
+      edges: ogma.getSelectedEdges(),
+    });
+  }
+);
+```
+
+## Styles and selection
+
+When a timeline item is selected, the `vis-selected` class is added to it. So you can tweak selected styles using selectors:
+
+```css
+.timeline-item.car.vis-selected,
+.vis-group.car.vis-selected {
+  stroke: #ccff55;
+  fill: #ccff55;
+}
+```
+
+## Result
+
+<video src="/selection.mp4" controls></video>
+
+
+---
+
+<!-- docs/timezone.md -->
+
+
+# Timezones and Locales
+
+By default the plugin will display all dates in english, on local time, but you can customize that easily. 
+
+## Setup
+
+First, you need to install `moment.js`
+
+```sh
+npm i moment
+```
+
+Then import it with locales: 
+
+```ts
+import moment from "moment/min/moment-with-locales";
+```
+
+## Timezone
+
+To specify a timezone, simply pass a moment object with de desired timezone: 
+
+```ts
+const timelinePlugin = new TimelinePlugin(ogma, container, {
+  barchart: {
+    graph2dOptions: {
+      moment: function (date) {
+        return moment(date).utcOffset("+08:00")
+      },
+    },
+  },
+  timeline: {
+    timelineOptions: {
+      moment: function (date) {
+        return moment(date).utcOffset("+08:00")
+      },
+    },
+  },
+});
+```
+
+## Locale
+
+To specify a language, it is the same, just pass the desired locale 
+
+```ts
+const timelinePlugin = new TimelinePlugin(ogma, container, {
+  barchart: {
+    graph2dOptions: {
+      moment: function (date) {
+        return moment(date).locale('fr')
+      },
+    },
+  },
+  timeline: {
+    timelineOptions: {
+      moment: function (date) {
+        return moment(date).locale('fr')
+      },
+    },
+  },
+});
+```
+
+## Locale and Timezone
+
+
+```ts
+const timelinePlugin = new TimelinePlugin(ogma, container, {
+  barchart: {
+    graph2dOptions: {
+      moment: function (date) {
+        return moment(date).utcOffset("+08:00").locale('fr')
+      },
+    },
+  },
+  timeline: {
+    timelineOptions: {
+      moment: function (date) {
+        return moment(date).utcOffset("+08:00").locale('fr')
+      },
+    },
+  },
+});
+```
+
+
+---
+
+# TypeScript typings
+
+## barchart.d.ts
+
+```ts
+import { Ogma, EdgeList, NodeList } from "@linkurious/ogma";
+import { Graph2d as VGraph2d, TimelineEventPropertiesResult } from "vis-timeline";
+import { Chart } from "./chart";
+import { BarchartOptions, Id } from "./types";
+export declare const defaultBarchartOptions: Required<BarchartOptions>;
+export declare class Barchart<ND = unknown, ED = unknown> extends Chart<ND, ED, VGraph2d> {
+    private nodeItemsByScale;
+    private edgeItemsByScale;
+    private currentNodeData;
+    private currentEdgeData;
+    private isTooZoomedByScale;
+    private options;
+    private rects;
+    private nodeRects;
+    private nodeGroups;
+    private edgeGroups;
+    private nodePoints;
+    private edgeRects;
+    private edgePoints;
+    private groupDataset;
+    /**
+     * @param {HTMLDivElement} container
+     * @param {Ogma} ogma
+     * @param {TimelineOptions} options
+     */
+    constructor(container: HTMLDivElement, ogma: Ogma<ND, ED>, options: Required<BarchartOptions<ND, ED>>, selectedNodes: Set<Id>, selectedEdges: Set<Id>);
+    refresh(nodes: NodeList<ND, ED>, edges: EdgeList<ED, ND>, nodeStarts: number[], nodeEnds: number[], edgeStarts: number[], edgeEnds: number[]): void;
+    /**
+     * Compute the groups depending on the chart zoom.
+     * Above a certain zoom, switch to timeline mode
+     */
+    computeGroups(nodes: NodeList<ND, ED>, edges: EdgeList<ED, ND>, nodeStarts: number[], nodeEnds: number[], edgeStarts: number[], edgeEnds: number[]): void;
+    onBarClick(evt: TimelineEventPropertiesResult): void;
+    protected onRangeChange(force?: boolean): void;
+    isTooZoomed(scale: number): boolean;
+    setOptions(options: Required<BarchartOptions<ND, ED>>): void;
+    protected registerEvents(): void;
+    private _group;
+    applySelection(): void;
+    getSelection(): {
+        nodes: NodeList<ND, ED>;
+        edges: EdgeList<ED, ND>;
+    };
+    filterNodes(selector: (a: number, b: number) => boolean, filteredNodes: Set<Id>): void;
+    filterEdges(selector: (a: number, b: number) => boolean, filteredEdges: Set<Id>): void;
+    private _getOffsets;
+    /** Adds every id registered at `time` for `groupId` (per `timeToIds`) to
+     * `target`. Shared by `_filter` (unselected items) and `_getIdsAt` (hit
+     * items). */
+    private _collectIds;
+    /** Toggles `className` on both the rect and point SVG elements of an item,
+     * when present. Shared by `_filter` (vis-filtered) and `_getIdsAt`
+     * (vis-selected). */
+    private _toggleClass;
+    private _filter;
+    private _getIdsAt;
+}
+```
+
+## chart.d.ts
+
+```ts
+import { Ogma, type NodeList, type EdgeList, type Edge, type Node } from "@linkurious/ogma";
+import { EventEmitter } from "eventemitter3";
+import { DataSet } from "vis-data";
+import { DataItem, TimelineAnimationOptions } from "vis-timeline";
+import { BaseOptions, BarChartItem, Events, Timebar, TimebarOptions, VChart, Id } from "./types";
+export declare const defaultChartOptions: Required<BaseOptions<BarChartItem | DataItem, NodeList | Node, EdgeList | Edge>>;
+export declare abstract class Chart<ND = unknown, ED = unknown, C extends VChart = VChart> extends EventEmitter<Events> {
+    chart: C;
+    protected dataset: DataSet<DataItem>;
+    protected selectedNodes: Set<Id>;
+    protected selectedEdges: Set<Id>;
+    container: HTMLDivElement;
+    protected currentScale: number;
+    protected timebars: Timebar[];
+    protected isChangingRange: boolean;
+    protected ogma: Ogma<ND, ED>;
+    private chartRange;
+    visible: boolean;
+    private destroyed;
+    constructor(container: HTMLDivElement, ogma: Ogma<ND, ED>, nodeSelection: Set<Id>, edgeSelection: Set<Id>);
+    protected registerEvents(): void;
+    addTimeBar(timebar: TimebarOptions): void;
+    removeTimeBar(index: number): void;
+    getTimebars(): {
+        date: Date;
+        delta: number;
+        id: import("vis-timeline").IdType;
+        fixed: boolean;
+    }[];
+    setTimebars(timebars: TimebarOptions[]): void;
+    setWindow(minTime: number | Date, maxTime: number | Date, options?: TimelineAnimationOptions): void;
+    private updateDeltas;
+    getWindow(): import("vis-timeline").TimelineWindow;
+    protected abstract applySelection(): void;
+    protected abstract onRangeChange(): void;
+    abstract refresh(nodes: NodeList, edges: EdgeList, nodeStarts: number[], nodeEnds: number[], edgeStarts: number[], edgeEnds: number[]): void;
+    redraw(): void;
+    protected getScale(): {
+        bars: number;
+        scale: number;
+        i: number;
+        name: string;
+    };
+    destroy(): void;
+}
+```
+
+## constants.d.ts
+
+```ts
+import { Scale } from "./types";
+export declare const day: number;
+export declare const month: number;
+export declare const year: number;
+export declare const scales: Scale[];
+export declare const zoomIn = "zoom-in";
+export declare const zoomOut = "zoom-out";
+export declare const scaleChange = "scale-change";
+export declare const click = "click";
+export declare const rangechanged = "rangechanged";
+export declare const rangechange = "rangechange";
+export declare const timechange = "timechange";
+export declare const timechanged = "timechanged";
+export declare const redraw = "redraw";
+export declare const select = "select";
+```
+
+## controller.d.ts
+
+```ts
+import { Ogma, type NodeList, type EdgeList } from "@linkurious/ogma";
+import { EventEmitter } from "eventemitter3";
+import { TimelineAnimationOptions } from "vis-timeline";
+import { Barchart } from "./barchart";
+import { Timeline } from "./timeline";
+import "vis-timeline/styles/vis-timeline-graph2d.css";
+import "./style.css";
+import { ControlerEvents, Id, Options, TimebarOptions } from "./types";
+export declare const defaultOptions: Partial<Options>;
+export declare class Controller<ND = unknown, ED = unknown> extends EventEmitter<ControlerEvents> {
+    private mode;
+    timeline: Timeline<ND, ED>;
+    nodes: NodeList;
+    edges: EdgeList;
+    barchart: Barchart<ND, ED>;
+    filteredNodes: Set<Id>;
+    filteredEdges: Set<Id>;
+    selectedNodes: Set<Id>;
+    selectedEdges: Set<Id>;
+    private ogma;
+    private options;
+    private container;
+    private nodeStarts;
+    private nodeEnds;
+    private edgeStarts;
+    private edgeEnds;
+    /** The chart (timeline or barchart) currently shown to the user. */
+    private get activeChart();
+    constructor(ogma: Ogma<ND, ED>, container: HTMLDivElement, options?: Options<ND, ED>);
+    refresh({ nodes, edges, }: {
+        nodes?: NodeList<ND, ED>;
+        edges?: EdgeList<ED, ND>;
+    }): void;
+    /** Shared implementation of showTimeline()/showBarchart(): copies the
+     * window and timebars from the chart being hidden onto the one being
+     * shown, then toggles which one is visible/active. */
+    private switchTo;
+    showTimeline(): void;
+    showBarchart(): void;
+    addTimeBar(timebar: TimebarOptions): void;
+    removeTimeBar(index: number): void;
+    getTimebars(): {
+        date: Date;
+        delta: number;
+        id: import("vis-timeline").IdType;
+        fixed: boolean;
+    }[];
+    setTimebars(timebars: TimebarOptions[]): void;
+    setWindow(start: number | Date, end: number | Date, options?: TimelineAnimationOptions): boolean;
+    getWindow(): import("vis-timeline").TimelineWindow;
+    setSelection({ nodes, edges }: {
+        nodes?: NodeList;
+        edges?: EdgeList;
+    }): void;
+    getSelection(): {
+        nodes: NodeList<ND, ED>;
+        edges: EdgeList<ED, ND>;
+    };
+    private onTimeChange;
+    setOptions(options: Options<ND, ED>): void;
+    destroy(): void;
+}
+```
+
+## index.d.ts
+
+```ts
+export * from "./timeline";
+export * from "./barchart";
+export * from "./controller";
+export * from "./constants";
+export * from "./types";
+```
+
+## selector.d.ts
+
+```ts
+import { FilterStrategy, FilterTolerance } from "./types";
+type Comparator = (a: number, b: number) => boolean;
+export declare function getSelector(bars: number[], strategy: FilterStrategy, tolerance: FilterTolerance): Comparator;
+export {};
+```
+
+## timeline.d.ts
+
+```ts
+import { Ogma, EdgeList, NodeList } from "@linkurious/ogma";
+import { Timeline as VTimeline, TimelineEventPropertiesResult } from "vis-timeline";
+import { Chart } from "./chart";
+import { Id, TimelineOptions } from "./types";
+/**
+ * @typedef {object} TimelineOptions
+ * @property {number} [barWidth=50] Barchart bar width
+ * @property {'center'|'left'|'right'} [barAlign='center'] Barchart bars alignment
+ * @property {'top'|'bottom'} [barAxisOrientation='top'] Axis position
+ * @property {number} [minTime] Unix timestamp of the earliest event
+ * @property {number} [maxTime] Unix timestamp of the latest event
+ *
+ */
+export declare const defaultTimelineOptions: Required<TimelineOptions>;
+export declare class Timeline<ND = unknown, ED = unknown> extends Chart<ND, ED, VTimeline> {
+    protected options: Required<TimelineOptions<ND, ED>>;
+    private nodeItems;
+    private edgeItems;
+    /**
+     * @param {HTMLDivElement} container
+     * @param {Ogma} ogma
+     * @param {TimelineOptions} options
+     */
+    constructor(container: HTMLDivElement, ogma: Ogma<ND, ED>, options: Required<TimelineOptions<ND, ED>>, selectedNodes: Set<Id>, selectedEdges: Set<Id>);
+    refresh(nodes: NodeList<ND, ED>, edges: EdgeList<ED, ND>, nodeStarts: number[], nodeEnds: number[], edgeStarts: number[], edgeEnds: number[]): void;
+    protected onRangeChange(): void;
+    highlightNodes(nodes: NodeList<ND, ED> | Id[]): void;
+    resethighlight(): void;
+    onBarClick(evt: TimelineEventPropertiesResult): void;
+    setOptions(options: Required<TimelineOptions<ND, ED>>): void;
+    protected registerEvents(): void;
+    private _group;
+    applySelection(): void;
+    getSelection(): {
+        nodes: NodeList<ND, ED>;
+        edges: EdgeList<ED, ND>;
+    };
+    filterNodes(selector: (a: number, b: number) => boolean, filteredNodes: Set<Id>): void;
+    filterEdges(selector: (a: number, b: number) => boolean, filteredEdges: Set<Id>): void;
+    private _filter;
+}
+```
+
+## types.d.ts
+
+```ts
+import { Edge, Node, NodeList, EdgeList, ItemList, ItemId, Item } from "@linkurious/ogma";
+import { TimelineOptions as VTimelineOptions, DataGroup, Graph2d, Timeline, TimelineEventPropertiesResult, Graph2dOptions, DataItem, IdType } from "vis-timeline";
+import { click, rangechanged, scaleChange, redraw, timechange, timechanged, rangechange, select } from "./constants";
+export type FilterStrategy = "before" | "after" | "between" | "outside";
+export type FilterTolerance = "strict" | "loose";
+export type FilterOptions = {
+    enabled: boolean;
+    strategy: FilterStrategy;
+    tolerance: FilterTolerance;
+};
+export type IdFunction<ElementType> = (item: ElementType) => string;
+export type GroupFunction<ElementType> = (groupId: string, items: ElementType) => string;
+export type ItemGenerator<T, ElementType> = (elements: ElementType, groupId: string) => Partial<T>;
+export interface BaseOptions<T, NodeType, EdgeType> {
+    nodeGroupIdFunction?: IdFunction<NodeType>;
+    nodeGroupContent?: GroupFunction<NodeType>;
+    nodeItemGenerator?: ItemGenerator<T, NodeType>;
+    getNodeClass?: ItemGenerator<string, NodeType>;
+    edgeGroupIdFunction?: IdFunction<EdgeType>;
+    edgeGroupContent?: GroupFunction<EdgeType>;
+    edgeItemGenerator?: ItemGenerator<T, EdgeType>;
+    getEdgeClass?: ItemGenerator<string, EdgeType>;
+}
+/**
+ * @typedef {object} BarchartOptions
+ * @property {Graph2dOptions} graph2dOptions (https://visjs.github.io/vis-timeline/docs/graph2d/#graph2dOptions) to pass to the barchart
+ * @property {Function} groupIdFunction Similar to [Ogma addNodeGrouping](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeGrouping) groupIdFunction
+ * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
+ */
+export interface BarchartOptions<ND = unknown, ED = unknown> extends BaseOptions<Exclude<BarChartItem, "ids" | "group" | "x" | "y">, NodeList<ND, ED>, EdgeList<ED, ND>> {
+    graph2dOptions?: Graph2dOptions;
+}
+export interface TimelineOptions<ND = unknown, ED = unknown> extends BaseOptions<Exclude<DataItem, "className" | "id" | "start" | "end" | "group">, Node<ND, ED>, Edge<ED, ND>> {
+    timelineOptions?: VTimelineOptions;
+}
+/**
+ * @typedef {object} Options
+ * @property {TimelineOptions} graph2dOptions (https://visjs.github.io/vis-timeline/docs/graph2d/#graph2dOptions) to pass to the barchart
+ * @property {BarchartOptions} groupIdFunction Similar to [Ogma addNodeGrouping](https://doc.linkurious.com/ogma/latest/api.html#Ogma-transformations-addNodeGrouping) groupIdFunction
+ * @property {Function} groupContent Generates the content of the group. See [Visjs groups](https://visjs.github.io/vis-timeline/docs/graph2d/#groups)
+ */
+export interface Options<ND = unknown, ED = unknown> {
+    timeline?: TimelineOptions<ND, ED>;
+    barchart?: BarchartOptions<ND, ED>;
+    timeBars?: TimebarOptions[];
+    edgeFilter?: FilterOptions;
+    nodeFilter?: FilterOptions;
+    nodeStartPath?: string;
+    nodeEndPath?: string;
+    edgeStartPath?: string;
+    edgeEndPath?: string;
+    switchOnZoom?: boolean;
+    showBarchart?: boolean;
+    start?: number | Date;
+    end?: number | Date;
+}
+export type Id = number | string;
+export type Lookup<T> = {
+    [key in Id]: T;
+};
+export type BarChartItem = {
+    ids: ItemId[];
+    group: string;
+    label: string;
+    x: number;
+    y: number;
+};
+export type TimeToIds = Map<number, Map<IdType, ItemId[]>>;
+export type ItemByScale = {
+    items: BarChartItem[];
+    itemToElements: Lookup<ItemList>;
+    groups: DataGroup[];
+    timeToIds: TimeToIds;
+    tooZoomed: boolean;
+    maxY: number;
+};
+export type TimelineData = {
+    items: DataItem[];
+    groups: DataGroup[];
+    itemToElements: Lookup<Item>;
+    elementToItem: Lookup<ItemId>;
+};
+export type TimelineMode = "barchart" | "timeline";
+export type NAND<A, B> = Omit<A, keyof B> & Omit<B, keyof A>;
+export type AND<A, B> = Omit<A, keyof NAND<A, B>>;
+export type VChart = AND<Graph2d, Timeline>;
+export type ScaleChangeEvt = {
+    scale: number;
+    tooZoomed: boolean;
+};
+export type ClickEvt = {
+    edges?: EdgeList | Edge;
+    nodes?: NodeList | Node;
+    evt: TimelineEventPropertiesResult;
+};
+export type SelectEvt = {
+    edges?: EdgeList | Edge;
+    nodes?: NodeList | Node;
+    evt: MouseEvent;
+};
+export type Events = {
+    [scaleChange]: (evt: ScaleChangeEvt) => void;
+    [click]: (evt: ClickEvt) => void;
+    [rangechanged]: () => void;
+    [rangechange]: () => void;
+    [timechange]: () => void;
+    [timechanged]: () => void;
+    [redraw]: () => void;
+    [select]: (evt: SelectEvt) => void;
+};
+export type ControlerEvents = {
+    [timechange]: () => void;
+    [select]: (evt: SelectEvt) => void;
+};
+export type Timebar = {
+    delta: number;
+    id: IdType;
+    fixed: boolean;
+};
+/**
+ * @typedef {object} TimebarOptions Options to setup filter bars in the chart.
+ * It can be a number, a date or an object.
+ */
+export type TimebarOptions = {
+    fixed?: boolean;
+    date: Date;
+} | number | Date;
+export type Scale = {
+    name: string;
+    millis: number;
+    round?: (date: Date) => number;
+};
+```
