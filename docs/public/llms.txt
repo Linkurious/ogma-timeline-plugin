@@ -1,0 +1,48 @@
+# @linkurious/ogma-timeline-plugin
+
+> Timeline and bar-chart view synced with an Ogma graph. It reads `start`/`end` dates from node and edge data and filters the graph by time. Requires `@linkurious/ogma` >= 4.4.0.
+
+## Docs
+
+- [Getting started](https://linkurious.github.io/ogma-timeline-plugin/getting-started.html): install and first timeline
+- [API](https://linkurious.github.io/ogma-timeline-plugin/API.html): options, methods, events
+- [Filtering](https://linkurious.github.io/ogma-timeline-plugin/filtering.html): strategies and tolerance
+- [Time bars](https://linkurious.github.io/ogma-timeline-plugin/timebars.html)
+- [Grouping](https://linkurious.github.io/ogma-timeline-plugin/grouping.html)
+- [Styling](https://linkurious.github.io/ogma-timeline-plugin/styling.html)
+- [Selecting](https://linkurious.github.io/ogma-timeline-plugin/selecting.html)
+- [Timezones and locales](https://linkurious.github.io/ogma-timeline-plugin/timezone.html)
+- [Examples](https://linkurious.github.io/ogma-timeline-plugin/examples/index.html)
+
+## Live examples
+
+- [Timeline](https://doc.linkurious.com/ogma/latest/examples/timeline.html)
+- [Timeline lifespan](https://doc.linkurious.com/ogma/latest/examples/timeline-lifespan.html)
+
+## Optional
+
+- [llms-full.txt](https://linkurious.github.io/ogma-timeline-plugin/llms-full.txt): this file plus all docs pages and the TypeScript typings
+- [README](https://github.com/Linkurious/ogma-timeline-plugin/blob/develop/README.md)
+- [npm](https://www.npmjs.com/package/@linkurious/ogma-timeline-plugin)
+
+## Key facts
+
+1. Filtering is driven by time bars, not by the visible window. `Controller.onTimeChange()` takes the sorted `timeBars` dates and applies `nodeFilter`/`edgeFilter` (`strategy` + `tolerance`) to them. Panning or zooming does not change which items are filtered.
+2. No time bars means everything is filtered out. The default is `timeBars: []` with `strategy: 'between'`; the `between` loop never runs, so every dated item lands in `filteredNodes`. Pass at least two time bars, or disable filtering (`enabled: false`).
+3. `filteredNodes` / `filteredEdges` hold the ids of the excluded items. Intended pattern:
+   ```ts
+   const filter = ogma.transformations.addNodeFilter({
+     criteria: node => !timeline.filteredNodes.has(node.getId())
+   });
+   timeline.on('timechange', () => filter.refresh());
+   ```
+4. Strategies, applied to the sorted bar dates:
+   - `between`: inside bar pairs (1-2, 3-4, ...)
+   - `outside`: outside all pairs
+   - `before`: before the first bar
+   - `after`: after the last bar
+
+   `tolerance: 'strict'` means the whole `[start, end]` range must match; `'loose'` means any overlap counts. Defaults for both nodes and edges: `{ enabled: true, strategy: 'between', tolerance: 'loose' }`.
+5. Items that have neither `start` nor `end` are never filtered out.
+6. Valid top-level options are only those in the `Options` type: `timeline`, `barchart`, `timeBars`, `nodeFilter`, `edgeFilter`, the `node|edge` + `Start|End` + `Path` options, `switchOnZoom`, `showBarchart`, `start`, `end`. `minTime`/`maxTime` do not exist. `start`/`end` only set the initial visible window.
+7. `timechange` fires when a time bar is dragged and when the range changes. `setWindow()` also re-filters and emits it.
