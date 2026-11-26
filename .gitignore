@@ -5,3 +5,4 @@ docs/.vitepress/.temp
 reports/
 coverage/
 
+docs/public/llms-full.txt

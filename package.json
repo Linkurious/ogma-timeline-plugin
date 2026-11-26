@@ -55,7 +55,7 @@
     "lint:ci": "mkdir -p reports && oxlint -c .oxlintrc.json -f checkstyle demo src test > reports/checkstyle.xml",
     "format": "oxfmt -c .oxfmtrc.json \"{src,demo,test}/**/*.{ts,css,html}\"",
     "format:check": "oxfmt -c .oxfmtrc.json --check \"{src,demo,test}/**/*.{ts,css,html}\"",
-    "predocs:build": "rm -rf docs/.vitepress/dist docs/.vitepress/.cache docs/.vitepress/.temp",
+    "predocs:build": "tsc && node scripts/llms-full.js && rm -rf docs/.vitepress/dist docs/.vitepress/.cache docs/.vitepress/.temp",
     "predocs:publish": "npm run docs:build",
     "preview": "vite preview",
     "test": "vite build --config=test/vite.config.ts && vitest run",
