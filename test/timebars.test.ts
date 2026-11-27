@@ -37,7 +37,7 @@ describe("Options", async () => {
       });
 
       return afterTimelineRedraw().then(
-        () => [...document.querySelectorAll(".vis-custom-time")].length
+        () => [...document.querySelectorAll(".vis-custom-time")].length,
       );
     });
     expect(filteredNodes).toEqual(3);
@@ -137,10 +137,12 @@ describe("Options", async () => {
     await session.page.mouse.move(x2, y2, { steps: 5 });
     await session.page.mouse.up({ button: "left" });
     const { filteredNodes2, timebars2 } = await session.page.evaluate(() => {
-      return {
+      // the node/edge filter recompute is throttled (50ms) on drag, so wait
+      // for it to settle before reading the derived filteredNodes state
+      return wait(100).then(() => ({
         filteredNodes2: controller.filteredNodes.size,
         timebars2: controller.getTimebars().map(({ date }) => date),
-      };
+      }));
     });
     expect(filteredNodes2).toEqual(1);
     const expectedDates2 = [
@@ -174,7 +176,7 @@ describe("Options", async () => {
         end: new Date("1 1 1970"),
       });
       return afterTimelineRedraw().then(() =>
-        controller.getTimebars().map(({ date }) => date)
+        controller.getTimebars().map(({ date }) => date),
       );
     });
     expect(dates).toEqual([new Date("1 1 1950"), new Date("1 1 1960")]);

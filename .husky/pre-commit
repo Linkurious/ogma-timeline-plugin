@@ -1,0 +1,8 @@
+# Skip pre-commit during merge commits
+if git rev-parse -q --verify MERGE_HEAD >/dev/null; then
+  echo "Skipping pre-commit hook during merge commit"
+  exit 0
+fi
+
+npx lint-staged
+

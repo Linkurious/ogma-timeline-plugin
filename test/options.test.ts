@@ -51,7 +51,7 @@ describe("Options", async () => {
           timelineVisible: controller.timeline.visible,
           barchartVisible: controller.barchart.visible,
         };
-      }
+      },
     );
     expect(timelineVisible).toBe(true);
     expect(barchartVisible).toBe(false);
@@ -106,7 +106,7 @@ describe("Options", async () => {
           timelineVisible: controller.timeline.visible,
           barchartVisible: controller.barchart.visible,
         };
-      }
+      },
     );
     expect(timelineVisible).toBe(true);
     expect(barchartVisible).toBe(false);
@@ -143,7 +143,7 @@ describe("Options", async () => {
         nodeStartPath: "startCustom",
       });
       return afterTimelineRedraw().then(
-        () => document.querySelectorAll(".vis-box.nodes").length
+        () => document.querySelectorAll(".vis-box.nodes").length,
       );
     });
     expect(elementSize).toBe(3);
@@ -165,7 +165,7 @@ describe("Options", async () => {
         nodeEndPath: "endCustom",
       });
       return afterTimelineRedraw().then(
-        () => document.querySelectorAll(".vis-range").length
+        () => document.querySelectorAll(".vis-range").length,
       );
     });
     expect(elementSize).toBe(3);
@@ -193,7 +193,7 @@ describe("Options", async () => {
         .then(() =>
           (
             document.querySelector(".vis-time-axis") as HTMLDivElement
-          ).children[0].classList.contains("vis-year1955")
+          ).children[0].classList.contains("vis-year1955"),
         );
     });
     expect(is1955).toBe(true);
@@ -219,10 +219,10 @@ describe("Options", async () => {
         .then(() => wait(100))
         .then(() => {
           const timeAxis = document.querySelector(
-            ".vis-time-axis"
+            ".vis-time-axis",
           ) as HTMLDivElement;
           return (timeAxis.lastChild as SVGSVGElement).classList.contains(
-            "vis-year2100"
+            "vis-year2100",
           );
         });
     });
@@ -252,7 +252,7 @@ describe("Options", async () => {
       });
 
       return afterTimelineRedraw().then(() =>
-        Array.from(controller.filteredNodes)
+        Array.from(controller.filteredNodes),
       );
     });
     expect(filteredNodes).toEqual([]);
@@ -280,7 +280,7 @@ describe("Options", async () => {
       });
 
       return afterTimelineRedraw().then(() =>
-        Array.from(controller.filteredNodes)
+        Array.from(controller.filteredNodes),
       );
     });
     expect(filteredNodes).toEqual([]);
@@ -308,7 +308,7 @@ describe("Options", async () => {
       });
 
       return afterTimelineRedraw().then(() =>
-        Array.from(controller.filteredNodes)
+        Array.from(controller.filteredNodes),
       );
     });
     expect(filteredNodes).toEqual([1]);

@@ -1,11 +1,11 @@
 import { defineConfig } from "vite";
-import { name } from "./package.json";
+import pkg from "./package.json" with { type: "json" };
 
 export default defineConfig({
   build: {
     lib: {
       entry: "src/index.ts",
-      name,
+      name: pkg.name,
     },
     rollupOptions: {
       external: ["@linkurious/ogma", "vis-timeline", "vis-data"],

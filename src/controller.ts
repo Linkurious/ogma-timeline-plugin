@@ -1,6 +1,6 @@
 import { Ogma, type NodeList, type EdgeList } from "@linkurious/ogma";
 import { deepmerge } from "deepmerge-ts";
-import EventEmitter from "eventemitter3";
+import { EventEmitter } from "eventemitter3";
 import throttle from "lodash.throttle";
 
 import { TimelineAnimationOptions } from "vis-timeline";
@@ -69,10 +69,15 @@ export class Controller<
   private edgeStarts: number[];
   private edgeEnds: number[];
 
+  /** The chart (timeline or barchart) currently shown to the user. */
+  private get activeChart(): Timeline<ND, ED> | Barchart<ND, ED> {
+    return this.mode === "timeline" ? this.timeline : this.barchart;
+  }
+
   constructor(
     ogma: Ogma<ND, ED>,
     container: HTMLDivElement,
-    options: Options<ND, ED> = {}
+    options: Options<ND, ED> = {},
   ) {
     super();
     this.mode = "barchart";
@@ -105,14 +110,14 @@ export class Controller<
       ogma,
       this.options.timeline as Required<TimelineOptions<ND, ED>>,
       this.selectedNodes,
-      this.selectedEdges
+      this.selectedEdges,
     );
     const barchart = new Barchart(
       barchartContainer,
       ogma,
       this.options.barchart as Required<BarchartOptions<ND, ED>>,
       this.selectedNodes,
-      this.selectedEdges
+      this.selectedEdges,
     );
     this.timeline = timeline;
     this.barchart = barchart;
@@ -134,35 +139,16 @@ export class Controller<
 
     // update the list of filtered nodes
     const throttled = throttle(() => this.onTimeChange(), 50);
-    this.barchart.on(timechange, () => {
-      throttled();
-    });
-    this.timeline.on(timechange, () => {
-      throttled();
-    });
-    this.barchart.on(timechanged, () => {
-      throttled();
-    });
-    this.timeline.on(timechanged, () => {
-      throttled();
-    });
-    this.barchart.on(rangechange, () => {
-      throttled();
-    });
-    this.timeline.on(rangechange, () => {
-      throttled();
+    [this.barchart, this.timeline].forEach((chart) => {
+      chart.on(timechange, () => throttled());
+      chart.on(timechanged, () => throttled());
+      chart.on(rangechange, () => throttled());
+      chart.on(select, (evt) => this.emit(select, evt));
     });
     this.barchart.on(rangechanged, () => {
       // do not throttle here because it is called once at the end of drag
       // and it would look glitchy with filtered bars
       this.onTimeChange();
-    });
-
-    this.barchart.on(select, (evt) => {
-      this.emit(select, evt);
-    });
-    this.timeline.on(select, (evt) => {
-      this.emit(select, evt);
     });
 
     const nodes = ogma.getNodes();
@@ -171,7 +157,7 @@ export class Controller<
     this.options.timeBars
       .sort(
         (a, b) =>
-          +((a as { date: Date }).date || a) - +((b as { date: Date }) || b)
+          +((a as { date: Date }).date || a) - +((b as { date: Date }) || b),
       )
       .forEach((timeBar) => {
         this.timeline.addTimeBar(timeBar);
@@ -183,14 +169,14 @@ export class Controller<
       this.options.start ||
         Math.min(
           this.nodeStarts.reduce((min, s) => Math.min(min, s), Infinity),
-          this.edgeStarts.reduce((min, s) => Math.min(min, s), Infinity)
+          this.edgeStarts.reduce((min, s) => Math.min(min, s), Infinity),
         ),
       this.options.end ||
         Math.max(
           this.nodeStarts.reduce((max, s) => Math.max(max, s), -Infinity),
-          this.edgeStarts.reduce((max, s) => Math.max(max, s), -Infinity)
+          this.edgeStarts.reduce((max, s) => Math.max(max, s), -Infinity),
         ),
-      { animation: false }
+      { animation: false },
     );
     ogma.events.on("destroy", () => {
       this.destroy();
@@ -204,15 +190,12 @@ export class Controller<
     nodes?: NodeList<ND, ED>;
     edges?: EdgeList<ED, ND>;
   }) {
-    const wd =
-      this.mode === "barchart"
-        ? this.barchart.getWindow()
-        : this.timeline.getWindow();
+    const wd = this.activeChart.getWindow();
     this.nodes = (nodes ? nodes : this.ogma.createNodeList()).filter(
-      (n) => n.getData(this.options.nodeStartPath) !== undefined
+      (n) => n.getData(this.options.nodeStartPath) !== undefined,
     );
     this.edges = (edges ? edges : this.ogma.createEdgeList()).filter(
-      (e) => e.getData(this.options.edgeStartPath) !== undefined
+      (e) => e.getData(this.options.edgeStartPath) !== undefined,
     );
     this.nodeStarts = this.nodes.getData(this.options.nodeStartPath);
     this.nodeEnds = this.nodes.getData(this.options.nodeEndPath);
@@ -224,7 +207,7 @@ export class Controller<
       this.nodeStarts,
       this.nodeEnds,
       this.edgeStarts,
-      this.edgeEnds
+      this.edgeEnds,
     );
     this.barchart.refresh(
       this.nodes,
@@ -232,7 +215,7 @@ export class Controller<
       this.nodeStarts,
       this.nodeEnds,
       this.edgeStarts,
-      this.edgeEnds
+      this.edgeEnds,
     );
     if (!this.options.nodeFilter.enabled) {
       this.filteredNodes.clear();
@@ -243,28 +226,29 @@ export class Controller<
     this.setWindow(wd.start, wd.end, { animation: false });
   }
 
+  /** Shared implementation of showTimeline()/showBarchart(): copies the
+   * window and timebars from the chart being hidden onto the one being
+   * shown, then toggles which one is visible/active. */
+  private switchTo(mode: TimelineMode) {
+    const from = mode === "timeline" ? this.barchart : this.timeline;
+    const to = mode === "timeline" ? this.timeline : this.barchart;
+    const { start, end } = from.getWindow();
+    to.setTimebars(from.getTimebars());
+    from.container.style.display = "none";
+    to.container.style.display = "";
+    this.mode = mode;
+    to.visible = true;
+    from.visible = false;
+    to.chart.setWindow(+start, +end, { animation: false });
+    to.redraw();
+  }
+
   showTimeline() {
-    const { start, end } = this.barchart.getWindow();
-    this.timeline.setTimebars(this.barchart.getTimebars());
-    this.barchart.container.style.display = "none";
-    this.timeline.container.style.display = "";
-    this.mode = "timeline";
-    this.timeline.visible = true;
-    this.barchart.visible = false;
-    this.timeline.chart.setWindow(+start, +end, { animation: false });
-    this.timeline.redraw();
+    this.switchTo("timeline");
   }
 
   showBarchart() {
-    const { start, end } = this.timeline.getWindow();
-    this.barchart.setTimebars(this.timeline.getTimebars());
-    this.barchart.container.style.display = "";
-    this.timeline.container.style.display = "none";
-    this.mode = "barchart";
-    this.timeline.visible = false;
-    this.barchart.visible = true;
-    this.barchart.chart.setWindow(+start, +end, { animation: false });
-    this.barchart.redraw();
+    this.switchTo("barchart");
   }
 
   addTimeBar(timebar: TimebarOptions): void {
@@ -289,24 +273,17 @@ export class Controller<
   setWindow(
     start: number | Date,
     end: number | Date,
-    options?: TimelineAnimationOptions
+    options?: TimelineAnimationOptions,
   ) {
     if (!Number.isFinite(+start) || !Number.isFinite(+end)) {
       return this.onTimeChange();
     }
-    if (this.mode === "timeline") {
-      this.timeline.setWindow(start, end, options);
-    } else {
-      this.barchart.setWindow(start, end, options);
-    }
+    this.activeChart.setWindow(start, end, options);
     return this.onTimeChange();
   }
 
   getWindow() {
-    if (this.mode === "timeline") {
-      return this.timeline.getWindow();
-    }
-    return this.barchart.getWindow();
+    return this.activeChart.getWindow();
   }
 
   setSelection({ nodes, edges }: { nodes?: NodeList; edges?: EdgeList }) {
@@ -322,57 +299,38 @@ export class Controller<
         this.selectedEdges.add(id);
       });
     }
-    if (this.mode === "timeline") {
-      this.timeline.redraw();
-    } else {
-      this.barchart.redraw();
-    }
+    this.activeChart.redraw();
   }
 
   getSelection() {
-    if (this.mode === "timeline") {
-      return this.timeline.getSelection();
-    } else {
-      return this.barchart.getSelection();
-    }
+    return this.activeChart.getSelection();
   }
 
   private onTimeChange() {
     if (!this.options.nodeFilter.enabled && !this.options.edgeFilter.enabled) {
       return this.emit(timechange);
     }
-    const times = (
-      this.mode === "timeline"
-        ? this.timeline.getTimebars()
-        : this.barchart.getTimebars()
-    )
+    const times = this.activeChart
+      .getTimebars()
       .map(({ date }) => +date)
       .sort((a, b) => a - b);
     if (this.options.nodeFilter.enabled) {
       const selector = getSelector(
         times,
         this.options.nodeFilter.strategy,
-        this.options.nodeFilter.tolerance
+        this.options.nodeFilter.tolerance,
       );
       this.filteredNodes.clear();
-      if (this.mode === "timeline") {
-        this.timeline.filterNodes(selector, this.filteredNodes);
-      } else {
-        this.barchart.filterNodes(selector, this.filteredNodes);
-      }
+      this.activeChart.filterNodes(selector, this.filteredNodes);
     }
     if (this.options.edgeFilter.enabled) {
       const selector = getSelector(
         times,
         this.options.edgeFilter.strategy,
-        this.options.edgeFilter.tolerance
+        this.options.edgeFilter.tolerance,
       );
       this.filteredEdges.clear();
-      if (this.mode === "timeline") {
-        this.timeline.filterEdges(selector, this.filteredEdges);
-      } else {
-        this.barchart.filterEdges(selector, this.filteredEdges);
-      }
+      this.activeChart.filterEdges(selector, this.filteredEdges);
     }
     return this.emit(timechange);
   }
@@ -391,10 +349,7 @@ export class Controller<
     this.timeline.setOptions(timelineOptions);
     this.barchart.setOptions(barchartOptions);
     this.refresh({ nodes: this.nodes, edges: this.edges });
-    const wd =
-      this.mode === "timeline"
-        ? this.timeline.getWindow()
-        : this.barchart.getWindow();
+    const wd = this.activeChart.getWindow();
     this.setWindow(this.options.start || wd.start, this.options.end || wd.end, {
       animation: false,
     });

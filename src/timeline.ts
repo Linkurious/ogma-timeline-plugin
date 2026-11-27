@@ -74,7 +74,7 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
     ogma: Ogma<ND, ED>,
     options: Required<TimelineOptions<ND, ED>>,
     selectedNodes: Set<Id>,
-    selectedEdges: Set<Id>
+    selectedEdges: Set<Id>,
   ) {
     super(container, ogma, selectedNodes, selectedEdges);
     this.options = options;
@@ -93,7 +93,10 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
     const timeline = new VTimeline(
       container,
       this.dataset,
-      deepmerge(defaultTimelineOptions.timelineOptions, options.timelineOptions)
+      deepmerge(
+        defaultTimelineOptions.timelineOptions,
+        options.timelineOptions,
+      ),
     );
     this.chart = timeline;
     // state flags
@@ -111,7 +114,7 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
     nodeStarts: number[],
     nodeEnds: number[],
     edgeStarts: number[],
-    edgeEnds: number[]
+    edgeEnds: number[],
   ): void {
     this.nodeItems = this._group(
       nodes,
@@ -120,7 +123,7 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
       this.options.nodeItemGenerator as ItemGenerator<DataItem, Item>,
       this.options.getNodeClass as ItemGenerator<string, Item>,
       nodeStarts,
-      nodeEnds
+      nodeEnds,
     );
     this.edgeItems = this._group(
       edges,
@@ -129,7 +132,7 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
       this.options.edgeItemGenerator as ItemGenerator<DataItem, Item>,
       this.options.getEdgeClass as ItemGenerator<string, Item>,
       edgeStarts,
-      edgeEnds
+      edgeEnds,
     );
     this.dataset.clear();
     this.dataset.add(this.edgeItems.items);
@@ -138,7 +141,7 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
     const totalGroups = new Set(
       this.edgeItems.groups
         .map((g) => g.id)
-        .concat(this.nodeItems.groups.map((g) => g.id))
+        .concat(this.nodeItems.groups.map((g) => g.id)),
     ).size;
     if (totalGroups > 1) {
       this.chart.setGroups([
@@ -207,7 +210,7 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
     itemGenerator: ItemGenerator<DataItem, Item>,
     itemClass: ItemGenerator<string, Item>,
     starts: number[],
-    ends: number[]
+    ends: number[],
   ): TimelineData {
     const items: DataItem[] = [];
     const ids = elements.getId();
@@ -239,7 +242,7 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
         } as DataItem);
         return groups;
       },
-      {} as Record<string, Item[]>
+      {} as Record<string, Item[]>,
     );
 
     const groups: DataGroup[] = Object.entries(groupIdToNode).map(
@@ -247,17 +250,17 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
         id: groupid,
         content: groupFunction(
           groupid,
-          this.ogma.getNodes(items as unknown as NodeId[])
+          this.ogma.getNodes(items as unknown as NodeId[]),
         ),
         className: `vis-group ${groupid}`,
         options: {},
-      })
+      }),
     );
     return { items, groups, itemToElements, elementToItem };
   }
   applySelection() {
     const ids = Array.from(this.selectedNodes.keys()).concat(
-      Array.from(this.selectedEdges.keys())
+      Array.from(this.selectedEdges.keys()),
     );
     this.chart.setSelection(ids);
   }
@@ -281,31 +284,32 @@ export class Timeline<ND = unknown, ED = unknown> extends Chart<
 
   filterNodes(
     selector: (a: number, b: number) => boolean,
-    filteredNodes: Set<Id>
+    filteredNodes: Set<Id>,
   ) {
     this._filter(selector, this.nodeItems, filteredNodes);
   }
   filterEdges(
     selector: (a: number, b: number) => boolean,
-    filteredEdges: Set<Id>
+    filteredEdges: Set<Id>,
   ) {
     this._filter(selector, this.edgeItems, filteredEdges);
   }
   private _filter(
     selector: (a: number, b: number) => boolean,
     timelineData: TimelineData,
-    elementSet: Set<Id>
+    elementSet: Set<Id>,
   ) {
     const items = timelineData.items;
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       const id = item.id;
+      if (id === undefined) continue;
       const timelineItem = this.chart.itemSet.groups[item.group as string]
         ? this.chart.itemSet.groups[item.group as string].items[id]
         : this.chart.itemSet.items[id];
       if (!timelineItem) continue;
       const start = +item.start;
-      const end = +item.end;
+      const end = item.end !== undefined ? +item.end : start;
       const box = timelineItem.dom?.box;
       const line = timelineItem.dom?.line;
       const dot = timelineItem.dom?.dot;

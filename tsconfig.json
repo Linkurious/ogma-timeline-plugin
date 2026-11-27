@@ -17,8 +17,8 @@
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "skipLibCheck": true,
-    "strictFunctionTypes": true,
-    "removeComments": false
+    "removeComments": false,
+    "strict": true
   },
   "include": ["src/**/*.ts"]
 }

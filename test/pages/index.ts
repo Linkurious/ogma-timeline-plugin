@@ -50,7 +50,7 @@ function createController(options: Options) {
   const controller = new Controller(
     window["ogma"],
     document.getElementById("timeline") as HTMLDivElement,
-    options
+    options,
   );
   window["controller"] = controller;
   return controller;
